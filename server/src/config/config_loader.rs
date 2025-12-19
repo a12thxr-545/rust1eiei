@@ -11,13 +11,13 @@ pub fn load() -> Result<DotEnvyConfig> {
 
     let server = Server {
         port: std::env::var("SERVER_PORT")
-            .expect("SERVER_PORT is valid")
+            .unwrap_or_else(|_| "8080".to_string())
             .parse()?,
         body_limit: std::env::var("SERVER_BODY_LIMIT")
-            .expect("SERVER_BODY_LIMIT is valid")
+            .unwrap_or_else(|_| "2097152".to_string())
             .parse()?,
         timeout: std::env::var("SERVER_TIMEOUT")
-            .expect("SERVER_TIMEOUT is valid")
+            .unwrap_or_else(|_| "30".to_string())
             .parse()?,
         max_crew_per_mission: std::env::var("MAX_CREW_PER_MISSION")
             .unwrap_or_else(|_| "5".to_string())
@@ -26,13 +26,11 @@ pub fn load() -> Result<DotEnvyConfig> {
 
     let database = Database {
         url: std::env::var("DATABASE_URL")
-            .expect("DATABASE_URL is valid")
-            .parse()?,
+            .unwrap_or_else(|_| "postgres://postgres:postgres@localhost:5432/postgres".to_string()),
     };
 
     let secret = std::env::var("JWT_USER_SECRET")
-        .expect("SECRET is valid")
-        .parse()?;
+        .unwrap_or_else(|_| "default_secret_key_for_development".to_string());
 
     let config = DotEnvyConfig {
         server,
