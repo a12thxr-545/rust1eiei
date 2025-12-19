@@ -30,7 +30,7 @@ fn static_serve() -> Router {
     Router::new().fallback_service(service)
 }
 
-fn api_serve(db_pool: Arc<PgPoolSquad>) -> Router {
+fn api_serve(db_pool: Arc<PgPoolSquad>, config: Arc<DotEnvyConfig>) -> Router {
     Router::new()
         .nest("/brawler", routers::brawlers::routes(Arc::clone(&db_pool)))
         .nest(
@@ -41,13 +41,17 @@ fn api_serve(db_pool: Arc<PgPoolSquad>) -> Router {
             "/authentication",
             routers::authentication::routes(Arc::clone(&db_pool)),
         )
+        .nest(
+            "/crew",
+            routers::crew_operation::routes(Arc::clone(&db_pool), Arc::clone(&config)),
+        )
         .fallback(|| async { (StatusCode::NOT_FOUND, "API not found") })
 }
 
 pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Result<()> {
     let app = Router::new()
         .merge(static_serve())
-        .nest("/api", api_serve(db_pool))
+        .nest("/api", api_serve(db_pool, Arc::clone(&config)))
         // .fallback(default_router::health_check)
         // .route("/health_check", get(default_router::health_check)
         .layer(tower_http::timeout::TimeoutLayer::with_status_code(

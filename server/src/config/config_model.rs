@@ -3,6 +3,7 @@ pub struct Server {
     pub port: u16,
     pub body_limit: u64,
     pub timeout: u64,
+    pub max_crew_per_mission: i64,
 }
 
 #[derive(Debug, Clone)]

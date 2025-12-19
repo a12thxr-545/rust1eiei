@@ -1,0 +1,14 @@
+@base_url = http://127.0.0.1:8000/api
+@arthur_token = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwiZXhwIjoxNzY2Mzc4ODMxLCJpYXQiOjE3NjYxMTk2MzF9.AamZ3ldn7QM90kXNXgRmpF4yZ5ZOpCWXoonuv2iNipY
+
+### Join Mission
+# @prompt mission_id
+POST {{base_url}}/crew/join/{{mission_id}}
+Content-Type: application/json
+Authorization: Bearer {{arthur_token}}
+
+### Leave Mission
+# @prompt mission_id
+DELETE {{base_url}}/crew/leave/{{mission_id}}
+Content-Type: application/json
+Authorization: Bearer {{arthur_token}}

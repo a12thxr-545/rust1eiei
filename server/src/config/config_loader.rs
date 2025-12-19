@@ -19,6 +19,9 @@ pub fn load() -> Result<DotEnvyConfig> {
         timeout: std::env::var("SERVER_TIMEOUT")
             .expect("SERVER_TIMEOUT is valid")
             .parse()?,
+        max_crew_per_mission: std::env::var("MAX_CREW_PER_MISSION")
+            .unwrap_or_else(|_| "5".to_string())
+            .parse()?,
     };
 
     let database = Database {
