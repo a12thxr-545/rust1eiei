@@ -1,0 +1,37 @@
+@base_url = http://127.0.0.1:8000/api
+@menta_token = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzY2Mzc2NTY2LCJpYXQiOjE3NjYxMTczNjZ9.Lek_JUxhkoIPGnyKxVjEdE0Ps2BfiBr4htzDtDR2ctY
+
+### create new mission
+# @prompt mission_name Mission Name
+# @prompt description Mission Description
+POST {{base_url}}/mission-management
+Content-Type: application/json
+Authorization: Bearer {{menta_token}}
+
+
+{
+    "name": "{{mission_name}}",
+    "description":"{{description}}"
+}
+
+
+### update mission
+# @prompt mission_id Mission ID
+# @prompt mission_name Mission Name
+# @prompt description Mission Description
+PATCH {{base_url}}/mission-management/{{mission_id}}
+Content-Type: application/json
+Authorization: Bearer {{menta_token}}
+
+
+{
+    "name": "{{mission_name}}",
+    "description": "{{description}}"
+}
+
+
+### remove mission
+# @prompt mission_id Mission ID
+DELETE {{base_url}}/mission-management/{{mission_id}}
+Content-Type: application/json
+Authorization: Bearer {{menta_token}}
