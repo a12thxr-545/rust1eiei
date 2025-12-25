@@ -49,6 +49,26 @@ where
             && crew_count < max_crew_per_mission
             && mission.chief_id == chief_id;
         if !update_condition {
+            if !is_status_open_or_fail {
+                return Err(anyhow::anyhow!(
+                    "Mission status must be Open or Failed to start. Current: {}",
+                    mission.status
+                ));
+            }
+            if crew_count <= 0 {
+                return Err(anyhow::anyhow!(
+                    "Mission must have at least one crew member"
+                ));
+            }
+            if crew_count >= max_crew_per_mission {
+                return Err(anyhow::anyhow!(
+                    "Mission crew limit reached or exceeded (Max: {})",
+                    max_crew_per_mission
+                ));
+            }
+            if mission.chief_id != chief_id {
+                return Err(anyhow::anyhow!("Only the Chief can start the mission"));
+            }
             return Err(anyhow::anyhow!("Invalid condition to change stages!"));
         }
 
@@ -64,6 +84,15 @@ where
         let update_condition = mission.status == MissionStatuses::InProgress.to_string()
             && mission.chief_id == chief_id;
         if !update_condition {
+            if mission.status != MissionStatuses::InProgress.to_string() {
+                return Err(anyhow::anyhow!(
+                    "Mission must be In Progress to complete. Current: {}",
+                    mission.status
+                ));
+            }
+            if mission.chief_id != chief_id {
+                return Err(anyhow::anyhow!("Only the Chief can complete the mission"));
+            }
             return Err(anyhow::anyhow!("Invalid condition to change stages!"));
         }
         let result = self
@@ -79,6 +108,15 @@ where
         let update_condition = mission.status == MissionStatuses::InProgress.to_string()
             && mission.chief_id == chief_id;
         if !update_condition {
+            if mission.status != MissionStatuses::InProgress.to_string() {
+                return Err(anyhow::anyhow!(
+                    "Mission must be In Progress to fail. Current: {}",
+                    mission.status
+                ));
+            }
+            if mission.chief_id != chief_id {
+                return Err(anyhow::anyhow!("Only the Chief can fail the mission"));
+            }
             return Err(anyhow::anyhow!("Invalid condition to change stages!"));
         }
         let result = self

@@ -1,5 +1,5 @@
 @base_url = http://127.0.0.1:8000/api
-@arthur_token = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzY2NDEzMDUxLCJpYXQiOjE3NjYxNTM4NTF9.QcyuX11Fw8DlCOgxDKsrxIn8skc5QiIlzOROOggwe3o
+@arthur_token = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzIiwiZXhwIjoxNzY2ODQ4NDU4LCJpYXQiOjE3NjY1ODkyNTh9.qri9WQ--YmbmyWOpnEOLYxJfYUXECiDQmS-0HopQ5OE
 
 ### create new mission
 # @prompt mission_name Mission Name
@@ -35,3 +35,5 @@ Authorization: Bearer {{arthur_token}}
 DELETE {{base_url}}/mission-management/{{mission_id}}
 Content-Type: application/json
 Authorization: Bearer {{arthur_token}}
+
+

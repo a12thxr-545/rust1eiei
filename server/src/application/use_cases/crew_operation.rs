@@ -15,7 +15,6 @@ where
 {
     crew_operation_repository: Arc<T1>,
     mission_viewing_repository: Arc<T2>,
-    max_crew_per_mission: i64,
 }
 
 impl<T1, T2> CrewOperationUseCase<T1, T2>
@@ -23,28 +22,29 @@ where
     T1: CrewOperationRepository + Send + Sync + 'static,
     T2: MissionViewingRepository + Send + Sync,
 {
-    pub fn new(
-        crew_operation_repository: Arc<T1>,
-        mission_viewing_repository: Arc<T2>,
-        max_crew_per_mission: i64,
-    ) -> Self {
+    pub fn new(crew_operation_repository: Arc<T1>, mission_viewing_repository: Arc<T2>) -> Self {
         Self {
             crew_operation_repository,
             mission_viewing_repository,
-            max_crew_per_mission,
         }
     }
 
     pub async fn join(&self, mission_id: i32, brawler_id: i32) -> Result<()> {
-        let max_crew_per_mission = self.max_crew_per_mission;
+        let max_crew_per_mission = std::env::var("MAX_CREW_PER_MISSION")
+            .expect("missing value")
+            .parse()?;
 
         let mission = self.mission_viewing_repository.get_one(mission_id).await?;
 
+        if mission.chief_id == brawler_id {
+            return Err(anyhow::anyhow!(
+                "Chiefs cannot join their own missions as crew members"
+            ));
+        }
         let crew_count = self
             .mission_viewing_repository
             .crew_counting(mission_id)
             .await?;
-
         let mission_status_condition = mission.status == MissionStatuses::Open.to_string()
             || mission.status == MissionStatuses::Failed.to_string();
         if !mission_status_condition {

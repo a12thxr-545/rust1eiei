@@ -7,21 +7,25 @@ edition = "2024"
 anyhow = "1.0.100"
 argon2 = { version = "0.5.3", features = ["password-hash", "rand", "std"] }
 async-trait = "0.1.89"
-axum = "0.8.6"
+axum = { version = "0.8.6", features = ["macros"] }
 axum-extra = { version = "0.12.1", features = ["cookie", "typed-header"] }
+base64 = "0.22.1"
 chrono = { version = "0.4.42", features = ["serde"] }
 cookie = "0.18.1"
-diesel = { version = "2.3.3", features = [
-    "postgres",
-    "serde_json",
-    "chrono",
-    "r2d2",
-] }
+diesel = { version = "2.3.3", features = ["chrono", "postgres", "r2d2"] }
 dotenvy = "0.15.7"
+infer = "0.19.0"
+json = "0.12.4"
 jsonwebtoken = { version = "10.1.0", features = ["aws_lc_rs"] }
+mockall = "0.13.1"
+pq = "1.4.3"
+reqwest = { version = "0.12.24", features = ["json", "multipart"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.145"
+sha1 = "0.10.6"
 tokio = { version = "1.48.0", features = ["full"] }
 tower-http = { version = "0.6.6", features = ["full"] }
 tracing = "0.1.41"
 tracing-subscriber = "0.3.20"
+uuid = { version = "1.18.1", features = ["v4"] }
+watch = "0.2.3"

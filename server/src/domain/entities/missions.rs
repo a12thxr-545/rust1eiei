@@ -6,15 +6,17 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Identifiable, Selectable, Queryable)]
+#[diesel(check_for_backend(diesel::pg::Pg))]
 #[diesel(table_name = missions)]
 pub struct MissionEntity {
     pub id: i32,
-    pub chief_id: i32,
     pub name: String,
-    pub status: String,
     pub description: Option<String>,
+    pub status: String,
+    pub chief_id: i32,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
+    pub deleted_at: Option<NaiveDateTime>,
 }
 
 impl MissionEntity {

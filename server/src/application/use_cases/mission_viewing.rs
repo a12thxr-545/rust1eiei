@@ -4,7 +4,7 @@ use anyhow::Result;
 
 use crate::domain::{
     repositories::mission_viewing::MissionViewingRepository,
-    value_objects::{mission_filter::MissionFilter, mission_model::MissionModel},
+    value_objects::{brawler_model::BrawlerModel, mission_filter::MissionFilter, mission_model::MissionModel},
 };
 pub struct MissionViewingUseCase<T>
 where
@@ -50,6 +50,15 @@ where
 
             result.push(model.to_model(crew_count));
         }
+
+        Ok(result)
+    }
+    
+    pub async fn get_mission_count(&self, mission_id: i32) -> Result<Vec<BrawlerModel>> {
+        let result = self
+            .mission_viewing_repository
+            .get_mission_count(mission_id)
+            .await?;
 
         Ok(result)
     }
