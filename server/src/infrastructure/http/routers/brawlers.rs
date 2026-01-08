@@ -1,6 +1,9 @@
 use std::sync::Arc;
 
-use axum::{ Extension, Json, Router, extract::State, http::StatusCode, response::IntoResponse, routing::post};
+use axum::{
+    Extension, Json, Router, extract::State, http::StatusCode, response::IntoResponse,
+    routing::post,
+};
 
 use crate::{
     application::use_cases::brawlers::BrawlersUseCase,
@@ -8,9 +11,10 @@ use crate::{
         repositories::brawlers::BrawlerRepository,
         value_objects::{brawler_model::RegisterBrawlerModel, uploaded_image::UploadedAvartar},
     },
-    infrastructure::{database::{
-        postgresql_connection::PgPoolSquad, repositories::brawlers::BrawlerPostgres,
-    }, http::middleware::auth::authorization},
+    infrastructure::{
+        database::{postgresql_connection::PgPoolSquad, repositories::brawlers::BrawlerPostgres},
+        http::middleware::auth::authorization,
+    },
 };
 
 pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
@@ -40,7 +44,6 @@ where
     }
 }
 
-
 pub async fn upload_avatar<T>(
     State(brawlers_use_case): State<Arc<BrawlersUseCase<T>>>,
     Extension(brawler_id): Extension<i32>,
@@ -48,7 +51,7 @@ pub async fn upload_avatar<T>(
 ) -> impl IntoResponse
 where
     T: BrawlerRepository + Send + Sync,
-  {
+{
     match brawlers_use_case
         .upload_avatar(upload_image.base64_string, brawler_id)
         .await
