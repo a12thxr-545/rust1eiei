@@ -1,1 +1,68 @@
-<p>login works!</p>
+<div class="login-container">
+    <mat-card>
+        <h3>{{ mode === 'login' ? 'Welcome Back' : 'Create Account' }}</h3>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off">
+            <!-- Username -->
+            <mat-form-field appearance="outline">
+                <mat-label>Username</mat-label>
+                <input matInput type="text" formControlName="username" placeholder="Enter your username"
+                    (blur)="updateErrorMsg('username')">
+            </mat-form-field>
+            @if (errorMsg.username()) {
+            <p class="error">{{ errorMsg.username() }}</p>
+            }
+
+            <!-- AKA / Display Name (Register only) -->
+            @if (mode === 'regis') {
+            <mat-form-field appearance="outline">
+                <mat-label>AKA (Display Name)</mat-label>
+                <input matInput type="text" formControlName="displayName" placeholder="What should we call you?"
+                    (blur)="updateErrorMsg('displayName')">
+            </mat-form-field>
+            @if (errorMsg.displayName()) {
+            <p class="error">{{ errorMsg.displayName() }}</p>
+            }
+            }
+
+            <!-- Password -->
+            <mat-form-field appearance="outline">
+                <mat-label>Password</mat-label>
+                <input matInput type="password" formControlName="password" placeholder="Enter your password"
+                    (blur)="updateErrorMsg('password')">
+            </mat-form-field>
+            @if (errorMsg.password()) {
+            <p class="error">{{ errorMsg.password() }}</p>
+            }
+
+            <!-- Confirm Password (Register only) -->
+            @if (mode === 'regis') {
+            <mat-form-field appearance="outline">
+                <mat-label>Confirm Password</mat-label>
+                <input matInput type="password" formControlName="cf_password" placeholder="Confirm your password"
+                    (blur)="updateErrorMsg('cf_password')">
+            </mat-form-field>
+            @if (errorMsg.cf_password()) {
+            <p class="error">{{ errorMsg.cf_password() }}</p>
+            }
+            }
+
+            <button mat-flat-button class="blue" type="submit" [disabled]="form.invalid || isLoading">
+                @if (isLoading) {
+                Loading...
+                } @else {
+                {{ mode === 'login' ? 'Login' : 'Sign Up' }}
+                }
+            </button>
+        </form>
+
+        <div class="login-spacer">or</div>
+
+        <p class="toggle">
+            @if (mode === 'login') {
+            Don't have an account? <span (click)="toggleMode()">Sign up</span>
+            } @else {
+            Already have an account? <span (click)="toggleMode()">Login</span>
+            }
+        </p>
+    </mat-card>
+</div>

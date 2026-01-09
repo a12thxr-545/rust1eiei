@@ -6,11 +6,7 @@ use crate::{
             uploaded_image::UploadedImage,
         },
     },
-    infrastructure::{
-        argon2::hash,
-        cloudinary::{ UploadImageOptions},
-        jwt::jwt_model::Passport,
-    },
+    infrastructure::{argon2::hash, cloudinary::UploadImageOptions, jwt::jwt_model::Passport},
 };
 use anyhow::Result;
 use std::sync::Arc;
@@ -39,7 +35,7 @@ where
 
         let brawler_id = self.brawler_repository.register(register_entity).await?;
 
-        let passport = Passport::new(brawler_id);
+        let passport = Passport::new(brawler_id, register_model.display_name.clone(), None);
         Ok(passport)
     }
     pub async fn upload_avatar(

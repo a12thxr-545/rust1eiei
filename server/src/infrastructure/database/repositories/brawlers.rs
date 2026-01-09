@@ -29,12 +29,12 @@ impl BrawlerRepository for BrawlerPostgres {
     async fn register(&self, register_brawler_entity: RegisterBrawlerEntity) -> Result<i32> {
         let mut connection = Arc::clone(&self.db_pool).get()?;
 
-        let result = insert_into(brawlers::table)
+        let user_id = insert_into(brawlers::table)
             .values(&register_brawler_entity)
             .returning(brawlers::id)
             .get_result::<i32>(&mut connection)?;
 
-        Ok(result)
+        Ok(user_id)
     }
 
     async fn find_by_username(&self, username: &String) -> Result<BrawlerEntity> {

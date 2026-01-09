@@ -17,21 +17,22 @@ pub struct Claims {
     pub sub: i32,
     pub exp: usize,
     pub iat: usize,
+    pub display_name: String,
+    pub avatar_url: Option<String>,
 }
 
-
 impl Passport {
-    pub fn new(brawler_id:i32) -> Self {
+    pub fn new(brawler_id: i32, display_name: String, avatar_url: Option<String>) -> Self {
         let jwt_env = get_jwt_env().unwrap();
         let token_type = "Bearer".to_string();
         let expires_in = (Utc::now() + Duration::days(jwt_env.life_time_days)).timestamp() as usize;
-        let display_name = format!("Brawler{}", brawler_id);
-        let avatar_url = None;
 
         let access_token_claims = Claims {
             sub: brawler_id,
             exp: expires_in,
             iat: Utc::now().timestamp() as usize,
+            display_name: display_name.clone(),
+            avatar_url: avatar_url.clone(),
         };
 
         let access_token = generate_token(jwt_env.secret, &access_token_claims).unwrap();
@@ -44,4 +45,4 @@ impl Passport {
             avatar_url,
         }
     }
-}   
+}

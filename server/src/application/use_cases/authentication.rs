@@ -7,10 +7,7 @@ use crate::{
     domain::repositories::brawlers::BrawlerRepository,
     infrastructure::{
         self,
-        jwt::{
-            authentication_model::LoginModel,
-            jwt_model::Passport,
-        },
+        jwt::{authentication_model::LoginModel, jwt_model::Passport},
     },
 };
 
@@ -37,14 +34,18 @@ where
         let username = login_model.username.clone();
 
         let brawler_entity = self.brawler_repository.find_by_username(&username).await?;
-        let hsah_password =   brawler_entity.password;
+        let hsah_password = brawler_entity.password;
         let login_password = login_model.password;
 
         if !infrastructure::argon2::verify(login_password, hsah_password)? {
             return Err(anyhow::anyhow!("Invalid username or password"));
         }
 
-        let passport = Passport::new(brawler_entity.id);
+        let passport = Passport::new(
+            brawler_entity.id,
+            brawler_entity.display_name,
+            brawler_entity.avatar_url,
+        );
 
         // let access_token_claims = Claims {
         //     sub: brawler.id.to_string(),
@@ -99,31 +100,31 @@ where
     //     })
     // }
 
-//     pub async fn refresh_token(&self, refresh_token: String) -> Result<Passport> {
-//         let secret_env = get_jwt_env()?;
+    //     pub async fn refresh_token(&self, refresh_token: String) -> Result<Passport> {
+    //         let secret_env = get_jwt_env()?;
 
-//         let claims = verify_token(secret_env.refresh_secret, refresh_token.clone())?;
+    //         let claims = verify_token(secret_env.refresh_secret, refresh_token.clone())?;
 
-//         let access_token_claims = Claims {
-//             sub: claims.sub.clone(),
-//             exp: (Utc::now() + Duration::days(1)).timestamp() as usize,
-//             iat: Utc::now().timestamp() as usize,
-//         };
+    //         let access_token_claims = Claims {
+    //             sub: claims.sub.clone(),
+    //             exp: (Utc::now() + Duration::days(1)).timestamp() as usize,
+    //             iat: Utc::now().timestamp() as usize,
+    //         };
 
-//         let refresh_token_claims = Claims {
-//             sub: claims.sub,
-//             exp: claims.exp,
-//             iat: Utc::now().timestamp() as usize,
-//         };
+    //         let refresh_token_claims = Claims {
+    //             sub: claims.sub,
+    //             exp: claims.exp,
+    //             iat: Utc::now().timestamp() as usize,
+    //         };
 
-//         let access_token = generate_token(secret_env.secret, &access_token_claims)?;
+    //         let access_token = generate_token(secret_env.secret, &access_token_claims)?;
 
-//         let refresh_token = generate_token(secret_env.life_time_days.to_string().clone(), &refresh_token_claims)?;
+    //         let refresh_token = generate_token(secret_env.life_time_days.to_string().clone(), &refresh_token_claims)?;
 
-//         Ok(Passport {
-//             token_type: refresh_token,
-//             access_token: access_token,
-//             expires_in: refresh_token_claims.exp,
-//         })
-//     }
+    //         Ok(Passport {
+    //             token_type: refresh_token,
+    //             access_token: access_token,
+    //             expires_in: refresh_token_claims.exp,
+    //         })
+    //     }
 }

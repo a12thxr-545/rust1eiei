@@ -1,1 +1,36 @@
-<p>navbar works!</p>
+<mat-toolbar class="navbar">
+    <div class="navbar-container">
+        <a routerLink="/" class="logo">
+            <mat-icon>sports_esports</mat-icon>
+            <span>Brawlers</span>
+        </a>
+
+        <div class="nav-links">
+            <a mat-button routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+                <mat-icon>home</mat-icon>
+                Home
+            </a>
+
+            @if (isLoggedIn()) {
+            <a mat-button routerLink="/profile" routerLinkActive="active">
+                <mat-icon>person</mat-icon>
+                Profile
+            </a>
+
+            <button mat-button (click)="logout()">
+                <mat-icon>logout</mat-icon>
+                Logout
+            </button>
+
+            @if (passportService.data()?.avatar_url) {
+            <img class="avatar" [src]="passportService.data()?.avatar_url" alt="avatar">
+            }
+            } @else {
+            <a mat-button routerLink="/login" routerLinkActive="active">
+                <mat-icon>login</mat-icon>
+                Login
+            </a>
+            }
+        </div>
+    </div>
+</mat-toolbar>
