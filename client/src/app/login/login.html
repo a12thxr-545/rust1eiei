@@ -3,10 +3,10 @@
         <h3>{{ mode === 'login' ? 'Welcome Back' : 'Create Account' }}</h3>
         <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off">
             <!-- Username -->
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="outline" [class.error-field]="errorMsg.username()">
                 <mat-label>Username</mat-label>
                 <input matInput type="text" formControlName="username" placeholder="Enter your username"
-                    (blur)="updateErrorMsg('username')">
+                    (blur)="mode === 'regis' && updateErrorMsg('username')">
             </mat-form-field>
             @if (errorMsg.username()) {
             <p class="error">{{ errorMsg.username() }}</p>
@@ -14,7 +14,7 @@
 
             <!-- AKA / Display Name (Register only) -->
             @if (mode === 'regis') {
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="outline" [class.error-field]="errorMsg.displayName()">
                 <mat-label>AKA (Display Name)</mat-label>
                 <input matInput type="text" formControlName="displayName" placeholder="What should we call you?"
                     (blur)="updateErrorMsg('displayName')">
@@ -25,10 +25,10 @@
             }
 
             <!-- Password -->
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="outline" [class.error-field]="errorMsg.password()">
                 <mat-label>Password</mat-label>
                 <input matInput type="password" formControlName="password" placeholder="Enter your password"
-                    (blur)="updateErrorMsg('password')">
+                    (blur)="mode === 'regis' && updateErrorMsg('password')">
             </mat-form-field>
             @if (errorMsg.password()) {
             <p class="error">{{ errorMsg.password() }}</p>
@@ -36,7 +36,7 @@
 
             <!-- Confirm Password (Register only) -->
             @if (mode === 'regis') {
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="outline" [class.error-field]="errorMsg.cf_password()">
                 <mat-label>Confirm Password</mat-label>
                 <input matInput type="password" formControlName="cf_password" placeholder="Confirm your password"
                     (blur)="updateErrorMsg('cf_password')">
@@ -46,7 +46,7 @@
             }
             }
 
-            <button mat-flat-button class="blue" type="submit" [disabled]="form.invalid || isLoading">
+            <button mat-flat-button class="blue" type="submit" [disabled]="isLoading">
                 @if (isLoading) {
                 Loading...
                 } @else {

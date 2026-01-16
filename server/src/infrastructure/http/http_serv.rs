@@ -60,8 +60,7 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
     let app = Router::new()
         .merge(static_serve())
         .nest("/api", api_serve(Arc::clone(&db_pool)))
-        // .fallback(default_router::health_check)
-        // .route("/health_check", get(routers::default::health_check))
+
         .layer(tower_http::timeout::TimeoutLayer::with_status_code(
             StatusCode::REQUEST_TIMEOUT,
             Duration::from_secs(config.server.timeout),

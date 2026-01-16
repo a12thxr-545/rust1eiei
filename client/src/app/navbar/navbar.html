@@ -1,36 +1,28 @@
-<mat-toolbar class="navbar">
-    <div class="navbar-container">
-        <a routerLink="/" class="logo">
-            <mat-icon>sports_esports</mat-icon>
-            <span>Brawlers</span>
-        </a>
+<mat-toolbar>
+    <span>My application</span>
+    <span class="spacer"></span>
 
-        <div class="nav-links">
-            <a mat-button routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-                <mat-icon>home</mat-icon>
-                Home
-            </a>
+    @if (isLoggedIn()) {
 
-            @if (isLoggedIn()) {
-            <a mat-button routerLink="/profile" routerLinkActive="active">
-                <mat-icon>person</mat-icon>
-                Profile
-            </a>
+    <span class="display-name">{{ display_name() }}</span>
+    <button mat-icon-button [matMenuTriggerFor]="userMenu" class="avatar-button">
+        <img class="avatar" [src]="avatar_url()" alt="avatar">
+    </button>
+    <mat-menu #userMenu="matMenu">
+        <button mat-menu-item (click)="goToProfile()">
+            <mat-icon>person</mat-icon>
+            <span>Profile</span>
+        </button>
+        <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Logout</span>
+        </button>
+    </mat-menu>
+    } @else if (!isOnLoginPage()) {
 
-            <button mat-button (click)="logout()">
-                <mat-icon>logout</mat-icon>
-                Logout
-            </button>
-
-            @if (passportService.data()?.avatar_url) {
-            <img class="avatar" [src]="passportService.data()?.avatar_url" alt="avatar">
-            }
-            } @else {
-            <a mat-button routerLink="/login" routerLinkActive="active">
-                <mat-icon>login</mat-icon>
-                Login
-            </a>
-            }
-        </div>
-    </div>
+    <a mat-button routerLink="/login">
+        <mat-icon>login</mat-icon>
+        Login
+    </a>
+    }
 </mat-toolbar>

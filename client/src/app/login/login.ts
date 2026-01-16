@@ -92,13 +92,26 @@ export class Login {
         break;
 
       case 'password':
-        if (ctrl.hasError('required')) this.errorMsg.password.set('Password is required');
-        else if (ctrl.hasError('invalidLength')) this.errorMsg.password.set(`Must be ${this.passwordMinLength}-${this.passwordMaxLength} characters`);
-        else if (ctrl.hasError('invalidLowerCase')) this.errorMsg.password.set('Must contain at least 1 lowercase letter [a-z]');
-        else if (ctrl.hasError('invalidUpperCase')) this.errorMsg.password.set('Must contain at least 1 uppercase letter [A-Z]');
-        else if (ctrl.hasError('invalidNumeric')) this.errorMsg.password.set('Must contain at least 1 number [0-9]');
-        else if (ctrl.hasError('invalidSpecialChar')) this.errorMsg.password.set('Must contain at least 1 special character');
-        else this.errorMsg.password.set('');
+        if (ctrl.hasError('required')) {
+          this.errorMsg.password.set('Password is required');
+        } else if (this.mode === 'regis') {
+          // Show all missing requirements in register mode
+          const errors: string[] = [];
+          if (ctrl.hasError('invalidLength')) errors.push(`${this.passwordMinLength}-${this.passwordMaxLength} characters`);
+          if (ctrl.hasError('invalidLowerCase')) errors.push('lowercase [a-z]');
+          if (ctrl.hasError('invalidUpperCase')) errors.push('uppercase [A-Z]');
+          if (ctrl.hasError('invalidNumeric')) errors.push('number [0-9]');
+          if (ctrl.hasError('invalidSpecialChar')) errors.push('special character');
+
+          if (errors.length > 0) {
+            this.errorMsg.password.set('Password must have: ' + errors.join(', '));
+          } else {
+            this.errorMsg.password.set('');
+          }
+        } else {
+          // In login mode, don't show detailed validation errors
+          this.errorMsg.password.set('');
+        }
         break;
 
       case 'displayName':
@@ -116,7 +129,36 @@ export class Login {
   }
 
   async onSubmit() {
-    if (this.form.invalid) return;
+    // Clear previous errors
+    this.clearErrors();
+
+    // Validate and show errors
+    if (this.mode === 'login') {
+      // Login mode: just check if fields are filled
+      if (!this.form.value.username || !this.form.value.password) {
+        this.errorMsg.username.set('Invalid username or password');
+        this.errorMsg.password.set('Invalid username or password');
+        return;
+      }
+    } else {
+      // Register mode: validate all fields and show specific errors
+      let hasError = false;
+
+      // Validate each field
+      this.updateErrorMsg('username');
+      this.updateErrorMsg('displayName');
+      this.updateErrorMsg('password');
+      this.updateErrorMsg('cf_password');
+
+      // Check if any field has error
+      if (this.errorMsg.username() || this.errorMsg.displayName() ||
+        this.errorMsg.password() || this.errorMsg.cf_password()) {
+        return;
+      }
+
+      // Also check form validity for any other validation
+      if (this.form.invalid) return;
+    }
 
     this.isLoading = true;
 
@@ -127,6 +169,7 @@ export class Login {
           password: this.form.value.password
         });
         if (error) {
+          this.errorMsg.username.set('Invalid username or password');
           this.errorMsg.password.set('Invalid username or password');
           return;
         }

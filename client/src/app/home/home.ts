@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { PassportService } from '../_services/passport-service';
 
 @Component({
   selector: 'app-home',
@@ -7,5 +9,8 @@ import { Component } from '@angular/core';
   styleUrl: './home.css',
 })
 export class Home {
+  private router = inject(Router);
+  private passport = inject(PassportService);
+
 
 }
