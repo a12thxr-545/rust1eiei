@@ -5,18 +5,32 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { PassportService } from '../_services/passport-service';
+import { SnackbarService } from '../_services/snackbar.service';
 import { Router } from '@angular/router';
 
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatCardModule],
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatCardModule,
+    MatProgressSpinnerModule,
+    NgxSpinnerModule
+  ],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
 export class Login {
   private passportService = inject(PassportService);
+  private snackbarService = inject(SnackbarService);
+  private spinnerService = inject(NgxSpinnerService);
   private router = inject(Router);
 
   private usernameMinLength = 4;
@@ -26,7 +40,7 @@ export class Login {
   private displayNameMinLength = 3;
 
   mode: 'login' | 'regis' = 'login';
-  isLoading = false;
+  isLoading = signal(false);
   form: FormGroup;
 
   errorMsg = {
@@ -52,8 +66,17 @@ export class Login {
 
   toggleMode() {
     this.mode = this.mode === 'login' ? 'regis' : 'login';
-    this.updateForm();
+    // Clear everything first
     this.clearErrors();
+    this.form.reset();
+    this.updateForm();
+    this.resetFormState();
+    // Make sure errors are cleared after updateForm
+    this.clearErrors();
+    console.log('After toggle - errors cleared:', {
+      username: this.errorMsg.username(),
+      password: this.errorMsg.password()
+    });
   }
 
   clearErrors() {
@@ -62,6 +85,18 @@ export class Login {
     this.errorMsg.displayName.set('');
     this.errorMsg.cf_password.set('');
   }
+
+  resetFormState() {
+    // Reset form controls to untouched state
+    Object.keys(this.form.controls).forEach(key => {
+      const control = this.form.get(key);
+      if (control) {
+        control.markAsUntouched();
+        control.markAsPristine();
+      }
+    });
+  }
+
 
   updateForm() {
     if (this.mode === 'login') {
@@ -115,7 +150,7 @@ export class Login {
         break;
 
       case 'displayName':
-        if (ctrl.hasError('required')) this.errorMsg.displayName.set('Display name is required');
+        if (ctrl.hasError('required')) this.errorMsg.displayName.set('aka is required');
         else if (ctrl.hasError('minlength')) this.errorMsg.displayName.set(`Must be at least ${this.displayNameMinLength} characters`);
         else this.errorMsg.displayName.set('');
         break;
@@ -136,14 +171,11 @@ export class Login {
     if (this.mode === 'login') {
       // Login mode: just check if fields are filled
       if (!this.form.value.username || !this.form.value.password) {
-        this.errorMsg.username.set('Invalid username or password');
-        this.errorMsg.password.set('Invalid username or password');
+        this.snackbarService.warning('Please enter username and password');
         return;
       }
     } else {
       // Register mode: validate all fields and show specific errors
-      let hasError = false;
-
       // Validate each field
       this.updateErrorMsg('username');
       this.updateErrorMsg('displayName');
@@ -153,6 +185,7 @@ export class Login {
       // Check if any field has error
       if (this.errorMsg.username() || this.errorMsg.displayName() ||
         this.errorMsg.password() || this.errorMsg.cf_password()) {
+        this.snackbarService.warning('Please fix the errors above');
         return;
       }
 
@@ -160,7 +193,8 @@ export class Login {
       if (this.form.invalid) return;
     }
 
-    this.isLoading = true;
+    this.isLoading.set(true);
+    this.spinnerService.show('auth-spinner');
 
     try {
       if (this.mode === 'login') {
@@ -168,11 +202,15 @@ export class Login {
           username: this.form.value.username,
           password: this.form.value.password
         });
+        console.log('Login result:', error); // Debug
         if (error) {
+          console.log('Login failed, showing error'); // Debug
+          this.snackbarService.error('Invalid username or password');
           this.errorMsg.username.set('Invalid username or password');
           this.errorMsg.password.set('Invalid username or password');
           return;
         }
+        this.snackbarService.success('Welcome back! Login successful');
       } else {
         const error = await this.passportService.register({
           username: this.form.value.username,
@@ -180,17 +218,22 @@ export class Login {
           display_name: this.form.value.displayName
         });
         if (error) {
+          this.snackbarService.error('Username already exists');
           this.errorMsg.username.set('Username already exists');
           return;
         }
+        this.snackbarService.success('Account created successfully!');
       }
 
       // Navigate to home on success
       this.router.navigate(['/']);
     } catch (error) {
       console.error('Auth error:', error);
+      this.snackbarService.error('An unexpected error occurred. Please try again.');
     } finally {
-      this.isLoading = false;
+      this.isLoading.set(false);
+      this.spinnerService.hide('auth-spinner');
     }
   }
 }
+

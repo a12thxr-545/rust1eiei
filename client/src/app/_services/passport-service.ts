@@ -5,6 +5,10 @@ import { LoginModel, Passport, RegisterBrawlerModel } from "../_model/passport"
 import { firstValueFrom } from "rxjs"
 import { isPlatformBrowser } from "@angular/common"
 
+export interface UploadedImage {
+    url: string;
+    public_id: string;
+}
 
 @Injectable({
     providedIn: 'root'
@@ -80,5 +84,30 @@ export class PassportService {
             return ` ${error}`
         }
         return null
+    }
+
+    async uploadAvatar(base64String: string): Promise<UploadedImage | null> {
+        try {
+            const api_url = this._base_url + '/brawlers/avatar'
+            const result = this._http.post<UploadedImage>(api_url, { base64_string: base64String })
+            const uploadedImage = await firstValueFrom(result)
+
+            // Update passport with new avatar URL
+            this.updateAvatarUrl(uploadedImage.url)
+
+            return uploadedImage
+        } catch (error) {
+            console.error('Upload avatar error:', error)
+            return null
+        }
+    }
+
+    updateAvatarUrl(url: string) {
+        const passport = this.data()
+        if (!passport) return
+
+        const updatedPassport = { ...passport, avatar_url: url }
+        this.data.set(updatedPassport)
+        this.savePassportToLocalStorage()
     }
 }

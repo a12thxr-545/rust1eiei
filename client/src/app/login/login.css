@@ -4,18 +4,10 @@
     justify-content: center;
     align-items: center;
 
-
     h3 {
         margin: 0;
         padding: 0;
         margin-bottom: 1em;
-    }
-
-    .error {
-        color: #bb303b;
-        font-size: small;
-        text-align: center;
-        margin-top: 0.2em;
     }
 
     mat-card {
@@ -30,21 +22,49 @@
         max-width: 400px;
     }
 
+    /* Field wrapper for input + error */
+    .field-wrapper {
+        position: relative;
+        margin-bottom: 0.6em;
+        text-align: left;
+        width: 100%;
+    }
+
+    /* Error label - below input, left aligned with icon */
+    .error-label {
+        color: #ef4444;
+        font-size: 12px;
+        font-weight: 400;
+        text-align: left;
+        margin: 6px 0 0 0;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 6px;
+        width: 100%;
+    }
+
+    .error-icon {
+        font-size: 14px;
+        line-height: 1;
+    }
+
     mat-form-field {
-        /* border: 1px solid green; */
         height: 50px;
-        margin-bottom: 1.2em;
+        margin-bottom: 0;
         display: block;
+        width: 100%;
     }
 
     mat-form-field.error-field ::ng-deep .mdc-notched-outline__leading,
     mat-form-field.error-field ::ng-deep .mdc-notched-outline__notch,
     mat-form-field.error-field ::ng-deep .mdc-notched-outline__trailing {
-        border-color: #bb303b !important;
+        border-color: #ef4444 !important;
     }
 
     mat-form-field.error-field ::ng-deep .mdc-floating-label {
-        color: #bb303b !important;
+        color: #ef4444 !important;
     }
 
     button.blue {
@@ -52,13 +72,32 @@
         width: 100%;
         background-color: #3448c5;
         color: rgb(241, 250, 250);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 48px;
+        transition: all 0.3s ease;
     }
 
     button.blue:disabled {
-        background-color: #a1a9d6;
-        color: #d4d9e9;
-        cursor: not-allowed;
-        opacity: 0.6;
+        background-color: #4a5bbf;
+        color: #e0e4f0;
+        cursor: wait;
+        opacity: 0.9;
+    }
+
+    button.blue mat-spinner {
+        display: inline-block;
+    }
+
+    button.blue mat-spinner ::ng-deep circle {
+        stroke: #fff !important;
+    }
+
+    .btn-loading-text {
+        font-size: 14px;
+        animation: pulse 1.5s ease-in-out infinite;
     }
 
     .toggle {
@@ -74,7 +113,6 @@
         cursor: pointer;
     }
 
-
     div.login-spacer {
         display: flex;
         align-items: center;
@@ -85,23 +123,17 @@
         font-family: 300;
         margin-top: 1em;
         margin-bottom: 1em;
-
-
-        /* border: 1px solid green; */
     }
-
 
     div.login-spacer::after {
         margin-left: 12px;
         border-bottom: 1px solid #a2abb4;
     }
 
-
     div.login-spacer::before {
         margin-right: 12px;
         border-bottom: 1px solid #a2abb4;
     }
-
 
     *::before,
     *::after {
@@ -110,4 +142,25 @@
         content: "";
         box-sizing: border-box;
     }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+}
+
+/* Loading message for ngx-spinner */
+.loading-message {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 16px;
+    animation: pulse 1.5s ease-in-out infinite;
 }

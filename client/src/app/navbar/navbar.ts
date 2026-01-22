@@ -3,19 +3,22 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { PassportService } from '../_services/passport-service';
 import { filter } from 'rxjs';
+import { CreateMissionDialog } from './create-mission-dialog/create-mission-dialog';
 
 @Component({
   selector: 'app-navbar',
-  imports: [MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule, RouterLink],
+  imports: [MatToolbarModule, MatButtonModule, MatIconModule, MatMenuModule, RouterLink, MatDialogModule],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })
 export class Navbar {
   private _passport = inject(PassportService);
   private _router = inject(Router);
+  private _dialog = inject(MatDialog);
 
   display_name: Signal<string | undefined>
   avatar_url: Signal<string | undefined>
@@ -45,5 +48,9 @@ export class Navbar {
 
   goToProfile() {
     this._router.navigate(['/profile']);
+  }
+
+  createMission() {
+    this._dialog.open(CreateMissionDialog);
   }
 }

@@ -57,6 +57,9 @@ where
         .await
     {
         Ok(uploaded_image) => (StatusCode::CREATED, Json(uploaded_image)).into_response(),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
+        Err(e) => {
+            tracing::error!("Upload avatar error: {:?}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
+        }
     }
 }

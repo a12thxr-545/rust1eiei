@@ -1,0 +1,30 @@
+<h2 mat-dialog-title>Create New Mission</h2>
+<mat-dialog-content>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mission-form">
+        <mat-form-field appearance="outline">
+            <mat-label>Mission Name</mat-label>
+            <input matInput formControlName="name" placeholder="Enter mission name">
+            @if (form.controls.name.hasError('required')) {
+                <mat-error>Name is required</mat-error>
+            }
+            @if (form.controls.name.hasError('minlength')) {
+                <mat-error>Name must be at least 3 characters</mat-error>
+            }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" placeholder="Enter mission description" rows="4"></textarea>
+        </mat-form-field>
+    </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="form.invalid || isLoading()">
+        @if (isLoading()) {
+            Creating...
+        } @else {
+            Create
+        }
+    </button>
+</mat-dialog-actions>

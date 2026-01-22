@@ -4,6 +4,11 @@
 
     @if (isLoggedIn()) {
 
+    <button mat-button (click)="createMission()">
+        <mat-icon>add</mat-icon>
+        Create Mission
+    </button>
+
     <span class="display-name">{{ display_name() }}</span>
     <button mat-icon-button [matMenuTriggerFor]="userMenu" class="avatar-button">
         <img class="avatar" [src]="avatar_url()" alt="avatar">

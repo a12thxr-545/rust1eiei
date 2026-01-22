@@ -1,1 +1,34 @@
-<p>home works!</p>
+<div class="mission-container">
+    @for (mission of missions(); track mission.id) {
+    <mat-card class="mission-card">
+        <mat-card-header>
+            <mat-card-title>{{ mission.name }}</mat-card-title>
+            <mat-card-subtitle>
+                <mat-chip-set>
+                    <mat-chip [highlighted]="true" [color]="mission.status === 'Open' ? 'primary' : 'warn'">
+                        {{ mission.status }}
+                    </mat-chip>
+                </mat-chip-set>
+            </mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+            <p>{{ mission.description || 'No description provided.' }}</p>
+            <div class="mission-stats">
+                <span><mat-icon inline>group</mat-icon> Crew: {{ mission.crew_count }}</span>
+                <span><mat-icon inline>schedule</mat-icon> {{ mission.created_at | date }}</span>
+            </div>
+        </mat-card-content>
+        <mat-card-actions align="end">
+            <button mat-button>DETAILS</button>
+            @if (mission.status === 'Open') {
+                <button mat-flat-button color="primary">JOIN</button>
+            }
+        </mat-card-actions>
+    </mat-card>
+    } @empty {
+    <div class="no-missions">
+        <mat-icon class="large-icon">assignment_late</mat-icon>
+        <p>No missions available at the moment.</p>
+    </div>
+    }
+</div>

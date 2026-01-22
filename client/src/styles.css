@@ -1,1 +1,143 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* ============================================
+   SNACKBAR STYLES
+   ============================================ */
+
+/* Base snackbar styling */
+.mat-mdc-snack-bar-container {
+    --mdc-snackbar-container-color: #323232;
+    --mat-snack-bar-button-color: #fff;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Success snackbar */
+.snackbar-success .mdc-snackbar__surface {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
+    border-left: 4px solid #374151;
+}
+
+.snackbar-success .mdc-snackbar__label,
+.snackbar-success .mat-mdc-button {
+    color: #fff !important;
+}
+
+/* Error snackbar */
+.snackbar-error .mdc-snackbar__surface {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
+    border-left: 4px solid #374151;
+}
+
+.snackbar-error .mdc-snackbar__label,
+.snackbar-error .mat-mdc-button {
+    color: #fff !important;
+}
+
+/* Warning snackbar */
+.snackbar-warning .mdc-snackbar__surface {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
+    border-left: 4px solid #374151;
+}
+
+.snackbar-warning .mdc-snackbar__label,
+.snackbar-warning .mat-mdc-button {
+    color: #fff !important;
+}
+
+/* Info snackbar */
+.snackbar-info .mdc-snackbar__surface {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
+    border-left: 4px solid #374151;
+}
+
+.snackbar-info .mdc-snackbar__label,
+.snackbar-info .mat-mdc-button {
+    color: #fff !important;
+}
+
+/* Snackbar text styling */
+.mat-mdc-snack-bar-container .mdc-snackbar__label {
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.25px;
+}
+
+/* Snackbar button styling */
+.mat-mdc-snack-bar-container .mat-mdc-button {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+}
+
+/* Snackbar animation */
+.mat-mdc-snack-bar-container {
+    animation: slideInFromTop 0.3s ease-out;
+}
+
+@keyframes slideInFromTop {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ============================================
+   LOADING OVERLAY STYLES
+   ============================================ */
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.loading-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-text {
+    color: #fff;
+    margin-top: 16px;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* NGX Spinner customization */
+.ngx-spinner-overlay {
+    backdrop-filter: blur(4px) !important;
+}

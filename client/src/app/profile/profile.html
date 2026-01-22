@@ -1,1 +1,33 @@
-<p>profile works!</p>
+<div class="profile-container">
+    <div class="profile-card">
+        <div class="profile-header">
+            <h1>Profile</h1>
+        </div>
+
+        <div class="avatar-section">
+            <div class="avatar-wrapper" (click)="triggerFileInput()">
+                <img [src]="displayAvatarUrl()" alt="Avatar" class="avatar-image" />
+
+                <div class="avatar-overlay" [class.uploading]="isUploading()">
+                    @if (isUploading()) {
+                    <div class="upload-spinner"></div>
+                    } @else {
+                    <span class="upload-text">Change</span>
+                    }
+                </div>
+            </div>
+
+            <input type="file" #fileInput accept="image/jpeg,image/png,.jpg,.jpeg,.png"
+                (change)="onFileSelected($event)" class="file-input-hidden" />
+
+            <p class="avatar-hint">Click to upload a new avatar</p>
+        </div>
+
+        <div class="profile-info">
+            <div class="info-item">
+                <span class="info-label">display name</span>
+                <span class="info-value">{{ passport()?.display_name || 'Unknown' }}</span>
+            </div>
+        </div>
+    </div>
+</div>
