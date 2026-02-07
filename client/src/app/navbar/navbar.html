@@ -1,33 +1,119 @@
-<mat-toolbar>
-    <span>My application</span>
-    <span class="spacer"></span>
+<nav class="navbar">
+    <div class="navbar-container">
+        <!-- Logo -->
+        <a routerLink="/" class="logo">
+            <span class="logo-text">YNWA</span>
+        </a>
 
-    @if (isLoggedIn()) {
+        <button class="theme-toggle" (click)="themeService.toggleTheme()"
+            [title]="'Cycle Theme (Current: ' + themeService.theme() + ')'">
+            @if (themeService.theme() === 'light') {
+            <!-- Light Mode -> Show Dark Icon -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+            } @else if (themeService.theme() === 'dark') {
+            <!-- Dark Mode -> Show Orange Icon -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2c-4 0-7 3-7 7 0 4 3 7 7 7s7-3 7-7c0-4-3-7-7-7z" />
+                <path d="M12 16v5" />
+                <path d="M8 21h8" />
+                <path d="M12 7v4" />
+            </svg>
+            } @else if (themeService.theme() === 'orange') {
+            <!-- Orange Mode -> Show Light Icon (Sun) -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5" />
+                <line x1="12" y1="1" x2="12" y2="3" />
+                <line x1="12" y1="21" x2="12" y2="23" />
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                <line x1="1" y1="12" x2="3" y2="12" />
+                <line x1="21" y1="12" x2="23" y2="12" />
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+            </svg>
+            }
 
-    <button mat-button (click)="createMission()">
-        <mat-icon>add</mat-icon>
-        Create Mission
-    </button>
-
-    <span class="display-name">{{ display_name() }}</span>
-    <button mat-icon-button [matMenuTriggerFor]="userMenu" class="avatar-button">
-        <img class="avatar" [src]="avatar_url()" alt="avatar">
-    </button>
-    <mat-menu #userMenu="matMenu">
-        <button mat-menu-item (click)="goToProfile()">
-            <mat-icon>person</mat-icon>
-            <span>Profile</span>
         </button>
-        <button mat-menu-item (click)="logout()">
-            <mat-icon>logout</mat-icon>
-            <span>Logout</span>
-        </button>
-    </mat-menu>
-    } @else if (!isOnLoginPage()) {
 
-    <a mat-button routerLink="/login">
-        <mat-icon>login</mat-icon>
-        Login
-    </a>
-    }
-</mat-toolbar>
+        <!-- Language Toggle -->
+        <button class="lang-toggle" (click)="lang.toggleLanguage()" [title]="'Language: ' + lang.language()">
+            {{ lang.language() === 'en' ? 'TH' : 'EN' }}
+        </button>
+
+        @if (isLoggedIn()) {
+        <!-- Nav Links -->
+        <div class="nav-links">
+            <a routerLink="/missions" routerLinkActive="active" class="nav-link">
+                <span>{{ lang.t('nav.missions') }}</span>
+            </a>
+            <button class="nav-link create-btn" (click)="openCreateModal()">
+                <span>{{ lang.t('nav.create') }}</span>
+            </button>
+        </div>
+
+        <!-- User Menu -->
+        <div class="user-section">
+            <span class="display-name">{{ display_name() }}</span>
+            <button class="avatar-btn" (click)="toggleMenu()">
+                <img [src]="avatar_url()" alt="avatar" class="avatar">
+            </button>
+
+            @if (showMenu()) {
+            <div class="dropdown-menu">
+                <button class="menu-item" (click)="goToProfile()">
+                    <span>{{ lang.t('nav.profile') }}</span>
+                </button>
+                <button class="menu-item logout" (click)="logout()">
+                    <span>{{ lang.t('nav.logout') }}</span>
+                </button>
+            </div>
+            }
+        </div>
+        } @else if (!isOnLoginPage()) {
+        <a routerLink="/login" class="login-btn">
+            <span>{{ lang.t('nav.login') }}</span>
+        </a>
+        }
+    </div>
+</nav>
+
+
+<!-- Create Mission Modal -->
+@if (showCreateModal()) {
+<div class="modal-overlay" (click)="closeCreateModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Create New Mission</h2>
+            <button class="close-btn" (click)="closeCreateModal()">
+                <span>X</span>
+            </button>
+        </div>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="modal-body">
+            <div class="form-group">
+                <label for="mission-name">Mission Name</label>
+                <input type="text" id="mission-name" formControlName="name" placeholder="Enter mission name"
+                    [class.error]="form.get('name')?.invalid && form.get('name')?.touched">
+                @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
+                <span class="error-text">Name is required</span>
+                }
+                @if (form.get('name')?.hasError('minlength') && form.get('name')?.touched) {
+                <span class="error-text">Name must be at least 3 characters</span>
+                }
+            </div>
+            <div class="form-group">
+                <label for="mission-desc">Description (Optional)</label>
+                <textarea id="mission-desc" formControlName="description" placeholder="Enter mission description"
+                    rows="4"></textarea>
+            </div>
+        </form>
+        <div class="modal-footer">
+            <button class="btn-secondary" type="button" (click)="closeCreateModal()">Cancel</button>
+            <button class="btn-primary" (click)="onSubmit()" [disabled]="form.invalid || isLoading()">
+                {{ isLoading() ? 'Creating...' : 'Create Mission' }}
+            </button>
+        </div>
+    </div>
+</div>
+}

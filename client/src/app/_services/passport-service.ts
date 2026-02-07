@@ -1,9 +1,10 @@
-import { HttpClient } from "@angular/common/http"
+import { HttpClient, HttpErrorResponse } from "@angular/common/http"
 import { environment } from "../../environments/environment.development"
 import { inject, Injectable, PLATFORM_ID, signal } from "@angular/core"
 import { LoginModel, Passport, RegisterBrawlerModel } from "../_model/passport"
 import { firstValueFrom } from "rxjs"
 import { isPlatformBrowser } from "@angular/common"
+import { Router } from "@angular/router"
 
 export interface UploadedImage {
     url: string;
@@ -19,6 +20,7 @@ export class PassportService {
     private _base_url = environment.base_url + '/api'
     private _http = inject(HttpClient)
     private _platformId = inject(PLATFORM_ID)
+    private _router = inject(Router)
 
 
     data = signal<undefined | Passport>(undefined)
@@ -28,7 +30,7 @@ export class PassportService {
         return isPlatformBrowser(this._platformId)
     }
 
-    private loadPassportFormLocalStorage(): string | null {
+    public loadPassportFromLocalStorage(): string | null {
         if (!this.isBrowser) return null
         const jsonString = localStorage.getItem(this._key)
         if (!jsonString) return 'notfound'
@@ -55,7 +57,7 @@ export class PassportService {
     }
 
     constructor() {
-        this.loadPassportFormLocalStorage()
+        this.loadPassportFromLocalStorage()
     }
 
     async get(login: LoginModel): Promise<null | string> {
@@ -63,7 +65,10 @@ export class PassportService {
             const api_url = this._base_url + '/authentication/login'
             await this.fetchPassport(api_url, login)
         } catch (error) {
-            return ` ${error}`
+            if (error instanceof HttpErrorResponse) {
+                return error.error || error.message;
+            }
+            return `${error}`;
         }
 
         return null
@@ -81,7 +86,10 @@ export class PassportService {
             const api_url = this._base_url + '/brawlers/register'
             await this.fetchPassport(api_url, model)
         } catch (error) {
-            return ` ${error}`
+            if (error instanceof HttpErrorResponse) {
+                return error.error || error.message;
+            }
+            return `${error}`;
         }
         return null
     }
@@ -109,5 +117,95 @@ export class PassportService {
         const updatedPassport = { ...passport, avatar_url: url }
         this.data.set(updatedPassport)
         this.savePassportToLocalStorage()
+    }
+
+    async uploadCover(base64String: string): Promise<UploadedImage | null> {
+        try {
+            const api_url = this._base_url + '/brawlers/cover'
+            const result = this._http.post<UploadedImage>(api_url, { base64_string: base64String })
+            const uploadedImage = await firstValueFrom(result)
+
+            // Update passport with new cover URL
+            this.updateCoverUrl(uploadedImage.url)
+
+            return uploadedImage
+        } catch (error) {
+            console.error('Upload cover error:', error)
+            return null
+        }
+    }
+
+    updateCoverUrl(url: string) {
+        const passport = this.data()
+        if (!passport) return
+
+        const updatedPassport = { ...passport, cover_url: url }
+        this.data.set(updatedPassport)
+        this.savePassportToLocalStorage()
+    }
+
+    async syncProfile(): Promise<void> {
+        if (!this.isBrowser) return
+
+        const passport = this.data()
+        if (!passport) return
+
+        try {
+            const api_url = this._base_url + '/brawlers/profile'
+            const result = this._http.get<Passport>(api_url)
+            const freshPassport = await firstValueFrom(result)
+
+            // Update local data with fresh data from server
+            this.data.set(freshPassport)
+            this.savePassportToLocalStorage()
+        } catch (error) {
+            console.error('Failed to sync profile:', error)
+            if (error instanceof HttpErrorResponse && error.status === 401) {
+                this.removePassport();
+                this._router.navigate(['/login']);
+            }
+        }
+    }
+
+    async checkUsername(username: string): Promise<boolean> {
+        try {
+            const api_url = `${this._base_url}/brawlers/check-username/${username}`
+            const result = this._http.get<boolean>(api_url)
+            return await firstValueFrom(result)
+        } catch (error) {
+            console.error('Check username error:', error)
+            return false
+        }
+    }
+
+    async updateDisplayName(displayName: string): Promise<string | null> {
+        try {
+            const api_url = `${this._base_url}/brawlers/display-name`
+            const result = this._http.put<Passport>(api_url, { displayName })
+            const updatedPassport = await firstValueFrom(result)
+
+            // Update local data
+            this.data.set(updatedPassport)
+            this.savePassportToLocalStorage()
+
+            return null // Success
+        } catch (error) {
+            console.error('Update display name error:', error)
+            if (error instanceof HttpErrorResponse) {
+                return error.error || error.message
+            }
+            return `${error}`
+        }
+    }
+
+    async uploadChatImage(base64String: string): Promise<UploadedImage | null> {
+        try {
+            const api_url = this._base_url + '/brawlers/chat-image'
+            const result = this._http.post<UploadedImage>(api_url, { base64_string: base64String })
+            return await firstValueFrom(result)
+        } catch (error) {
+            console.error('Upload chat image error:', error)
+            return null
+        }
     }
 }

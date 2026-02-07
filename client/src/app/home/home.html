@@ -1,34 +1,101 @@
-<div class="mission-container">
-    @for (mission of missions(); track mission.id) {
-    <mat-card class="mission-card">
-        <mat-card-header>
-            <mat-card-title>{{ mission.name }}</mat-card-title>
-            <mat-card-subtitle>
-                <mat-chip-set>
-                    <mat-chip [highlighted]="true" [color]="mission.status === 'Open' ? 'primary' : 'warn'">
-                        {{ mission.status }}
-                    </mat-chip>
-                </mat-chip-set>
-            </mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-            <p>{{ mission.description || 'No description provided.' }}</p>
-            <div class="mission-stats">
-                <span><mat-icon inline>group</mat-icon> Crew: {{ mission.crew_count }}</span>
-                <span><mat-icon inline>schedule</mat-icon> {{ mission.created_at | date }}</span>
+<div class="home-page">
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <span class="hero-tag">Mission Control</span>
+            <h1>Build your crew.<br>Launch your mission.</h1>
+            <p>Create missions, recruit crew members, and embark on adventures together.</p>
+
+            <div class="hero-actions">
+                @if (isLoggedIn()) {
+                <button class="btn-primary" (click)="navigateToMissions()">
+                    <span>View Missions</span>
+                </button>
+                } @else {
+                <button class="btn-primary" (click)="navigateToLogin()">
+                    <span>Get Started</span>
+                </button>
+                }
             </div>
-        </mat-card-content>
-        <mat-card-actions align="end">
-            <button mat-button>DETAILS</button>
-            @if (mission.status === 'Open') {
-                <button mat-flat-button color="primary">JOIN</button>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <span class="stat-value">{{ stats.totalMissions }}</span>
+                <span class="stat-label">Missions</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-value">{{ stats.activeMissions }}</span>
+                <span class="stat-label">Active</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-value">{{ stats.totalCrew }}</span>
+                <span class="stat-label">Crew</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <h2>Everything you need</h2>
+        <div class="features-grid">
+            @for (feature of features; track feature.title) {
+            <div class="feature-item">
+                <h3>{{ feature.title }}</h3>
+                <p>{{ feature.description }}</p>
+            </div>
             }
-        </mat-card-actions>
-    </mat-card>
-    } @empty {
-    <div class="no-missions">
-        <mat-icon class="large-icon">assignment_late</mat-icon>
-        <p>No missions available at the moment.</p>
-    </div>
+        </div>
+    </section>
+
+    <!-- Latest Missions -->
+    @if (missions().length > 0) {
+    <section class="missions">
+        <div class="section-header">
+            <h2>Latest missions</h2>
+            <button class="btn-ghost" (click)="navigateToMissions()">
+                <span>View all</span>
+            </button>
+        </div>
+        <div class="missions-list">
+            @for (mission of missions(); track mission.id) {
+            <div class="mission-card">
+                <div class="mission-header">
+                    <span class="mission-status" [class]="'status-' + mission.status.toLowerCase()">
+                        {{ mission.status }}
+                    </span>
+                </div>
+                <h3>{{ mission.name }}</h3>
+                <p class="mission-desc">{{ mission.description || 'No description' }}</p>
+                <div class="mission-meta">
+                    <span class="crew-count">
+                        Crew: {{ mission.crew_count }}
+                    </span>
+                    <span class="mission-date">{{ mission.created_at | date:'mediumDate' }}</span>
+                </div>
+            </div>
+            }
+        </div>
+    </section>
     }
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <h2>Ready to launch?</h2>
+        <p>Start your journey today</p>
+        @if (isLoggedIn()) {
+        <button class="btn-white" (click)="navigateToMissions()">
+            <span>Explore Missions</span>
+        </button>
+        } @else {
+        <button class="btn-white" (click)="navigateToLogin()">
+            <span>Join Now — It's Free</span>
+        </button>
+        }
+    </section>
 </div>

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
@@ -32,6 +32,25 @@ export class CreateMissionDialog {
   });
 
   isLoading = signal(false);
+  imagePreview = signal<string | null>(null);
+  selectedFile: File | null = null;
+  imageInput = viewChild<ElementRef<HTMLInputElement>>('imageInput');
+
+  triggerImageInput() {
+    this.imageInput()?.nativeElement.click();
+  }
+
+  onImageSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      this.selectedFile = input.files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.imagePreview.set(e.target?.result as string);
+      };
+      reader.readAsDataURL(this.selectedFile);
+    }
+  }
 
   async onSubmit() {
     if (this.form.invalid) return;
@@ -40,9 +59,19 @@ export class CreateMissionDialog {
     this.spinnerService.show('mission-spinner');
 
     try {
+      let imageUrl: string | undefined;
+
+      if (this.imagePreview()) {
+        const uploadedImage = await this.missionService.uploadMissionImage(this.imagePreview()!);
+        if (uploadedImage) {
+          imageUrl = uploadedImage.url;
+        }
+      }
+
       const error = await this.missionService.createMission({
         name: this.form.controls.name.value!,
-        description: this.form.controls.description.value || undefined
+        description: this.form.controls.description.value || undefined,
+        image_url: imageUrl
       });
 
       if (error) {

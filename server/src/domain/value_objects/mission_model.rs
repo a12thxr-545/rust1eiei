@@ -13,7 +13,10 @@ pub struct MissionModel {
     pub description: Option<String>,
     pub status: String,
     pub chief_id: i32,
+    pub chief_name: String,
     pub crew_count: i64,
+    pub image_url: Option<String>,
+    pub code: String,
     pub created_at: NaiveDateTime,
     pub updated_at: NaiveDateTime,
 }
@@ -22,6 +25,7 @@ pub struct MissionModel {
 pub struct AddMissionModel {
     pub name: String,
     pub description: Option<String>,
+    pub image_url: Option<String>,
 }
 
 impl AddMissionModel {
@@ -31,6 +35,18 @@ impl AddMissionModel {
             description: self.description.clone(),
             status: MissionStatuses::Open.to_string(),
             chief_id,
+            image_url: self.image_url.clone(),
+            code: "".to_string(), // Will be set in use case
+        }
+    }
+    pub fn to_entity_with_code(&self, chief_id: i32, code: String) -> AddMissionEntity {
+        AddMissionEntity {
+            name: self.name.clone(),
+            description: self.description.clone(),
+            status: MissionStatuses::Open.to_string(),
+            chief_id,
+            image_url: self.image_url.clone(),
+            code,
         }
     }
 }

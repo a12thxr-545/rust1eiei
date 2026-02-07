@@ -1,27 +1,17 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, PLATFORM_ID, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PasswordMatchValidator, passwordValidator } from '../_helpers/passpword-vaidator';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
 import { PassportService } from '../_services/passport-service';
 import { SnackbarService } from '../_services/snackbar.service';
 import { Router } from '@angular/router';
-
 
 @Component({
   selector: 'app-login',
   imports: [
     FormsModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatCardModule,
-    MatProgressSpinnerModule,
     NgxSpinnerModule
   ],
   templateUrl: './login.html',
@@ -33,11 +23,11 @@ export class Login {
   private spinnerService = inject(NgxSpinnerService);
   private router = inject(Router);
 
-  private usernameMinLength = 4;
-  private usernameMaxLength = 10;
+  private usernameMinLength = 1;
+  private usernameMaxLength = 32;
   private passwordMinLength = 8;
   private passwordMaxLength = 16;
-  private displayNameMinLength = 3;
+  private displayNameMinLength = 1;
 
   mode: 'login' | 'regis' = 'login';
   isLoading = signal(false);
@@ -50,7 +40,15 @@ export class Login {
     cf_password: signal<string | null>(''),
   }
 
+  suggestedUsernames = signal<string[]>([]);
+
   constructor() {
+    const platformId = inject(PLATFORM_ID);
+    // If already logged in, redirect to home
+    if (isPlatformBrowser(platformId) && this.passportService.data()) {
+      this.router.navigate(['/']);
+    }
+
     this.form = new FormGroup({
       username: new FormControl(null, [
         Validators.required,
@@ -58,25 +56,18 @@ export class Login {
         Validators.maxLength(this.usernameMaxLength)
       ]),
       password: new FormControl(null, [
-        Validators.required,
-        passwordValidator(this.passwordMinLength, this.passwordMaxLength)
+        Validators.required
       ])
     })
   }
 
   toggleMode() {
     this.mode = this.mode === 'login' ? 'regis' : 'login';
-    // Clear everything first
     this.clearErrors();
     this.form.reset();
     this.updateForm();
     this.resetFormState();
-    // Make sure errors are cleared after updateForm
     this.clearErrors();
-    console.log('After toggle - errors cleared:', {
-      username: this.errorMsg.username(),
-      password: this.errorMsg.password()
-    });
   }
 
   clearErrors() {
@@ -87,7 +78,6 @@ export class Login {
   }
 
   resetFormState() {
-    // Reset form controls to untouched state
     Object.keys(this.form.controls).forEach(key => {
       const control = this.form.get(key);
       if (control) {
@@ -97,12 +87,12 @@ export class Login {
     });
   }
 
-
   updateForm() {
     if (this.mode === 'login') {
       this.form.removeControl('cf_password');
       this.form.removeControl('displayName');
       this.form.removeValidators(PasswordMatchValidator('password', 'cf_password'));
+      this.form.get('password')?.setValidators([Validators.required]);
     } else {
       this.form.addControl('displayName', new FormControl(null, [
         Validators.required,
@@ -110,7 +100,12 @@ export class Login {
       ]));
       this.form.addControl('cf_password', new FormControl(null, [Validators.required]));
       this.form.addValidators(PasswordMatchValidator('password', 'cf_password'));
+      this.form.get('password')?.setValidators([
+        Validators.required,
+        passwordValidator(this.passwordMinLength, this.passwordMaxLength)
+      ]);
     }
+    this.form.get('password')?.updateValueAndValidity();
     this.form.updateValueAndValidity();
   }
 
@@ -123,6 +118,7 @@ export class Login {
         if (ctrl.hasError('required')) this.errorMsg.username.set('Username is required');
         else if (ctrl.hasError('minlength')) this.errorMsg.username.set(`Must be at least ${this.usernameMinLength} characters`);
         else if (ctrl.hasError('maxlength')) this.errorMsg.username.set(`Must be at most ${this.usernameMaxLength} characters`);
+        else if (ctrl.hasError('pattern')) this.errorMsg.username.set('Invalid characters');
         else this.errorMsg.username.set('');
         break;
 
@@ -130,27 +126,25 @@ export class Login {
         if (ctrl.hasError('required')) {
           this.errorMsg.password.set('Password is required');
         } else if (this.mode === 'regis') {
-          // Show all missing requirements in register mode
           const errors: string[] = [];
-          if (ctrl.hasError('invalidLength')) errors.push(`${this.passwordMinLength}-${this.passwordMaxLength} characters`);
-          if (ctrl.hasError('invalidLowerCase')) errors.push('lowercase [a-z]');
-          if (ctrl.hasError('invalidUpperCase')) errors.push('uppercase [A-Z]');
-          if (ctrl.hasError('invalidNumeric')) errors.push('number [0-9]');
-          if (ctrl.hasError('invalidSpecialChar')) errors.push('special character');
+          if (ctrl.hasError('invalidLength')) errors.push(`${this.passwordMinLength}-${this.passwordMaxLength} chars`);
+          if (ctrl.hasError('invalidLowerCase')) errors.push('lowercase');
+          if (ctrl.hasError('invalidUpperCase')) errors.push('uppercase');
+          if (ctrl.hasError('invalidNumeric')) errors.push('number');
+          if (ctrl.hasError('invalidSpecialChar')) errors.push('special char');
 
           if (errors.length > 0) {
-            this.errorMsg.password.set('Password must have: ' + errors.join(', '));
+            this.errorMsg.password.set('Needs: ' + errors.join(', '));
           } else {
             this.errorMsg.password.set('');
           }
         } else {
-          // In login mode, don't show detailed validation errors
           this.errorMsg.password.set('');
         }
         break;
 
       case 'displayName':
-        if (ctrl.hasError('required')) this.errorMsg.displayName.set('aka is required');
+        if (ctrl.hasError('required')) this.errorMsg.displayName.set('Display name is required');
         else if (ctrl.hasError('minlength')) this.errorMsg.displayName.set(`Must be at least ${this.displayNameMinLength} characters`);
         else this.errorMsg.displayName.set('');
         break;
@@ -164,32 +158,25 @@ export class Login {
   }
 
   async onSubmit() {
-    // Clear previous errors
     this.clearErrors();
 
-    // Validate and show errors
     if (this.mode === 'login') {
-      // Login mode: just check if fields are filled
       if (!this.form.value.username || !this.form.value.password) {
         this.snackbarService.warning('Please enter username and password');
         return;
       }
     } else {
-      // Register mode: validate all fields and show specific errors
-      // Validate each field
       this.updateErrorMsg('username');
       this.updateErrorMsg('displayName');
       this.updateErrorMsg('password');
       this.updateErrorMsg('cf_password');
 
-      // Check if any field has error
       if (this.errorMsg.username() || this.errorMsg.displayName() ||
         this.errorMsg.password() || this.errorMsg.cf_password()) {
         this.snackbarService.warning('Please fix the errors above');
         return;
       }
 
-      // Also check form validity for any other validation
       if (this.form.invalid) return;
     }
 
@@ -202,15 +189,13 @@ export class Login {
           username: this.form.value.username,
           password: this.form.value.password
         });
-        console.log('Login result:', error); // Debug
         if (error) {
-          console.log('Login failed, showing error'); // Debug
           this.snackbarService.error('Invalid username or password');
-          this.errorMsg.username.set('Invalid username or password');
-          this.errorMsg.password.set('Invalid username or password');
+          this.errorMsg.username.set('Invalid credentials');
+          this.errorMsg.password.set('Invalid credentials');
           return;
         }
-        this.snackbarService.success('Welcome back! Login successful');
+        this.snackbarService.success('Welcome back!');
       } else {
         const error = await this.passportService.register({
           username: this.form.value.username,
@@ -218,22 +203,57 @@ export class Login {
           display_name: this.form.value.displayName
         });
         if (error) {
-          this.snackbarService.error('Username already exists');
-          this.errorMsg.username.set('Username already exists');
+          const msg = error.includes('already taken') ? 'Username already taken' : 'Registration failed';
+          this.snackbarService.error(msg);
+          if (error.includes('already taken')) {
+            this.errorMsg.username.set('Username already taken');
+          }
           return;
         }
-        this.snackbarService.success('Account created successfully!');
+        this.snackbarService.success('Account created!');
       }
 
-      // Navigate to home on success
       this.router.navigate(['/']);
     } catch (error) {
       console.error('Auth error:', error);
-      this.snackbarService.error('An unexpected error occurred. Please try again.');
+      this.snackbarService.error('An unexpected error occurred');
     } finally {
       this.isLoading.set(false);
       this.spinnerService.hide('auth-spinner');
     }
   }
-}
 
+  async checkUsernameAvailability() {
+    const ctrl = this.form.get('username');
+    const username = ctrl?.value;
+    if (!username || ctrl?.invalid) {
+      this.suggestedUsernames.set([]);
+      return;
+    }
+
+    const isAvailable = await this.passportService.checkUsername(username);
+    if (!isAvailable) {
+      this.errorMsg.username.set('Username already taken');
+      this.generateSuggestions(username);
+    } else {
+      this.errorMsg.username.set('');
+      this.suggestedUsernames.set([]);
+    }
+  }
+
+  private generateSuggestions(username: string) {
+    const random = () => Math.floor(Math.random() * 999);
+    const suggestions = [
+      `${username}${random()}`,
+      `${username}_${random()}`,
+      `${username}${new Date().getFullYear()}`
+    ];
+    this.suggestedUsernames.set(suggestions);
+  }
+
+  applySuggestion(suggestion: string) {
+    this.form.patchValue({ username: suggestion });
+    this.errorMsg.username.set('');
+    this.suggestedUsernames.set([]);
+  }
+}

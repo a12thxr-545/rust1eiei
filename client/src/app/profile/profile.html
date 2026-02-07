@@ -1,13 +1,24 @@
 <div class="profile-container">
     <div class="profile-card">
-        <div class="profile-header">
-            <h1>Profile</h1>
+        <!-- Cover Image -->
+        <div class="cover-image" [style.background-image]="displayCoverUrl()">
+            <div class="cover-gradient"></div>
+            <button class="cover-edit-btn" (click)="triggerCoverInput()">
+                <span>Edit Cover</span>
+            </button>
+            @if (isUploadingCover()) {
+            <div class="cover-loading">
+                <div class="upload-spinner"></div>
+            </div>
+            }
         </div>
+        <input type="file" #coverInput accept="image/jpeg,image/png,.jpg,.jpeg,.png" (change)="onCoverSelected($event)"
+            class="file-input-hidden" />
 
+        <!-- Avatar -->
         <div class="avatar-section">
             <div class="avatar-wrapper" (click)="triggerFileInput()">
                 <img [src]="displayAvatarUrl()" alt="Avatar" class="avatar-image" />
-
                 <div class="avatar-overlay" [class.uploading]="isUploading()">
                     @if (isUploading()) {
                     <div class="upload-spinner"></div>
@@ -16,17 +27,52 @@
                     }
                 </div>
             </div>
-
             <input type="file" #fileInput accept="image/jpeg,image/png,.jpg,.jpeg,.png"
                 (change)="onFileSelected($event)" class="file-input-hidden" />
-
-            <p class="avatar-hint">Click to upload a new avatar</p>
         </div>
 
+        <!-- Profile Info -->
         <div class="profile-info">
-            <div class="info-item">
-                <span class="info-label">display name</span>
-                <span class="info-value">{{ passport()?.display_name || 'Unknown' }}</span>
+            @if (isEditingName()) {
+            <div class="name-edit-container">
+                <input type="text" class="name-input" [ngModel]="editDisplayName()"
+                    (ngModelChange)="editDisplayName.set($event)" placeholder="Enter display name..." maxlength="50"
+                    [disabled]="isSavingName()">
+                <div class="name-edit-actions">
+                    <button class="btn-save" (click)="saveDisplayName()" [disabled]="isSavingName()">
+                        {{ isSavingName() ? 'Saving...' : 'Save' }}
+                    </button>
+                    <button class="btn-cancel" (click)="cancelEditingName()" [disabled]="isSavingName()">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+            } @else {
+            <div class="name-display">
+                <h1 class="display-name">{{ passport()?.display_name || 'Unknown' }}</h1>
+                <button class="btn-edit-name" (click)="startEditingName()" title="Edit name">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                </button>
+            </div>
+            }
+            <p class="role-text">Brawler</p>
+        </div>
+
+
+        <!-- Stats -->
+        <div class="stats-section">
+            <div class="stat-item">
+                <span class="stat-value">0</span>
+                <span class="stat-label">Completed</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-value">0</span>
+                <span class="stat-label">Joined</span>
             </div>
         </div>
     </div>

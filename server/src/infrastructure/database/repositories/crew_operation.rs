@@ -1,6 +1,9 @@
 use anyhow::{Ok, Result};
 use async_trait::async_trait;
-use diesel::{ExpressionMethods, RunQueryDsl, dsl::delete, insert_into};
+use diesel::{
+    BoolExpressionMethods, ExpressionMethods, OptionalExtension, QueryDsl, RunQueryDsl,
+    dsl::delete, insert_into,
+};
 use std::sync::Arc;
 
 use crate::{
@@ -8,7 +11,10 @@ use crate::{
         entities::crew_memberships::CrewMemberShips,
         repositories::crew_operation::CrewOperationRepository,
     },
-    infrastructure::database::{postgresql_connection::PgPoolSquad, schema::crew_memberships},
+    infrastructure::database::{
+        postgresql_connection::PgPoolSquad,
+        schema::{crew_memberships, missions},
+    },
 };
 
 pub struct CrewOperationPostgres {
@@ -38,5 +44,26 @@ impl CrewOperationRepository for CrewOperationPostgres {
             .filter(crew_memberships::mission_id.eq(crew_member_ships.mission_id))
             .execute(&mut conn)?;
         Ok(())
+    }
+
+    async fn get_current_mission(&self, brawler_id: i32) -> Result<Option<i32>> {
+        let mut conn = Arc::clone(&self.db_pool).get()?;
+
+        // Find mission the user is currently in that is not completed/failed
+        let mission_id = crew_memberships::table
+            .inner_join(missions::table)
+            .filter(crew_memberships::brawler_id.eq(brawler_id))
+            .filter(missions::deleted_at.is_null())
+            .filter(
+                missions::status
+                    .eq("Open")
+                    .or(missions::status.eq("InProgress"))
+                    .or(missions::status.eq("Failed")),
+            )
+            .select(crew_memberships::mission_id)
+            .first::<i32>(&mut conn)
+            .optional()?;
+
+        Ok(mission_id)
     }
 }

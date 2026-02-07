@@ -1,147 +1,270 @@
-.login-container {
+/* ============================================
+   MINIMAL AUTH PAGE
+   ============================================ */
+
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-color);
+    padding: 24px;
+    transition: background 0.3s ease;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 380px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
+}
 
-    h3 {
-        margin: 0;
-        padding: 0;
-        margin-bottom: 1em;
-    }
+/* ============================================
+   BRAND SECTION
+   ============================================ */
 
-    mat-card {
-        margin-top: 2em;
-        padding: 2em;
-    }
+.auth-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 48px;
+}
 
-    div.login-spacer,
-    form {
-        width: 300px;
-        min-width: 200px;
-        max-width: 400px;
-    }
+.brand-icon {
+    width: 40px;
+    height: 40px;
+    color: var(--accent-color);
+}
 
-    /* Field wrapper for input + error */
-    .field-wrapper {
-        position: relative;
-        margin-bottom: 0.6em;
-        text-align: left;
-        width: 100%;
-    }
+.brand-icon svg {
+    width: 100%;
+    height: 100%;
+}
 
-    /* Error label - below input, left aligned with icon */
-    .error-label {
-        color: #ef4444;
-        font-size: 12px;
-        font-weight: 400;
-        text-align: left;
-        margin: 6px 0 0 0;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        gap: 6px;
-        width: 100%;
-    }
+.auth-brand h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -1px;
+    margin: 0;
+}
 
-    .error-icon {
-        font-size: 14px;
-        line-height: 1;
-    }
+/* ============================================
+   AUTH CARD
+   ============================================ */
 
-    mat-form-field {
-        height: 50px;
-        margin-bottom: 0;
-        display: block;
-        width: 100%;
-    }
+.auth-card {
+    width: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 40px 32px;
+    box-shadow: var(--shadow);
+}
 
-    mat-form-field.error-field ::ng-deep .mdc-notched-outline__leading,
-    mat-form-field.error-field ::ng-deep .mdc-notched-outline__notch,
-    mat-form-field.error-field ::ng-deep .mdc-notched-outline__trailing {
-        border-color: #ef4444 !important;
-    }
+.auth-card h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 8px 0;
+    letter-spacing: -0.3px;
+}
 
-    mat-form-field.error-field ::ng-deep .mdc-floating-label {
-        color: #ef4444 !important;
-    }
+.auth-card .subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0 0 32px 0;
+}
 
-    button.blue {
-        font-size: large;
-        width: 100%;
-        background-color: #3448c5;
-        color: rgb(241, 250, 250);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        min-height: 48px;
-        transition: all 0.3s ease;
-    }
+/* ============================================
+   FORM INPUTS
+   ============================================ */
 
-    button.blue:disabled {
-        background-color: #4a5bbf;
-        color: #e0e4f0;
-        cursor: wait;
-        opacity: 0.9;
-    }
+.input-group {
+    margin-bottom: 20px;
+}
 
-    button.blue mat-spinner {
-        display: inline-block;
-    }
+.input-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    letter-spacing: 0.2px;
+}
 
-    button.blue mat-spinner ::ng-deep circle {
-        stroke: #fff !important;
-    }
+.input-group input {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 15px;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
 
-    .btn-loading-text {
-        font-size: 14px;
-        animation: pulse 1.5s ease-in-out infinite;
-    }
+.input-group input::placeholder {
+    color: var(--text-muted);
+}
 
-    .toggle {
-        color: #a2abb4;
-        width: 100%;
-        text-align: center;
-        font-size: small;
-    }
+.input-group input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    background: var(--card-bg);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
 
-    .toggle span {
-        color: #3448c5;
-        font-weight: 900;
-        cursor: pointer;
-    }
+/* Error State */
+.input-group.has-error input {
+    border-color: #f43f5e;
+}
 
-    div.login-spacer {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        line-height: 1.375rem;
-        color: #a2abb4;
-        font-family: 300;
-        margin-top: 1em;
-        margin-bottom: 1em;
-    }
+.error-text {
+    display: block;
+    font-size: 12px;
+    color: #f43f5e;
+    margin-top: 8px;
+    padding-left: 2px;
+}
 
-    div.login-spacer::after {
-        margin-left: 12px;
-        border-bottom: 1px solid #a2abb4;
-    }
+/* ============================================
+   SUBMIT BUTTON
+   ============================================ */
 
-    div.login-spacer::before {
-        margin-right: 12px;
-        border-bottom: 1px solid #a2abb4;
-    }
+.submit-btn {
+    width: 100%;
+    padding: 14px 24px;
+    background: var(--accent-color);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    margin-top: 8px;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
 
-    *::before,
-    *::after {
-        flex-grow: 1;
-        height: 1px;
-        content: "";
-        box-sizing: border-box;
+.submit-btn:hover:not(:disabled) {
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
+}
+
+.submit-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.submit-btn:disabled {
+    background: #333;
+    color: #666;
+    cursor: not-allowed;
+}
+
+.submit-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Loading Spinner */
+.spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid transparent;
+    border-top-color: #666;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
     }
+}
+
+/* ============================================
+   DIVIDER
+   ============================================ */
+
+.divider {
+    display: flex;
+    align-items: center;
+    margin: 28px 0;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #222;
+}
+
+.divider span {
+    padding: 0 16px;
+    font-size: 12px;
+    color: #444;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ============================================
+   TOGGLE LINK
+   ============================================ */
+
+.toggle-text {
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+}
+
+.link-btn {
+    background: none;
+    border: none;
+    color: var(--accent-color);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s ease;
+}
+
+.link-btn:hover {
+    color: #2563eb;
+    text-decoration: underline;
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+
+.footer-text {
+    font-size: 12px;
+    color: #444;
+    margin-top: 32px;
+    text-align: center;
+}
+
+
+/* ============================================
+   LOADING MESSAGE
+   ============================================ */
+
+.loading-message {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 16px;
+    animation: pulse 1.5s ease-in-out infinite;
 }
 
 @keyframes pulse {
@@ -152,15 +275,100 @@
     }
 
     50% {
-        opacity: 0.6;
+        opacity: 0.5;
     }
 }
 
-/* Loading message for ngx-spinner */
-.loading-message {
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 480px) {
+    .auth-page {
+        padding: 20px 16px;
+        align-items: flex-start;
+        /* Better for tall content on small screens */
+        padding-top: 60px;
+    }
+
+    .auth-card {
+        padding: 24px 20px;
+        border-radius: 20px;
+    }
+
+    .auth-brand {
+        margin-bottom: 24px;
+    }
+
+    .auth-brand h1 {
+        font-size: 24px;
+    }
+
+    .auth-card h2 {
+        font-size: 20px;
+    }
+
+    .auth-card .subtitle {
+        font-size: 13px;
+        margin-bottom: 24px;
+    }
+}
+
+/* Username Suggestions */
+.username-suggestions {
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(251, 191, 36, 0.05);
+    border: 1px solid rgba(251, 191, 36, 0.2);
+    border-radius: 8px;
+    animation: fadeIn 0.3s ease;
+}
+
+.username-suggestions p {
+    font-size: 11px;
+    color: #999;
+    margin: 0 0 8px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.suggestion-hint {
+    color: #fbbf24;
+    font-weight: 600;
+}
+
+.suggestion-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.suggestion-tag {
+    background: #1a1a1a;
+    border: 1px solid #333;
     color: #fff;
-    font-size: 14px;
-    font-weight: 500;
-    margin-top: 16px;
-    animation: pulse 1.5s ease-in-out infinite;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.suggestion-tag:hover {
+    background: #fbbf24;
+    border-color: #fbbf24;
+    color: #000;
+    transform: translateY(-1px);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

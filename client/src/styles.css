@@ -1,90 +1,195 @@
 /* You can add global styles to this file, and also import other style files */
+html,
+body {
+    overflow-x: hidden;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    /* Light Theme (Default) */
+    --bg-color: #f8fafc;
+    --card-bg: #ffffff;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
+    --border-color: #e2e8f0;
+    --input-bg: #ffffff;
+    --nav-bg: rgba(255, 255, 255, 0.8);
+    --accent-color: #3b82f6;
+    --hover-bg: rgba(59, 130, 246, 0.05);
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.3);
+}
+
+[data-theme='dark'] {
+    /* Dark Theme */
+    --bg-color: #0a0a0a;
+    --card-bg: #111111;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --border-color: #1a1a1a;
+    --input-bg: #1a1a1a;
+    --nav-bg: rgba(10, 10, 10, 0.8);
+    --accent-color: #3b82f6;
+    --hover-bg: rgba(59, 130, 246, 0.1);
+    --shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --glass-bg: rgba(15, 15, 15, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='orange'] {
+    /* Orange + Deep Navy Theme (#0a2642) */
+    --bg-color: #0a2642;
+    --card-bg: #143454;
+    --text-primary: #ffffff;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --border-color: #1e4770;
+    --input-bg: #0d2d4d;
+    --nav-bg: rgba(10, 38, 66, 0.95);
+    --accent-color: #F26522;
+    /* Orange Accent */
+    --hover-bg: rgba(242, 101, 34, 0.15);
+    --shadow: 0 4px 25px -5px rgba(0, 0, 0, 0.4);
+    --glass-bg: rgba(10, 38, 66, 0.85);
+    --glass-border: rgba(242, 101, 34, 0.4);
+}
+
+
+
+
+
+
+
+[data-theme='red'] {
+    /* Liverpool Theme */
+    --bg-color: #0d0000;
+    --card-bg: #1a0202;
+    --text-primary: #fff1f1;
+    --text-secondary: #fca5a5;
+    --text-muted: #991b1b;
+    --border-color: #450a0a;
+    --input-bg: #2d0505;
+    --nav-bg: rgba(13, 0, 0, 0.85);
+    --accent-color: #c8102e;
+    /* Liverpool Red */
+    --hover-bg: rgba(200, 16, 46, 0.15);
+    --shadow: 0 10px 15px -3px rgb(153 27 27 / 0.4);
+    --glass-bg: rgba(26, 2, 2, 0.7);
+    --glass-border: rgba(200, 16, 46, 0.3);
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    margin: 0;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
 
 /* ============================================
-   SNACKBAR STYLES
+   SNACKBAR STYLES - MINIMAL DARK THEME
    ============================================ */
 
 /* Base snackbar styling */
 .mat-mdc-snack-bar-container {
-    --mdc-snackbar-container-color: #323232;
-    --mat-snack-bar-button-color: #fff;
-    border-radius: 8px !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    --mdc-snackbar-container-color: var(--card-bg);
+    --mat-snack-bar-button-color: var(--accent-color);
+    margin-top: 70px !important;
+}
+
+.mat-mdc-snack-bar-container .mdc-snackbar__surface {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 12px !important;
+    box-shadow: var(--shadow) !important;
+    padding: 4px 8px !important;
 }
 
 /* Success snackbar */
 .snackbar-success .mdc-snackbar__surface {
-    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
-    border-left: 4px solid #374151;
+    border-left: 3px solid #22c55e !important;
 }
 
-.snackbar-success .mdc-snackbar__label,
+.snackbar-success .mdc-snackbar__label {
+    color: #22c55e !important;
+}
+
 .snackbar-success .mat-mdc-button {
-    color: #fff !important;
+    color: #22c55e !important;
+    opacity: 0.7;
 }
 
 /* Error snackbar */
 .snackbar-error .mdc-snackbar__surface {
-    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
-    border-left: 4px solid #374151;
+    border-left: 3px solid #ef4444 !important;
 }
 
-.snackbar-error .mdc-snackbar__label,
+.snackbar-error .mdc-snackbar__label {
+    color: #ef4444 !important;
+}
+
 .snackbar-error .mat-mdc-button {
-    color: #fff !important;
+    color: #ef4444 !important;
+    opacity: 0.7;
 }
 
 /* Warning snackbar */
 .snackbar-warning .mdc-snackbar__surface {
-    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
-    border-left: 4px solid #374151;
+    border-left: 3px solid #f59e0b !important;
 }
 
-.snackbar-warning .mdc-snackbar__label,
+.snackbar-warning .mdc-snackbar__label {
+    color: #f59e0b !important;
+}
+
 .snackbar-warning .mat-mdc-button {
-    color: #fff !important;
+    color: #f59e0b !important;
+    opacity: 0.7;
 }
 
 /* Info snackbar */
 .snackbar-info .mdc-snackbar__surface {
-    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
-    border-left: 4px solid #374151;
+    border-left: 3px solid #3b82f6 !important;
 }
 
-.snackbar-info .mdc-snackbar__label,
+.snackbar-info .mdc-snackbar__label {
+    color: #3b82f6 !important;
+}
+
 .snackbar-info .mat-mdc-button {
-    color: #fff !important;
+    color: #3b82f6 !important;
+    opacity: 0.7;
 }
 
 /* Snackbar text styling */
 .mat-mdc-snack-bar-container .mdc-snackbar__label {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-weight: 500;
-    font-size: 14px;
-    letter-spacing: 0.25px;
+    font-size: 13px;
+    letter-spacing: 0.2px;
 }
 
 /* Snackbar button styling */
 .mat-mdc-snack-bar-container .mat-mdc-button {
-    font-weight: 600;
+    font-weight: 500;
+    font-size: 12px;
     text-transform: uppercase;
-    font-size: 13px;
+    letter-spacing: 0.5px;
+    min-width: auto !important;
+    padding: 0 12px !important;
 }
 
-/* Snackbar animation */
-.mat-mdc-snack-bar-container {
-    animation: slideInFromTop 0.3s ease-out;
-}
-
-@keyframes slideInFromTop {
-    from {
-        transform: translateY(-100%);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+.mat-mdc-snack-bar-container .mat-mdc-button:hover {
+    opacity: 1 !important;
 }
 
 /* ============================================
@@ -140,4 +245,25 @@
 /* NGX Spinner customization */
 .ngx-spinner-overlay {
     backdrop-filter: blur(4px) !important;
+    background-color: var(--nav-bg) !important;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 5px;
+    border: 2px solid var(--bg-color);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
 }

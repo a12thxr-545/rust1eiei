@@ -1,0 +1,40 @@
+<div class="members-page">
+    <!-- Header -->
+    <div class="page-header">
+        <h1>Brawlers</h1>
+        <p>Search and connect with other fighters</p>
+    </div>
+
+    <div class="members-container">
+        <!-- Search Bar -->
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" [(ngModel)]="paginator().pagination.query" (keyup.enter)="onSearch()"
+                    placeholder="Search brawlers by name or username..." (ngModelChange)="onSearch()">
+            </div>
+        </div>
+
+        <!-- Members Grid -->
+        <div class="members-grid">
+            @for (member of paginator().items; track member.id) {
+            <div class="member-item">
+                <app-member-card [member]="member"></app-member-card>
+            </div>
+            } @empty {
+            <div class="empty-state">
+                <div class="empty-icon">
+                </div>
+                <h3>No brawlers found</h3>
+                <p>Try searching with a different name</p>
+            </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-footer">
+            <mat-paginator [length]="paginator().pagination.length" [pageSize]="paginator().pagination.pageSize"
+                [pageSizeOptions]="pageSizeOptions" aria-label="Select page" (page)="onChangedPage($event)">
+            </mat-paginator>
+        </div>
+    </div>
+</div>

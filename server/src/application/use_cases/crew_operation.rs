@@ -41,6 +41,22 @@ where
                 "Chiefs cannot join their own missions as crew members"
             ));
         }
+
+        // Check if user is already in a mission
+        let current_mission = self
+            .crew_operation_repository
+            .get_current_mission(brawler_id)
+            .await?;
+        if let Some(current_id) = current_mission {
+            if current_id != mission_id {
+                return Err(anyhow::anyhow!(
+                    "You are already in another mission. Leave it first before joining a new one."
+                ));
+            } else {
+                return Err(anyhow::anyhow!("You are already in this mission"));
+            }
+        }
+
         let crew_count = self
             .mission_viewing_repository
             .crew_counting(mission_id)
@@ -73,6 +89,42 @@ where
         if !leaving_condition {
             return Err(anyhow::anyhow!("Mission is not leavable"));
         }
+        self.crew_operation_repository
+            .leave(CrewMemberShips {
+                mission_id,
+                brawler_id,
+            })
+            .await?;
+
+        Ok(())
+    }
+
+    pub async fn get_current_mission(&self, brawler_id: i32) -> Result<Option<i32>> {
+        self.crew_operation_repository
+            .get_current_mission(brawler_id)
+            .await
+    }
+
+    pub async fn kick(&self, mission_id: i32, chief_id: i32, brawler_id: i32) -> Result<()> {
+        let mission = self.mission_viewing_repository.get_one(mission_id).await?;
+
+        if mission.chief_id != chief_id {
+            return Err(anyhow::anyhow!("Only the mission chief can kick members"));
+        }
+
+        if mission.chief_id == brawler_id {
+            return Err(anyhow::anyhow!("You cannot kick yourself"));
+        }
+
+        let kicking_condition = mission.status == MissionStatuses::Open.to_string()
+            || mission.status == MissionStatuses::Failed.to_string();
+
+        if !kicking_condition {
+            return Err(anyhow::anyhow!(
+                "Members can only be kicked from open or failed missions"
+            ));
+        }
+
         self.crew_operation_repository
             .leave(CrewMemberShips {
                 mission_id,

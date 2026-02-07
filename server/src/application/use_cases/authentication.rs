@@ -44,7 +44,9 @@ where
         let passport = Passport::new(
             brawler_entity.id,
             brawler_entity.display_name,
+            brawler_entity.username,
             brawler_entity.avatar_url,
+            brawler_entity.cover_url,
         );
 
         // let access_token_claims = Claims {

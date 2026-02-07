@@ -1,20 +1,44 @@
 <h2 mat-dialog-title>Create New Mission</h2>
 <mat-dialog-content>
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mission-form">
+        <!-- Image Upload -->
+        <div class="image-upload-section">
+            <div class="image-preview" (click)="triggerImageInput()">
+                @if (imagePreview()) {
+                <img [src]="imagePreview()" alt="Mission Image" />
+                <div class="image-overlay">
+                    <span>Change</span>
+                </div>
+                } @else {
+                <div class="image-placeholder">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <polyline points="21 15 16 10 5 21" />
+                    </svg>
+                    <span>Add Image</span>
+                </div>
+                }
+            </div>
+            <input type="file" #imageInput accept="image/jpeg,image/png,.jpg,.jpeg,.png"
+                (change)="onImageSelected($event)" class="hidden-input" />
+        </div>
+
         <mat-form-field appearance="outline">
             <mat-label>Mission Name</mat-label>
             <input matInput formControlName="name" placeholder="Enter mission name">
             @if (form.controls.name.hasError('required')) {
-                <mat-error>Name is required</mat-error>
+            <mat-error>Name is required</mat-error>
             }
             @if (form.controls.name.hasError('minlength')) {
-                <mat-error>Name must be at least 3 characters</mat-error>
+            <mat-error>Name must be at least 3 characters</mat-error>
             }
         </mat-form-field>
 
         <mat-form-field appearance="outline">
             <mat-label>Description</mat-label>
-            <textarea matInput formControlName="description" placeholder="Enter mission description" rows="4"></textarea>
+            <textarea matInput formControlName="description" placeholder="Enter mission description"
+                rows="4"></textarea>
         </mat-form-field>
     </form>
 </mat-dialog-content>
@@ -22,9 +46,9 @@
     <button mat-button (click)="onCancel()">Cancel</button>
     <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="form.invalid || isLoading()">
         @if (isLoading()) {
-            Creating...
+        Creating...
         } @else {
-            Create
+        Create
         }
     </button>
 </mat-dialog-actions>

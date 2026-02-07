@@ -1,82 +1,108 @@
-<div class="login-container">
-    <!-- Loading Overlay with ngx-spinner -->
+<div class="auth-page">
+    <!-- Loading Overlay -->
     <ngx-spinner name="auth-spinner" type="ball-clip-rotate" size="medium" bdColor="rgba(0, 0, 0, 0.8)">
         <p class="loading-message">{{ mode === 'login' ? 'Signing in...' : 'Creating account...' }}</p>
     </ngx-spinner>
 
-    <mat-card>
-        <h3>{{ mode === 'login' ? 'Welcome Back' : 'Create Account' }}</h3>
-        <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off">
-            <!-- Username -->
-            <div class="field-wrapper">
-                <mat-form-field appearance="outline" [class.error-field]="errorMsg.username()">
-                    <mat-label>Username</mat-label>
-                    <input matInput type="text" formControlName="username" placeholder="Enter your username"
-                        (blur)="mode === 'regis' && updateErrorMsg('username')">
-                </mat-form-field>
-                @if (errorMsg.username()) {
-                <p class="error-label"><span class="error-icon">⊗</span> {{ errorMsg.username() }}</p>
-                }
-            </div>
+    <div class="auth-container">
+        <!-- Logo / Brand -->
+        <div class="auth-brand">
+            <h1>Squad</h1>
+        </div>
 
-            <!-- AKA / Display Name (Register only) -->
-            @if (mode === 'regis') {
-            <div class="field-wrapper">
-                <mat-form-field appearance="outline" [class.error-field]="errorMsg.displayName()">
-                    <mat-label>aka</mat-label>
-                    <input matInput type="text" formControlName="displayName" placeholder="aka"
-                        (blur)="updateErrorMsg('displayName')">
-                </mat-form-field>
-                @if (errorMsg.displayName()) {
-                <p class="error-label"><span class="error-icon">⊗</span> {{ errorMsg.displayName() }}</p>
-                }
-            </div>
-            }
+        <!-- Auth Card -->
+        <div class="auth-card">
+            <h2>{{ mode === 'login' ? 'Welcome back' : 'Create account' }}</h2>
+            <p class="subtitle">{{ mode === 'login' ? 'Enter your credentials to continue' : 'Fill in your details to
+                get started' }}</p>
 
-            <!-- Password -->
-            <div class="field-wrapper">
-                <mat-form-field appearance="outline" [class.error-field]="errorMsg.password()">
-                    <mat-label>Password</mat-label>
-                    <input matInput type="password" formControlName="password" placeholder="Enter your password"
+            <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off">
+                <!-- Username -->
+                <div class="input-group" [class.has-error]="errorMsg.username()">
+                    <label for="username">Username</label>
+                    <input id="username" type="text" formControlName="username" placeholder="Enter username"
+                        (blur)="mode === 'regis' ? (updateErrorMsg('username') || checkUsernameAvailability()) : null">
+                    @if (errorMsg.username()) {
+                    <span class="error-text">{{ errorMsg.username() }}</span>
+                    }
+
+                    <!-- Username Suggestions -->
+                    @if (mode === 'regis' && suggestedUsernames().length > 0) {
+                    <div class="username-suggestions">
+                        <p>Suggestion: <span class="suggestion-hint">Try these available IDs:</span></p>
+                        <div class="suggestion-list">
+                            @for (sug of suggestedUsernames(); track sug) {
+                            <button type="button" class="suggestion-tag" (click)="applySuggestion(sug)">
+                                {{ sug }}
+                            </button>
+                            }
+                        </div>
+                    </div>
+                    }
+                </div>
+
+                <!-- Display Name (Register only) -->
+                @if (mode === 'regis') {
+                <div class="input-group" [class.has-error]="errorMsg.displayName()">
+                    <label for="displayName">Display Name</label>
+                    <input id="displayName" type="text" formControlName="displayName"
+                        placeholder="What should we call you?" (blur)="updateErrorMsg('displayName')">
+                    @if (errorMsg.displayName()) {
+                    <span class="error-text">{{ errorMsg.displayName() }}</span>
+                    }
+                </div>
+                }
+
+                <!-- Password -->
+                <div class="input-group" [class.has-error]="errorMsg.password()">
+                    <label for="password">Password</label>
+                    <input id="password" type="password" formControlName="password" placeholder="Enter password"
                         (blur)="mode === 'regis' && updateErrorMsg('password')">
-                </mat-form-field>
-                @if (errorMsg.password()) {
-                <p class="error-label"><span class="error-icon">⊗</span> {{ errorMsg.password() }}</p>
+                    @if (errorMsg.password()) {
+                    <span class="error-text">{{ errorMsg.password() }}</span>
+                    }
+                </div>
+
+                <!-- Confirm Password (Register only) -->
+                @if (mode === 'regis') {
+                <div class="input-group" [class.has-error]="errorMsg.cf_password()">
+                    <label for="cf_password">Confirm Password</label>
+                    <input id="cf_password" type="password" formControlName="cf_password"
+                        placeholder="Confirm your password" (blur)="updateErrorMsg('cf_password')">
+                    @if (errorMsg.cf_password()) {
+                    <span class="error-text">{{ errorMsg.cf_password() }}</span>
+                    }
+                </div>
                 }
+
+                <!-- Submit Button -->
+                <button type="submit" class="submit-btn" [disabled]="isLoading()">
+                    @if (isLoading()) {
+                    <span class="spinner"></span>
+                    <span>{{ mode === 'login' ? 'Signing in...' : 'Creating...' }}</span>
+                    } @else {
+                    <span>{{ mode === 'login' ? 'Sign in' : 'Create account' }}</span>
+                    }
+                </button>
+            </form>
+
+            <!-- Divider -->
+            <div class="divider">
+                <span>or</span>
             </div>
 
-            <!-- Confirm Password (Register only) -->
-            @if (mode === 'regis') {
-            <div class="field-wrapper">
-                <mat-form-field appearance="outline" [class.error-field]="errorMsg.cf_password()">
-                    <mat-label>Confirm Password</mat-label>
-                    <input matInput type="password" formControlName="cf_password" placeholder="Confirm your password"
-                        (blur)="updateErrorMsg('cf_password')">
-                </mat-form-field>
-                @if (errorMsg.cf_password()) {
-                <p class="error-label"><span class="error-icon">⊗</span> {{ errorMsg.cf_password() }}</p>
-                }
-            </div>
-            }
-
-            <button mat-flat-button class="blue" type="submit" [disabled]="isLoading()">
-                @if (isLoading()) {
-                <mat-spinner diameter="20" strokeWidth="2"></mat-spinner>
-                <span class="btn-loading-text">{{ mode === 'login' ? 'Signing in...' : 'Creating...' }}</span>
+            <!-- Toggle Mode -->
+            <p class="toggle-text">
+                @if (mode === 'login') {
+                Don't have an account? <button type="button" class="link-btn" (click)="toggleMode()">Sign up</button>
                 } @else {
-                {{ mode === 'login' ? 'Login' : 'Sign Up' }}
+                Already have an account? <button type="button" class="link-btn" (click)="toggleMode()">Sign in</button>
                 }
-            </button>
-        </form>
+            </p>
 
-        <div class="login-spacer">or</div>
+        </div>
 
-        <p class="toggle">
-            @if (mode === 'login') {
-            Don't have an account? <span (click)="toggleMode()">Sign up</span>
-            } @else {
-            Already have an account? <span (click)="toggleMode()">Login</span>
-            }
-        </p>
-    </mat-card>
+        <!-- Footer -->
+        <p class="footer-text">By continuing, you agree to our Terms of Service</p>
+    </div>
 </div>

@@ -1,42 +1,513 @@
-.mission-container {
+/* ============================================
+   MINIMAL HOME PAGE
+   ============================================ */
+
+.home-page {
+    min-height: 100vh;
+    background: var(--bg-color);
+    color: var(--text-primary);
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* ============================================
+   HERO SECTION
+   ============================================ */
+
+.hero {
+    min-height: 70vh;
     display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    padding: 16px;
+    align-items: center;
     justify-content: center;
+    padding: 120px 24px 80px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.hero-content {
+    max-width: 640px;
+    text-align: center;
+}
+
+.hero-tag {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent-color);
+    margin-bottom: 24px;
+}
+
+.hero h1 {
+    font-size: 64px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -2px;
+    margin: 0 0 24px 0;
+    color: var(--text-primary);
+}
+
+.hero p {
+    font-size: 18px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0 0 40px 0;
+}
+
+.hero-actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: var(--accent-color);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-primary:hover {
+    filter: brightness(0.9);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary svg {
+    width: 18px;
+    height: 18px;
+}
+
+.btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--text-secondary);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-ghost:hover {
+    color: var(--text-primary);
+    border-color: var(--text-primary);
+    background: var(--hover-bg);
+}
+
+.btn-ghost svg {
+    width: 16px;
+    height: 16px;
+}
+
+.btn-white {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 32px;
+    background: #fff;
+    border: none;
+    border-radius: 8px;
+    color: #000;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-white:hover {
+    background: #e5e5e5;
+    transform: translateY(-1px);
+}
+
+/* ============================================
+   STATS SECTION
+   ============================================ */
+
+.stats {
+    padding: 60px 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.stats-grid {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 48px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    display: block;
+    font-size: 64px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -3px;
+    line-height: 1;
+}
+
+.stat-label {
+    display: block;
+    font-size: 14px;
+    color: var(--accent-color);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-top: 8px;
+}
+
+.stat-divider {
+    width: 1px;
+    height: 64px;
+    background: var(--border-color);
+    opacity: 0.5;
+}
+
+/* ============================================
+   FEATURES SECTION
+   ============================================ */
+
+.features {
+    padding: 80px 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.features h2 {
+    font-size: 32px;
+    font-weight: 700;
+    text-align: center;
+    margin: 0 0 60px 0;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.feature-item {
+    text-align: center;
+    padding: 20px;
+}
+
+.feature-item h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 12px 0;
+    letter-spacing: -0.5px;
+}
+
+.feature-item p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* ============================================
+   MISSIONS SECTION
+   ============================================ */
+
+.missions {
+    padding: 80px 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 900px;
+    margin: 0 auto 40px;
+}
+
+.section-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.3px;
+    color: var(--text-primary);
+}
+
+.missions-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    max-width: 900px;
+    margin: 0 auto;
 }
 
 .mission-card {
-    width: 300px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 24px;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow);
+}
+
+.mission-card:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+.mission-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
     margin-bottom: 16px;
 }
 
-.mission-stats {
+.mission-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--hover-bg);
+    border-radius: 10px;
     display: flex;
-    justify-content: space-between;
-    margin-top: 16px;
-    color: gray;
-    font-size: 0.9em;
-}
-
-.mission-stats span {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.no-missions {
-    display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 300px;
-    color: gray;
+    color: var(--accent-color);
 }
 
-.large-icon {
-    font-size: 48px;
-    width: 48px;
-    height: 48px;
-    margin-bottom: 16px;
+.mission-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.mission-status {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.mission-status.status-open {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+}
+
+.mission-status.status-pending {
+    background: rgba(251, 191, 36, 0.15);
+    color: #fbbf24;
+}
+
+.mission-status.status-completed {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+}
+
+.mission-status.status-in_progress {
+    background: rgba(168, 85, 247, 0.15);
+    color: #a855f7;
+}
+
+.mission-card h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 8px 0;
+}
+
+.mission-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0 0 16px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.mission-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.crew-count {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.crew-count svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* ============================================
+   CTA SECTION
+   ============================================ */
+
+.cta {
+    padding: 100px 24px;
+    text-align: center;
+    background: var(--bg-color);
+    border-top: 1px solid var(--border-color);
+}
+
+.cta h2 {
+    font-size: 40px;
+    font-weight: 700;
+    margin: 0 0 12px 0;
+    letter-spacing: -1.5px;
+    color: var(--text-primary);
+}
+
+.cta p {
+    font-size: 18px;
+    color: var(--text-secondary);
+    margin: 0 0 32px 0;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 900px) {
+    .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .missions-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .home-page {
+        padding-top: 60px;
+    }
+
+    .hero {
+        min-height: auto;
+        padding: 80px 20px 60px;
+    }
+
+    .hero h1 {
+        font-size: 38px;
+        letter-spacing: -1px;
+        line-height: 1.2;
+    }
+
+    .hero p {
+        font-size: 16px;
+        margin-bottom: 32px;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        width: 100%;
+        gap: 12px;
+    }
+
+    .btn-primary,
+    .btn-ghost,
+    .btn-white {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .stats {
+        padding: 40px 20px;
+    }
+
+    .stats-grid {
+        gap: 24px;
+        flex-direction: column;
+    }
+
+    .stat-value {
+        font-size: 48px;
+    }
+
+    .stat-divider {
+        display: none;
+    }
+
+    .features {
+        padding: 60px 20px;
+    }
+
+    .features h2 {
+        font-size: 28px;
+        margin-bottom: 40px;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .feature-item {
+        padding: 16px;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        background: var(--card-bg);
+    }
+
+    .missions {
+        padding: 60px 20px;
+    }
+
+    .section-header {
+        flex-direction: row;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .section-header h2 {
+        font-size: 20px;
+    }
+
+    .missions-list {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .cta {
+        padding: 60px 20px;
+    }
+
+    .cta h2 {
+        font-size: 32px;
+        letter-spacing: -1px;
+    }
+
+    .cta p {
+        font-size: 16px;
+    }
 }

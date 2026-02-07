@@ -1,0 +1,84 @@
+<div class="profile-container">
+    @if (isLoading()) {
+    <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading profile...</p>
+    </div>
+    } @else if (user()) {
+    <div class="profile-card">
+        <!-- Cover Image -->
+        <div class="cover-image"
+            [style.background-image]="'url(' + (user()?.cover_url || '/assets/default-cover.jpg') + ')'">
+            <div class="cover-gradient"></div>
+        </div>
+
+        <!-- Avatar -->
+        <div class="avatar-section">
+            <div class="avatar-wrapper">
+                <img [src]="user()?.avatar_url || '/assets/defaultavtar.jpg'" alt="Avatar" class="avatar-image" />
+            </div>
+        </div>
+
+        <!-- Profile Info -->
+        <div class="profile-info">
+            <div class="header-content">
+                <div class="name-section">
+                    <h1 class="display-name">{{ user()?.display_name || 'Unknown' }}</h1>
+                    <p class="username">@{{ user()?.username }}</p>
+                </div>
+
+                <div class="actions-section">
+                    @if (!isMyProfile()) {
+                    @if (isFriend()) {
+                    <div class="friend-badge">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 6L9 17l-5-5" />
+                        </svg>
+                        <span>Friend</span>
+                    </div>
+                    } @else {
+                    <button class="add-friend-btn" (click)="addFriend()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <line x1="19" y1="8" x2="19" y2="14" />
+                            <line x1="16" y1="11" x2="22" y2="11" />
+                        </svg>
+                        <span>Add Friend</span>
+                    </button>
+                    }
+                    } @else {
+                    <button class="edit-profile-btn" routerLink="/profile">Edit Profile</button>
+                    }
+                </div>
+            </div>
+            <p class="role-text">Brawler</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-section">
+            <div class="stat-item">
+                <span class="stat-value">{{ user()?.age || '??' }}</span>
+                <span class="stat-label">Years Old</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-value">Brawler</span>
+                <span class="stat-label">Rank</span>
+            </div>
+        </div>
+
+        <!-- Bio -->
+        <div class="bio-section">
+            <h3>Interest</h3>
+            <p class="bio-text">{{ user()?.interest || 'No background shared yet. This fighter prefers to keep their
+                secrets.' }}</p>
+        </div>
+    </div>
+    } @else {
+    <div class="not-found">
+        <h2>User not found</h2>
+        <button class="back-btn" routerLink="/missions">Back to Operations</button>
+    </div>
+    }
+</div>

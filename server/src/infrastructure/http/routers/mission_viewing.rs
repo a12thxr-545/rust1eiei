@@ -45,11 +45,12 @@ where
 
 pub async fn gets<T>(
     State(mission_viewing_use_case): State<Arc<MissionViewingUseCase<T>>>,
-    filter: Query<MissionFilter>,
+    Query(filter): Query<MissionFilter>,
 ) -> impl IntoResponse
 where
     T: MissionViewingRepository + Send + Sync,
 {
+    tracing::info!("Filtering missions with: {:?}", filter);
     match mission_viewing_use_case.get_all(&filter).await {
         Ok(mission_models) => (StatusCode::OK, Json(mission_models)).into_response(),
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),

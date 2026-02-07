@@ -12,7 +12,7 @@ use crate::{
     },
     infrastructure::database::{
         postgresql_connection::PgPoolSquad,
-        schema::{crew_memberships, missions},
+        schema::{brawlers, crew_memberships, missions},
     },
 };
 pub struct MissionViewingPostgres {
@@ -51,6 +51,7 @@ impl MissionViewingRepository for MissionViewingPostgres {
     }
 
     async fn get_all(&self, mission_filter: &MissionFilter) -> Result<Vec<MissionEntity>> {
+        println!("Repository Filtering missions with: {:?}", mission_filter);
         let mut conn = Arc::clone(&self.db_pool).get()?;
 
         let mut query = missions::table
@@ -58,12 +59,36 @@ impl MissionViewingRepository for MissionViewingPostgres {
             .into_boxed();
 
         if let Some(status) = &mission_filter.status {
-            let status_string = status.to_string();
-            query = query.filter(missions::status.eq(status_string));
+            query = query.filter(missions::status.eq(status));
         };
         if let Some(name) = &mission_filter.name {
             query = query.filter(missions::name.ilike(format!("%{}%", name)));
         };
+        if let Some(code) = &mission_filter.code {
+            query = query.filter(missions::code.eq(code.to_uppercase()));
+        };
+        if let Some(chief_id) = &mission_filter.chief_id {
+            query = query.filter(missions::chief_id.eq(*chief_id));
+        };
+        if let Some(exclude_chief_id) = &mission_filter.exclude_chief_id {
+            query = query.filter(missions::chief_id.ne(*exclude_chief_id));
+        };
+
+        if let Some(member_id) = &mission_filter.member_id {
+            let mission_ids = crew_memberships::table
+                .filter(crew_memberships::brawler_id.eq(*member_id))
+                .select(crew_memberships::mission_id)
+                .load::<i32>(&mut conn)?;
+            query = query.filter(missions::id.eq_any(mission_ids));
+        }
+
+        if let Some(exclude_member_id) = &mission_filter.exclude_member_id {
+            let mission_ids = crew_memberships::table
+                .filter(crew_memberships::brawler_id.eq(*exclude_member_id))
+                .select(crew_memberships::mission_id)
+                .load::<i32>(&mut conn)?;
+            query = query.filter(diesel::dsl::not(missions::id.eq_any(mission_ids)));
+        }
 
         let value = query
             .select(MissionEntity::as_select())
@@ -77,8 +102,10 @@ impl MissionViewingRepository for MissionViewingPostgres {
 
         let sql = r#"
             SELECT 
-               b.display_name,
-               COALESCE(b.avatar_url, '') AS avatar_url,
+                b.id AS brawler_id,
+                b.display_name,
+                b.username,
+                COALESCE(b.avatar_url, '') AS avatar_url,
                COALESCE(s.success_count, 0) AS mission_success_count,
                COALESCE(j.joined_count, 0) AS mission_joined_count
             FROM 
@@ -118,5 +145,16 @@ impl MissionViewingRepository for MissionViewingPostgres {
             .load::<BrawlerModel>(&mut conn)?;
 
         Ok(result)
+    }
+
+    async fn get_chief_name(&self, chief_id: i32) -> Result<String> {
+        let mut conn = Arc::clone(&self.db_pool).get()?;
+
+        let name = brawlers::table
+            .filter(brawlers::id.eq(chief_id))
+            .select(brawlers::display_name)
+            .first::<String>(&mut conn)?;
+
+        Ok(name)
     }
 }
