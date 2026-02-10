@@ -13,6 +13,8 @@ export interface MissionInvitation {
     mission_name: string;
     inviter_id: number;
     inviter_name: string;
+    invitee_id: number;
+    invitee_name: string;
     status: string;
     created_at: string;
 }

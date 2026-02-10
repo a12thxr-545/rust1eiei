@@ -1,5 +1,4 @@
 pub mod brawlers;
-pub mod chat;
 pub mod crew_operation;
 pub mod friendships;
 pub mod mission_invitations;

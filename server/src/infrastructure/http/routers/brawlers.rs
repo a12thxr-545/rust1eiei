@@ -36,7 +36,6 @@ pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
     let protected_router = Router::new()
         .route("/avatar", post(upload_avatar))
         .route("/cover", post(upload_cover))
-        .route("/chat-image", post(upload_chat_image))
         .route("/profile", get(get_profile))
         .route("/display-name", put(update_display_name))
         .route("/bio", put(update_bio))
@@ -139,26 +138,6 @@ where
         Ok(uploaded_image) => (StatusCode::CREATED, Json(uploaded_image)).into_response(),
         Err(e) => {
             tracing::error!("Upload cover error: {:?}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
-        }
-    }
-}
-
-pub async fn upload_chat_image<T>(
-    State(brawlers_use_case): State<Arc<BrawlersUseCase<T>>>,
-    Extension(brawler_id): Extension<i32>,
-    Json(upload_image): Json<UploadedAvartar>,
-) -> impl IntoResponse
-where
-    T: BrawlerRepository + Send + Sync,
-{
-    match brawlers_use_case
-        .upload_chat_image(upload_image.base64_string, brawler_id)
-        .await
-    {
-        Ok(uploaded_image) => (StatusCode::CREATED, Json(uploaded_image)).into_response(),
-        Err(e) => {
-            tracing::error!("Upload chat image error: {:?}", e);
             (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
         }
     }

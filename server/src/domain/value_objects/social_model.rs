@@ -17,6 +17,8 @@ pub struct MissionInvitationModel {
     pub mission_name: String,
     pub inviter_id: i32,
     pub inviter_name: String,
+    pub invitee_id: i32,
+    pub invitee_name: String,
     pub status: String,
     pub created_at: String,
 }

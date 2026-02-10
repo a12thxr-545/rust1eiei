@@ -15,7 +15,8 @@
         <!-- Avatar -->
         <div class="avatar-section">
             <div class="avatar-wrapper">
-                <img [src]="user()?.avatar_url || '/assets/defaultavtar.jpg'" alt="Avatar" class="avatar-image" />
+                <img [src]="user()?.avatar_url || 'assets/defaultavtar.jpg'"
+                    (error)="$any($event.target).src = 'assets/defaultavtar.jpg'" alt="Avatar" class="avatar-image" />
             </div>
         </div>
 

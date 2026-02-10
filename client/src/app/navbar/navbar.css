@@ -4,57 +4,183 @@
 
 .navbar {
     position: fixed;
-    top: 12px;
+    top: 24px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
-    background: rgba(var(--nav-bg-rgb, 15, 23, 42), 0.7);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(var(--nav-bg-rgb, 15, 23, 42), 0.6);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 40px;
-    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-    width: auto;
-    max-width: 90%;
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    width: max-content !important;
+    min-width: 0 !important;
+    max-width: 92% !important;
     box-shadow:
-        0 10px 40px rgba(0, 0, 0, 0.2),
+        0 4px 30px rgba(0, 0, 0, 0.2),
+        inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    overflow: visible;
+    cursor: pointer;
+}
+
+.navbar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 40px;
+    padding: 1px;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.1));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+.navbar.expanded {
+    width: 92% !important;
+    max-width: 1100px !important;
+    cursor: default;
+    background: rgba(var(--nav-bg-rgb, 15, 23, 42), 0.8);
+    box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.5),
         inset 0 1px 1px rgba(255, 255, 255, 0.1);
 }
 
-.navbar:hover {
+.navbar:not(.expanded):hover {
     background: rgba(var(--nav-bg-rgb, 15, 23, 42), 0.85);
-    transform: translateX(-50%) scale(1.02);
-    box-shadow:
-        0 20px 60px rgba(0, 0, 0, 0.3),
-        inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    transform: translateX(-50%) translateY(-2px);
+    border-color: rgba(var(--accent-color-rgb), 0.4);
 }
 
 .navbar-container {
-    padding: 6px 12px 6px 20px;
+    padding: 4px 12px;
     height: auto;
-    min-height: 48px;
+    min-height: 40px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    width: 100%;
+    justify-content: center;
+    width: auto;
+    transition: all 0.5s ease;
 }
 
-.nav-left,
-.nav-right {
+.navbar.expanded .navbar-container {
+    padding: 8px 12px 8px 24px;
+    min-height: 56px;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.nav-left {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
+}
+
+.navbar.expanded .nav-left,
+.navbar.expanded .nav-right {
     flex: 1;
+}
+
+.navbar:not(.expanded) .nav-left {
+    flex: 0 0 auto;
+    justify-content: center;
+}
+
+.nav-center,
+.nav-right {
+    animation: contentFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes contentFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.expand-indicator {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        transform: translateX(0);
+    }
+
+    40% {
+        transform: translateX(5px);
+    }
+
+    60% {
+        transform: translateX(3px);
+    }
+}
+
+.expand-indicator svg {
+    width: 16px;
+    height: 16px;
 }
 
 .nav-center {
     display: flex;
     justify-content: center;
+    flex: 0 0 auto;
 }
 
 .nav-right {
+    display: flex;
+    align-items: center;
     justify-content: flex-end;
-    gap: 8px;
+    gap: 12px;
+}
+
+.collapse-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+    margin-left: 4px;
+}
+
+.collapse-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.2);
+    transform: scale(1.05);
+}
+
+.collapse-btn svg {
+    width: 18px;
+    height: 18px;
 }
 
 /* ============================================
@@ -94,9 +220,9 @@
 .nav-links {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 8px;
     background: rgba(255, 255, 255, 0.05);
-    padding: 4px;
+    padding: 6px;
     border-radius: 30px;
 }
 
@@ -129,6 +255,7 @@
     box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
 }
 
+
 /* ============================================
    USER SECTION
    ============================================ */
@@ -136,7 +263,7 @@
 .user-section {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
     position: relative;
 }
 
@@ -178,30 +305,10 @@
    DROPDOWN MENU
    ============================================ */
 
-.theme-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    padding: 0;
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.theme-toggle:hover {
-    border-color: var(--accent-color);
-    color: var(--accent-color);
-    background: var(--hover-bg);
-}
-
-.theme-toggle svg {
+.theme-item .menu-icon {
     width: 18px;
     height: 18px;
+    margin-right: 2px;
 }
 
 .dropdown-menu {
@@ -478,7 +585,7 @@
    ============================================ */
 
 @media (max-width: 1024px) {
-    .navbar {
+    .navbar.expanded {
         width: 94%;
         max-width: none;
     }
@@ -508,7 +615,6 @@
 @media (max-width: 640px) {
     .navbar {
         top: 8px;
-        width: calc(100% - 12px);
     }
 
     .logo-text {
@@ -532,8 +638,7 @@
     }
 
     .avatar-btn,
-    .avatar,
-    .theme-toggle {
+    .avatar {
         width: 30px;
         height: 30px;
     }

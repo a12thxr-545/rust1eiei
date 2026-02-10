@@ -69,6 +69,10 @@ export class Home implements OnInit {
     this.stats.totalCrew = missions.reduce((sum, m) => sum + m.crew_count, 0);
   }
 
+  viewMission(id: number) {
+    this.router.navigate(['/missions'], { queryParams: { view: id } });
+  }
+
   navigateToMissions() {
     this.router.navigate(['/missions']);
   }

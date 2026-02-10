@@ -4,6 +4,7 @@ import { Navbar } from "./navbar/navbar";
 import { PassportService } from './_services/passport-service';
 import { isPlatformBrowser } from '@angular/common';
 import { filter } from 'rxjs';
+import { RealtimeService } from './_services/realtime.service';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +16,7 @@ export class App implements OnInit {
   private passportService = inject(PassportService);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
+  private realtimeService = inject(RealtimeService);
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {

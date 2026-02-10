@@ -1,0 +1,113 @@
+<div class="social-overlay" (click)="onClose()">
+    <div class="social-modal inbox-only" (click)="$event.stopPropagation()">
+        <!-- Header -->
+        <div class="social-header">
+            <div class="header-main">
+                <div class="title-with-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="title-icon">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" />
+                    </svg>
+                    <h2>Inbox</h2>
+                </div>
+                <p>Manage your mission invitations and friend requests</p>
+            </div>
+            <button class="close-icon-btn" (click)="onClose()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="social-content">
+            <div class="inbox-full-view">
+                <div class="social-grid single-col">
+                    <div class="social-col">
+                        <!-- Friend Requests -->
+                        <div class="social-section">
+                            <div class="section-header">
+                                <h3>Friend Requests</h3>
+                                <span class="count-pill">{{ socialService.pendingRequests().length }}</span>
+                            </div>
+                            <div class="social-list custom-scrollbar">
+                                @for (req of socialService.pendingRequests(); track req.friendship_id) {
+                                <div class="social-item alert">
+                                    <img [src]="req.avatar_url || 'assets/defaultavtar.jpg'"
+                                        (error)="$any($event.target).src = 'assets/defaultavtar.jpg'"
+                                        class="user-avatar">
+                                    <div class="user-details">
+                                        <a [routerLink]="['/u', req.username]" (click)="onClose()" class="user-link">
+                                            <span class="user-name">{{ req.display_name }}</span>
+                                        </a>
+                                        <span class="action-text">sent you a friend request</span>
+                                    </div>
+                                    <div class="item-actions">
+                                        <button class="icon-btn success" (click)="acceptFriend(req.friend_id)"
+                                            title="Accept">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
+                                        </button>
+                                        <button class="icon-btn danger" (click)="rejectFriend(req.friend_id)"
+                                            title="Reject">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                } @empty {
+                                <div class="empty-list-hint">
+                                    <p>No pending friend requests</p>
+                                </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Mission Invitations -->
+                        <div class="social-section">
+                            <div class="section-header">
+                                <h3>Mission Invitations</h3>
+                                <span class="count-pill">{{ socialService.invitations().length }}</span>
+                            </div>
+                            <div class="social-list custom-scrollbar">
+                                @for (inv of socialService.invitations(); track inv.invitation_id) {
+                                <div class="social-item mission-alert">
+                                    <div class="mission-icon-box">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                                        </svg>
+                                    </div>
+                                    <div class="user-details">
+                                        <span class="user-name">{{ inv.mission_name }}</span>
+                                        <span class="action-text">Invited by <strong>{{ inv.inviter_name
+                                                }}</strong></span>
+                                    </div>
+                                    <div class="item-actions">
+                                        <button class="view-mini-btn"
+                                            (click)="viewMission(inv.mission_id)">View</button>
+                                        <button class="join-mini-btn"
+                                            (click)="respondToInvite(inv.invitation_id, true)">Join</button>
+                                        <button class="icon-btn danger"
+                                            (click)="respondToInvite(inv.invitation_id, false)">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                } @empty {
+                                <div class="empty-list-hint">
+                                    <p>No mission invitations</p>
+                                </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

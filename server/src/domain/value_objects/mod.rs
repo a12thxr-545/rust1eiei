@@ -3,5 +3,6 @@ pub mod brawler_model;
 pub mod mission_filter;
 pub mod mission_model;
 pub mod mission_statuses;
+pub mod realtime;
 pub mod social_model;
 pub mod uploaded_image;

@@ -6,7 +6,7 @@ use axum::{
     http::StatusCode,
     middleware,
     response::IntoResponse,
-    routing::{ patch},
+    routing::patch,
 };
 
 use crate::{
@@ -18,12 +18,16 @@ use crate::{
         },
         value_objects::mission_statuses::MissionStatuses,
     },
-    infrastructure::{database::{
-        postgresql_connection::PgPoolSquad,
-        repositories::{
-            mission_operation::MissionOperationPostgres, mission_viewing::MissionViewingPostgres,
+    infrastructure::{
+        database::{
+            postgresql_connection::PgPoolSquad,
+            repositories::{
+                mission_operation::MissionOperationPostgres,
+                mission_viewing::MissionViewingPostgres,
+            },
         },
-    }, http::middleware::auth::authorization},
+        http::middleware::auth::authorization,
+    },
 };
 
 pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
@@ -52,7 +56,10 @@ where
     T1: MissionOperationRepository + Send + Sync,
     T2: MissionViewingRepository + Send + Sync,
 {
-    match mission_operation_use_case.in_progress(mission_id, chief_id).await {
+    match mission_operation_use_case
+        .in_progress(mission_id, chief_id)
+        .await
+    {
         Ok(mission_id) => {
             let response = format!(
                 "Mision ({}) is now {:?}",

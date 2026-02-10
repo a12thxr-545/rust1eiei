@@ -121,18 +121,86 @@
     height: 20px;
 }
 
+/* content Tabs */
+.social-tabs {
+    display: flex;
+    padding: 0 32px;
+    gap: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.tab-btn {
+    padding: 16px 24px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: #94a3b8;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.tab-btn.active {
+    color: #f97316;
+    border-bottom-color: #f97316;
+    background: rgba(249, 115, 22, 0.05);
+}
+
+.count-small {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1px 6px;
+    border-radius: 6px;
+    font-size: 11px;
+}
+
+.pulse-badge {
+    background: #f97316;
+    color: #fff;
+    animation: badgePulse 2s infinite;
+}
+
+@keyframes badgePulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 6px rgba(249, 115, 22, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(249, 115, 22, 0);
+    }
+}
+
 /* Content Layout */
 .social-content {
     flex: 1;
     overflow: hidden;
-    padding: 32px;
+    padding: 24px 32px;
 }
 
 .social-grid {
     display: grid;
     grid-template-columns: 380px 1fr;
-    gap: 32px;
+    gap: 24px;
     height: 100%;
+}
+
+.social-grid.single-col {
+    grid-template-columns: 1fr;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 .social-col {
@@ -241,10 +309,12 @@
 }
 
 .user-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
     object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .mission-icon-box {
@@ -335,6 +405,30 @@
     font-size: 12px;
     font-weight: 700;
     cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.join-mini-btn:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.view-mini-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.view-mini-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
 }
 
 /* Search Box */

@@ -7,8 +7,8 @@
         <mat-card-subtitle>@{{member().username}}</mat-card-subtitle>
     </mat-card-header>
 
-    <img mat-card-image [src]="member().photoOfTheDay || '/assets/defaultavtar.jpg'"
-        alt="photo of {{member().username}}">
+    <img mat-card-image [src]="member().photoOfTheDay || 'assets/defaultavtar.jpg'"
+        (error)="$any($event.target).src = 'assets/defaultavtar.jpg'" alt="photo of {{member().username}}">
 
     <mat-card-content>
         <p class="interest-text">{{member().bio || 'No background shared yet.'}}</p>

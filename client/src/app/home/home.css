@@ -270,12 +270,36 @@
     padding: 24px;
     transition: all 0.2s ease;
     box-shadow: var(--shadow);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
 }
 
 .mission-card:hover {
     border-color: var(--accent-color);
     transform: translateY(-4px);
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+.btn-view-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--hover-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mission-card:hover .btn-view-circle {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: #fff;
+    transform: scale(1.1);
 }
 
 .mission-header {

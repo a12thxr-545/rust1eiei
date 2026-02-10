@@ -27,13 +27,6 @@
                 }
             </button>
             <button class="tab" [class.active]="selectedTabIndex === 3" (click)="onTabChange(3)">
-                <span>Inbox</span>
-                @if (socialService.pendingRequests().length + socialService.invitations().length > 0) {
-                <span class="badge inbox">{{ socialService.pendingRequests().length + socialService.invitations().length
-                    }}</span>
-                }
-            </button>
-            <button class="tab" [class.active]="selectedTabIndex === 4" (click)="onTabChange(4)">
                 <span>History</span>
                 @if (finishedMissions().length > 0) {
                 <span class="badge history">{{ finishedMissions().length }}</span>
@@ -41,12 +34,6 @@
             </button>
         </div>
 
-        <!-- Current Mission Alert -->
-        @if (currentMissionId() !== null) {
-        <div class="current-mission-alert">
-            <span>You are currently in a mission. Leave it to join another.</span>
-        </div>
-        }
 
         <!-- Tab Content -->
         <div class="tab-content">
@@ -69,7 +56,7 @@
                 <p>Wait for other users to create missions!</p>
             </div>
             } @else {
-            <div class="table-wrapper">
+            <div class="table-wrapper desktop-only">
                 <table>
                     <thead>
                         <tr>
@@ -134,6 +121,35 @@
                     </tbody>
                 </table>
             </div>
+
+            <div class="mobile-grid">
+                @for (mission of missions(); track mission.id) {
+                <div class="mission-card-mobile" (click)="openViewModal(mission)">
+                    <div class="card-top">
+                        <span class="room-code">#{{ mission.code }}</span>
+                        <span class="status" [class]="getStatusClass(mission.status)">{{ mission.status }}</span>
+                    </div>
+                    <div class="card-mid">
+                        <div class="mission-info">
+                            <span class="name">{{ mission.name }}</span>
+                            <span class="desc">{{ mission.description || 'No description' }}</span>
+                        </div>
+                    </div>
+                    <div class="card-bottom">
+                        <span class="crew">Crew: {{ mission.crew_count }}</span>
+                        <div class="card-actions" (click)="$event.stopPropagation()">
+                            @if (isInMission(mission.id)) {
+                            <button class="action-btn leave" (click)="leaveMission(mission)"
+                                [disabled]="isProcessing()">Leave</button>
+                            } @else {
+                            <button class="action-btn join" (click)="joinMission(mission)"
+                                [disabled]="isProcessing() || currentMissionId() !== null">Join</button>
+                            }
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
             }
             }
 
@@ -150,7 +166,7 @@
                 <p>Explore the mission list to find a squad to join!</p>
             </div>
             } @else {
-            <div class="table-wrapper">
+            <div class="table-wrapper desktop-only">
                 <table class="joined-table">
                     <thead>
                         <tr>
@@ -210,6 +226,32 @@
                     </tbody>
                 </table>
             </div>
+
+            <div class="mobile-grid">
+                @for (mission of joinedMissions(); track mission.id) {
+                <div class="mission-card-mobile" (click)="openViewModal(mission)">
+                    <div class="card-top">
+                        <span class="room-code">#{{ mission.code }}</span>
+                        <span class="status" [class]="getStatusClass(mission.status)">{{ mission.status }}</span>
+                    </div>
+                    <div class="card-mid">
+                        <div class="mission-info">
+                            <span class="name">{{ mission.name }}</span>
+                            <span class="desc">{{ mission.description || 'No description' }}</span>
+                        </div>
+                    </div>
+                    <div class="card-bottom">
+                        <span class="crew">Crew: {{ mission.crew_count }}</span>
+                        <span class="leader-name">{{ mission.chief_name }}</span>
+                        <div class="card-actions" (click)="$event.stopPropagation()">
+                            <button class="action-btn" (click)="openViewModal(mission)">View</button>
+                            <button class="action-btn leave" (click)="leaveMission(mission)"
+                                [disabled]="isProcessing()">Leave</button>
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
             }
             }
 
@@ -226,7 +268,7 @@
                 <p>Click "Create Mission" in the navbar to get started!</p>
             </div>
             } @else {
-            <div class="table-wrapper">
+            <div class="table-wrapper desktop-only">
                 <table class="my-table">
                     <thead>
                         <tr>
@@ -286,121 +328,36 @@
                     </tbody>
                 </table>
             </div>
-            }
-            }
 
-            <!-- Inbox -->
-            @if (selectedTabIndex === 3) {
-            <div class="inbox-container">
-                <!-- Friends Section -->
-                <div class="inbox-section friends-list-section">
-                    <h3>My Brawlers Friends ({{ socialService.friends().length }})</h3>
-                    @if (socialService.friends().length > 0) {
-                    <div class="request-list">
-                        @for (friend of socialService.friends(); track friend.friendship_id) {
-                        <div class="request-item">
-                            <div class="user-info">
-                                <img [src]="friend.avatar_url || '/assets/defaultavtar.jpg'" class="req-avatar">
-                                <div class="name-col">
-                                    <a [routerLink]="['/u', friend.username]" class="req-name-link">
-                                        <span class="req-name">{{ friend.display_name }}</span>
-                                    </a>
-                                    <span class="req-username">@{{ friend.username }}</span>
-                                </div>
-                            </div>
-                            <div class="req-actions">
-                                <span class="friend-badge">✓ Friend</span>
-                            </div>
+            <div class="mobile-grid">
+                @for (mission of myMissions(); track mission.id) {
+                <div class="mission-card-mobile" (click)="openViewModal(mission)">
+                    <div class="card-top">
+                        <span class="room-code">#{{ mission.code }}</span>
+                        <span class="status" [class]="getStatusClass(mission.status)">{{ mission.status }}</span>
+                    </div>
+                    <div class="card-mid">
+                        <div class="mission-info">
+                            <span class="name">{{ mission.name }}</span>
+                            <span class="desc">{{ mission.description || 'No description' }}</span>
                         </div>
-                        }
                     </div>
-                    } @else {
-                    <div class="empty-inbox">
-                        <p>No friends yet. Search for brawlers below to grow your squad!</p>
-                    </div>
-                    }
-                </div>
-
-                <!-- Search Brawlers Section -->
-                <div class="inbox-section search-brawlers">
-                    <h3>Search Brawlers</h3>
-                    <div class="search-box">
-                        <input type="text" [(ngModel)]="brawlerSearchQuery" (ngModelChange)="onBrawlerSearch()"
-                            placeholder="Find fighters to connect with...">
-                    </div>
-
-                    @if (brawlerSearchResults().items.length > 0) {
-                    <div class="request-list search-results">
-                        @for (user of brawlerSearchResults().items; track user.id) {
-                        @if (user.id !== passportService.data()?.id) {
-                        <div class="request-item">
-                            <div class="user-info">
-                                <img [src]="user.avatar_url || '/assets/defaultavtar.jpg'" class="req-avatar">
-                                <div class="name-col">
-                                    <a [routerLink]="['/u', user.username]" class="req-name-link">
-                                        <span class="req-name">{{ user.display_name }}</span>
-                                    </a>
-                                    <span class="req-username">@{{ user.username }}</span>
-                                </div>
-                            </div>
-                            <div class="req-actions">
-                                @if (isFriend(user.id)) {
-                                <span class="friend-badge">✓ Friend</span>
-                                } @else {
-                                <button class="action-btn join" (click)="addFriend(user.id)">Add Friend</button>
-                                }
-                            </div>
+                    <div class="card-bottom">
+                        <span class="crew">Crew: {{ mission.crew_count }}</span>
+                        <div class="card-actions" (click)="$event.stopPropagation()">
+                            <button class="action-btn" (click)="openViewModal(mission)">View</button>
+                            <button class="action-btn edit" (click)="openEditModal(mission)">Edit</button>
+                            <button class="action-btn delete" (click)="openDeleteModal(mission)">Delete</button>
                         </div>
-                        }
-                        }
-                    </div>
-                    }
-                </div>
-
-                <div class="inbox-section">
-                    <h3>Friend Requests ({{ socialService.pendingRequests().length }})</h3>
-                    <div class="request-list">
-                        @for (req of socialService.pendingRequests(); track req.friendship_id) {
-                        <div class="request-item">
-                            <div class="user-info">
-                                <img [src]="req.avatar_url || '/assets/defaultavtar.jpg'" class="req-avatar">
-                                <div class="name-col">
-                                    <a [routerLink]="['/u', req.username]" class="req-name-link">
-                                        <span class="req-name">{{ req.display_name }}</span>
-                                    </a>
-                                    <span class="req-username">@{{ req.username }}</span>
-                                </div>
-                            </div>
-                            <div class="req-actions">
-                                <button class="action-btn join" (click)="acceptFriend(req.friend_id)">Accept</button>
-                                <button class="action-btn delete" (click)="rejectFriend(req.friend_id)">Reject</button>
-                            </div>
-                        </div>
-                        }
                     </div>
                 </div>
-
-                <div class="inbox-section">
-                    <h3>Mission Invitations ({{ socialService.invitations().length }})</h3>
-                    <div class="request-list">
-                        @for (inv of socialService.invitations(); track inv.invitation_id) {
-                        <div class="request-item">
-                            <span class="req-name">{{ inv.mission_name }}</span>
-                            <div class="req-actions">
-                                <button class="action-btn join"
-                                    (click)="respondToInvite(inv.invitation_id, true)">Accept</button>
-                                <button class="action-btn delete"
-                                    (click)="respondToInvite(inv.invitation_id, false)">Reject</button>
-                            </div>
-                        </div>
-                        }
-                    </div>
-                </div>
+                }
             </div>
+            }
             }
 
             <!-- Mission History (Finished) -->
-            @if (selectedTabIndex === 4) {
+            @if (selectedTabIndex === 3) {
             @if (isLoadingFinishedMissions()) {
             <div class="loading-state">
                 <div class="spinner"></div>
@@ -412,7 +369,7 @@
                 <p>Complete or fail missions to see them here!</p>
             </div>
             } @else {
-            <div class="table-wrapper">
+            <div class="table-wrapper desktop-only">
                 <table class="finished-table">
                     <thead>
                         <tr>
@@ -470,6 +427,27 @@
                     </tbody>
                 </table>
             </div>
+
+            <div class="mobile-grid">
+                @for (mission of finishedMissions(); track mission.id) {
+                <div class="mission-card-mobile" (click)="openViewModal(mission)">
+                    <div class="card-top">
+                        <span class="room-code">#{{ mission.code }}</span>
+                        <span class="status" [class]="getStatusClass(mission.status)">{{ mission.status }}</span>
+                    </div>
+                    <div class="card-mid">
+                        <div class="mission-info">
+                            <span class="name">{{ mission.name }}</span>
+                            <span class="desc">{{ mission.description || 'No description' }}</span>
+                        </div>
+                    </div>
+                    <div class="card-bottom">
+                        <span class="crew">Crew: {{ mission.crew_count }}</span>
+                        <span class="leader-name">{{ mission.chief_name }}</span>
+                    </div>
+                </div>
+                }
+            </div>
             }
             }
         </div>
@@ -479,208 +457,158 @@
 <!-- View Modal -->
 @if (showViewModal()) {
 <div class="modal-overlay" (click)="closeViewModal()">
-    <div class="modal modal-large" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h2>Mission Details</h2>
-            <button class="close-btn" (click)="closeViewModal()">
-                <span>X</span>
-            </button>
+    <div class="modal modal-premium" (click)="$event.stopPropagation()">
+        <!-- Premium Header Hero -->
+        @if (selectedMission(); as mission) {
+        <div class="modal-hero">
+            <div class="hero-content">
+                <div class="mission-status-pill" [class]="getStatusClass(mission.status)">
+                    <span class="status-dot"></span>
+                    {{ mission.status }}
+                </div>
+                <h2 class="hero-title">{{ mission.name }}</h2>
+                <div class="room-id-badge">
+                    <span class="room-label">CORE ID</span>
+                    <span class="room-val">#{{ mission.code }}</span>
+                </div>
+            </div>
+            <button class="close-btn-floating" (click)="closeViewModal()">×</button>
         </div>
-        <div class="modal-body">
-            @if (selectedMission(); as mission) {
 
-            <div class="detail-row">
-                <span class="label">Room ID</span>
-                <span class="value room-code-detail">#{{ mission.code }}</span>
-            </div>
-            <div class="detail-row">
-                <span class="label">Name</span>
-                <span class="value">{{ mission.name }}</span>
-            </div>
-            <div class="detail-row">
-                <span class="label">Description</span>
-                <span class="value">{{ mission.description || 'No description' }}</span>
-            </div>
-            <div class="detail-row">
-                <span class="label">Status</span>
-                <span class="status" [class]="getStatusClass(mission.status)">{{ mission.status }}</span>
-            </div>
-            <div class="detail-row">
-                <span class="label">Created By</span>
-                <span class="value creator-name">
-                    {{ mission.chief_name }}
-                </span>
-            </div>
-            <div class="detail-row">
-                <span class="label">Created</span>
-                <span class="value">{{ mission.created_at | date:'medium' }}</span>
-            </div>
+        <div class="modal-body-premium">
+            <!-- Sidebar: Mission Info -->
+            <div class="mission-main-info">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-text">
+                            <span class="info-label">Objective</span>
+                            <span class="info-value">{{ mission.description || 'Confidential objective' }}</span>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-text">
+                            <span class="info-label">Commander</span>
+                            <span class="info-value">{{ mission.chief_name }}</span>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-text">
+                            <span class="info-label">Created</span>
+                            <span class="info-value">{{ mission.created_at | date:'MMM d, HH:mm' }}</span>
+                        </div>
+                    </div>
+                </div>
 
-            <!-- Mission Operations for Chief -->
-            @if (isLeader(mission)) {
-            <div class="mission-operations-chief">
-                @if (mission.status === 'Open' || mission.status === 'Failed') {
-                <button class="btn-operation start" (click)="startMission(mission.id)"
-                    [disabled]="isProcessing() || mission.crew_count === 0">
-                    Start Mission
-                </button>
-                } @else if (mission.status === 'InProgress') {
-                <div class="operation-group">
-                    <button class="btn-operation success" (click)="completeMission(mission.id)"
-                        [disabled]="isProcessing()">
-                        Success
-                    </button>
-                    <button class="btn-operation fail" (click)="failMission(mission.id)" [disabled]="isProcessing()">
-                        Fail
-                    </button>
+                <!-- Mission Operations for Chief -->
+                @if (isLeader(mission)) {
+                <div class="op-panel">
+                    <span class="op-label">Operational Authority</span>
+                    <div class="op-actions">
+                        @if (mission.status === 'Open') {
+                        <button class="btn-premium-op start" (click)="startMission(mission.id)"
+                            [disabled]="isProcessing() || mission.crew_count === 0">
+                            Start Mission
+                        </button>
+                        } @else if (mission.status === 'InProgress') {
+                        <button class="btn-premium-op success" (click)="completeMission(mission.id)"
+                            [disabled]="isProcessing()">
+                            Mission Success
+                        </button>
+                        <button class="btn-premium-op fail" (click)="failMission(mission.id)"
+                            [disabled]="isProcessing()">
+                            Fail
+                        </button>
+                        }
+                    </div>
                 </div>
                 }
             </div>
-            }
 
-            <!-- Crew Members Section -->
-            <div class="crew-section">
-                <div class="crew-header">
-                    <span class="label">Crew Members ({{ mission.crew_count }})</span>
-                </div>
-                @if (loadingCrew()) {
-                <div class="crew-loading">
-                    <span>Loading crew...</span>
-                </div>
-                } @else if (crewMembers().length === 0) {
-                <div class="crew-empty">
-                    <span>No crew members yet</span>
-                </div>
-                } @else {
-                <div class="crew-list">
-                    @for (member of crewMembers(); track member.brawler_id) {
-                    <div class="crew-member" [class.is-leader]="member.brawler_id === mission.chief_id">
-                        <img [src]="member.avatar_url || '/assets/defaultavtar.jpg'" [alt]="member.display_name"
-                            class="crew-avatar">
-                        <div class="crew-info">
-                            <div class="crew-name-row">
-                                <a [routerLink]="['/u', member.username]" class="req-name-link">
-                                    <span class="crew-name">{{ member.display_name }}</span>
-                                </a>
+            <!-- Main Content: Crew & Invitations -->
+            <div class="mission-social-sections">
+                <!-- Crew Members -->
+                <div class="social-card">
+                    <div class="card-header">
+                        <h3>Crew Members</h3>
+                        <span class="member-count">{{ mission.crew_count }} Active</span>
+                    </div>
+
+                    <div class="member-list-scroll">
+                        @if (loadingCrew() && crewMembers().length === 0) {
+                        <div class="loading-micro">
+                            <div class="dots"></div>
+                        </div>
+                        } @else {
+                        @for (member of crewMembers(); track member.brawler_id) {
+                        <div class="member-card-premium" [class.is-leader]="member.brawler_id === mission.chief_id">
+                            <div class="member-avatar-wrapper">
+                                <img [src]="member.avatar_url || 'assets/defaultavtar.jpg'"
+                                    (error)="$any($event.target).src = 'assets/defaultavtar.jpg'"
+                                    class="premium-avatar">
                                 @if (member.brawler_id === mission.chief_id) {
-                                <span class="leader-badge">
-                                    Leader
-                                </span>
+                                <div class="leader-crown">⭐</div>
                                 }
                             </div>
-                            <span class="crew-stats">
-                                {{ member.mission_success_count }} completed · {{ member.mission_joined_count }} joined
-                            </span>
-                        </div>
-                        @if (isLeader(mission) && member.brawler_id !== mission.chief_id)
-                        {
-                        <button class="kick-btn" (click)="kickMember(member.brawler_id)" title="Kick member"
-                            [disabled]="isProcessing()">
-                            Kick
-                        </button>
-                        }
-                        @if (member.brawler_id !== passportService.data()?.id && !isFriend(member.brawler_id)) {
-                        <button class="action-btn join" (click)="addFriend(member.brawler_id)">Add Friend</button>
-                        }
-                    </div>
-                    }
-                </div>
-                }
-            </div>
-
-            <!-- Invite Friends Section -->
-            @if (isInMission(mission.id) || isLeader(mission)) {
-            <div class="invite-section">
-                <div class="crew-header">
-                    <span class="label">Invite Friends</span>
-                </div>
-                <div class="invite-list">
-                    @for (friend of socialService.friends(); track friend.friend_id) {
-                    <div class="invite-item">
-                        <img [src]="friend.avatar_url || '/assets/defaultavtar.jpg'" class="crew-avatar">
-                        <span class="crew-name">{{ friend.display_name }}</span>
-                        <button class="action-btn join" (click)="inviteFriend(friend.friend_id)">Invite</button>
-                    </div>
-                    } @empty {
-                    <div class="crew-empty">
-                        <span>No friends available to invite.</span>
-                    </div>
-                    }
-                </div>
-            </div>
-            }
-
-            <!-- Rating Section -->
-            @if (isInMission(mission.id)) {
-            <div class="rating-section">
-                <div class="rating-header">
-                    <span class="label">Mission Rating</span>
-                    @if (missionRatings()) {
-                    <div class="rating-summary">
-                        <span class="avg-rating">{{ (missionRatings()!.averageRating || 0).toFixed(1) }}</span>
-                        <span class="star-icon">★</span>
-                        <span class="total-ratings">({{ missionRatings()!.totalRatings }} ratings)</span>
-                    </div>
-                    }
-                </div>
-
-                <!-- Rate Form -->
-                @if (myRating() === null) {
-                <div class="rate-form">
-                    <div class="star-selector">
-                        @for (star of [1,2,3,4,5]; track star) {
-                        <button class="star-btn" [class.active]="selectedRating() >= star" (click)="setRating(star)">
-                            ★
-                        </button>
-                        }
-                    </div>
-                    <textarea class="rating-comment" [ngModel]="ratingComment()"
-                        (ngModelChange)="ratingComment.set($event)" placeholder="Add a comment (optional)..."
-                        rows="2"></textarea>
-                    <button class="submit-rating-btn" [disabled]="selectedRating() === 0 || isSubmittingRating()"
-                        (click)="submitRating()">
-                        {{ isSubmittingRating() ? 'Submitting...' : 'Submit Rating' }}
-                    </button>
-                </div>
-                } @else {
-                <div class="my-rating">
-                    <span>Your rating:</span>
-                    <div class="stars-display">
-                        @for (star of [1,2,3,4,5]; track star) {
-                        <span class="star" [class.filled]="myRating()! >= star">★</span>
-                        }
-                    </div>
-                </div>
-                }
-
-                <!-- Ratings List -->
-                @if (missionRatings() && missionRatings()!.ratings.length > 0) {
-                <div class="ratings-list">
-                    @for (rating of missionRatings()!.ratings; track rating.id) {
-                    <div class="rating-item">
-                        <img [src]="rating.brawlerAvatar || '/assets/defaultavtar.jpg'" class="rating-avatar">
-                        <div class="rating-content">
-                            <div class="rating-top">
-                                <span class="rating-author">{{ rating.brawlerName }}</span>
-                                <div class="rating-stars">
-                                    @for (star of [1,2,3,4,5]; track star) {
-                                    <span class="star-small" [class.filled]="rating.rating >= star">★</span>
-                                    }
-                                </div>
+                            <div class="member-meta">
+                                <a [routerLink]="['/u', member.username]" class="member-name">{{ member.display_name
+                                    }}</a>
+                                <span class="member-stats">{{ member.mission_success_count }}W · {{
+                                    member.mission_joined_count }}J</span>
                             </div>
-                            @if (rating.comment) {
-                            <p class="rating-comment-text">{{ rating.comment }}</p>
+                            @if (isLeader(mission) && member.brawler_id !== mission.chief_id) {
+                            <button class="kick-btn-minimal" (click)="kickMember(member.brawler_id)"
+                                title="Kick member">×</button>
                             }
                         </div>
+                        } @empty {
+                        <div class="empty-state-micro">No crew members assembled.</div>
+                        }
+                        }
                     </div>
-                    }
+                </div>
+
+                <!-- Invite Section - Only for active missions -->
+                @if ((isInMission(mission.id) || isLeader(mission)) && (mission.status === 'Open' || mission.status ===
+                'InProgress')) {
+                <div class="social-card">
+                    <div class="card-header">
+                        <h3>Send Invitations</h3>
+                        <span class="hint-text">Invite your friends to the squad</span>
+                    </div>
+
+                    <div class="member-list-scroll">
+                        @for (friend of socialService.friends(); track friend.friend_id) {
+                        <div class="invite-card-premium">
+                            <img [src]="friend.avatar_url || 'assets/defaultavtar.jpg'"
+                                (error)="$any($event.target).src = 'assets/defaultavtar.jpg'"
+                                class="premium-avatar-small">
+                            <span class="friend-name">{{ friend.display_name }}</span>
+
+                            <div class="invite-status-cell">
+                                @if (isMember(friend.friend_id)) {
+                                <span class="pill pill-joined">In Crew</span>
+                                } @else if (isInvited(friend.friend_id)) {
+                                @if (isInvitationInCooldown(friend.friend_id)) {
+                                <span class="pill pill-pending">Pending...</span>
+                                } @else {
+                                <button class="btn-invite-premium retry"
+                                    (click)="inviteFriend(friend.friend_id)">Resend</button>
+                                }
+                                } @else {
+                                <button class="btn-invite-premium"
+                                    (click)="inviteFriend(friend.friend_id)">Invite</button>
+                                }
+                            </div>
+                        </div>
+                        } @empty {
+                        <div class="empty-state-micro">No friends available to invite.</div>
+                        }
+                    </div>
                 </div>
                 }
             </div>
-            }
-
-            }
         </div>
+        }
     </div>
 </div>
 }

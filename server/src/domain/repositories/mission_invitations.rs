@@ -14,4 +14,6 @@ pub trait MissionInvitationRepository {
         &self,
         mission_id: i32,
     ) -> Result<Vec<MissionInvitationEntity>>;
+    async fn get_by_id(&self, invitation_id: i32) -> Result<MissionInvitationEntity>;
+    async fn delete_existing(&self, mid: i32, uid: i32) -> Result<()>;
 }

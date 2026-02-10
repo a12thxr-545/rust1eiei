@@ -65,4 +65,15 @@ impl CrewOperationRepository for CrewOperationPostgres {
 
         Ok(mission_id)
     }
+
+    async fn is_member(&self, mission_id: i32, brawler_id: i32) -> Result<bool> {
+        let mut conn = Arc::clone(&self.db_pool).get()?;
+        let exists = crew_memberships::table
+            .filter(crew_memberships::mission_id.eq(mission_id))
+            .filter(crew_memberships::brawler_id.eq(brawler_id))
+            .first::<(i32, i32, chrono::NaiveDateTime)>(&mut conn)
+            .optional()?
+            .is_some();
+        Ok(exists)
+    }
 }

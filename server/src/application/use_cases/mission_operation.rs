@@ -37,21 +37,20 @@ where
             .crew_counting(mission_id)
             .await?;
 
-        let is_status_open_or_fail = mission.status == MissionStatuses::Open.to_string()
-            || mission.status == MissionStatuses::Failed.to_string();
+        let is_status_open = mission.status == MissionStatuses::Open.to_string();
 
         let max_crew_per_mission = std::env::var("MAX_CREW_PER_MISSION")
             .expect("missing value")
-            .parse()?;
+            .parse::<i64>()?;
 
-        let update_condition = is_status_open_or_fail
+        let update_condition = is_status_open
             && crew_count > 0
             && crew_count < max_crew_per_mission
             && mission.chief_id == chief_id;
         if !update_condition {
-            if !is_status_open_or_fail {
+            if !is_status_open {
                 return Err(anyhow::anyhow!(
-                    "Mission status must be Open or Failed to start. Current: {}",
+                    "Mission status must be Open to start. Current: {}",
                     mission.status
                 ));
             }

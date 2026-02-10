@@ -7,18 +7,19 @@ import { SnackbarService } from '../_services/snackbar.service';
 import { ThemeService } from '../_services/theme.service';
 import { filter } from 'rxjs';
 import { SocialService } from '../_services/social-service';
-import { SocialModal } from './social-modal';
+import { SquadModal } from './squad-modal';
+import { InboxModal } from './inbox-modal';
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, RouterLinkActive, ReactiveFormsModule, SocialModal],
+  imports: [RouterLink, RouterLinkActive, ReactiveFormsModule, SquadModal, InboxModal],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })
 export class Navbar {
   private _passport = inject(PassportService);
   private _router = inject(Router);
-  private _missionService = inject(MissionService);
+  public missionService = inject(MissionService);
   private _snackbar = inject(SnackbarService);
   private _fb = inject(FormBuilder);
   public themeService = inject(ThemeService);
@@ -30,8 +31,10 @@ export class Navbar {
   isOnLoginPage = signal<boolean>(false);
   showMenu = signal<boolean>(false);
   showCreateModal = signal<boolean>(false);
-  showSocialModal = signal<boolean>(false);
+  showSquadModal = signal<boolean>(false);
+  showInboxModal = signal<boolean>(false);
   isLoading = signal<boolean>(false);
+  isExpanded = signal<boolean>(false);
 
   form: FormGroup;
 
@@ -63,6 +66,21 @@ export class Navbar {
     if (!target.closest('.user-section')) {
       this.showMenu.set(false);
     }
+    if (!target.closest('.navbar')) {
+      this.isExpanded.set(false);
+    }
+  }
+
+  toggleExpand(event: MouseEvent): void {
+    // If clicking specifically on elements that should trigger actions, don't just toggle
+    const target = event.target as HTMLElement;
+    if (target.closest('.nav-link') || target.closest('.avatar-btn') || target.closest('.theme-toggle') || target.closest('.collapse-btn')) {
+      return;
+    }
+
+    if (!this.isExpanded()) {
+      this.isExpanded.set(true);
+    }
   }
 
   toggleMenu(): void {
@@ -82,12 +100,12 @@ export class Navbar {
 
   goToSquad(): void {
     this.showMenu.set(false);
-    this.showSocialModal.set(true);
+    this.showSquadModal.set(true);
   }
 
   goToInbox(): void {
     this.showMenu.set(false);
-    this.showSocialModal.set(true);
+    this.showInboxModal.set(true);
   }
 
   openCreateModal(): void {
@@ -103,7 +121,7 @@ export class Navbar {
     if (this.form.invalid) return;
 
     this.isLoading.set(true);
-    const error = await this._missionService.createMission({
+    const error = await this.missionService.createMission({
       name: this.form.value.name,
       description: this.form.value.description || undefined,
     });
@@ -115,7 +133,7 @@ export class Navbar {
       this._snackbar.success('Mission created successfully!');
       this.closeCreateModal();
       // Refresh current mission state
-      this._missionService.getCurrentMission();
+      this.missionService.getCurrentMission();
     }
   }
 }

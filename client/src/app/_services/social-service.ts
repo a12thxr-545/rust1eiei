@@ -71,7 +71,17 @@ export class SocialService {
     }
 
     async respondToInvitation(invitationId: number, accept: boolean) {
-        await lastValueFrom(this.http.post(`${this.baseUrl}/invitations/respond/${invitationId}`, { accept }));
+        const res = await lastValueFrom(this.http.post<{ mission_id: number }>(`${this.baseUrl}/invitations/respond/${invitationId}`, { accept }));
         await this.loadInvitations();
+        return res.mission_id;
+    }
+
+    async loadMissionInvitations(missionId: number): Promise<MissionInvitation[]> {
+        try {
+            return await lastValueFrom(this.http.get<MissionInvitation[]>(`${this.baseUrl}/mission/${missionId}/invitations`));
+        } catch (e) {
+            console.error(e);
+            return [];
+        }
     }
 }

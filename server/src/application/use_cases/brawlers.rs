@@ -141,29 +141,6 @@ where
         Ok(uploaded_image)
     }
 
-    pub async fn upload_chat_image(
-        &self,
-        base64_image: String,
-        brawler_id: i32,
-    ) -> Result<UploadedImage> {
-        let option = UploadImageOptions {
-            folder: Some("chat_images".to_string()),
-            public_id: Some(format!(
-                "chat_{}_{}",
-                brawler_id,
-                chrono::Utc::now().timestamp_millis()
-            )),
-            transformation: Some("c_limit,w_800".to_string()),
-        };
-
-        let base64_image = Base64Image::new(&base64_image)?;
-
-        let uploaded_image =
-            crate::infrastructure::cloudinary::upload(base64_image, option).await?;
-
-        Ok(uploaded_image)
-    }
-
     pub async fn search(
         &self,
         query: &str,

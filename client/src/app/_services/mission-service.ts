@@ -63,8 +63,6 @@ export class MissionService {
   async createMission(mission: AddMission): Promise<string | null> {
     try {
       await firstValueFrom(this._http.post(this._management_url, mission));
-      // Refresh missions after creating
-      await this.loadMissions();
       return null;
     } catch (error: any) {
       if (error.error && typeof error.error === 'string') {

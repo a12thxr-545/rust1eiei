@@ -1,4 +1,4 @@
-import { Component, inject, signal, ElementRef, ViewChild, Output, EventEmitter } from '@angular/core';
+import { Component, inject, signal, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -8,13 +8,13 @@ import { MemberService } from '../_services/member.service';
 import { SnackbarService } from '../_services/snackbar.service';
 
 @Component({
-    selector: 'app-social-modal',
+    selector: 'app-squad-modal',
     standalone: true,
     imports: [CommonModule, FormsModule, RouterLink],
-    templateUrl: './social-modal.html',
-    styleUrl: './social-modal.css'
+    templateUrl: './squad-modal.html',
+    styleUrl: './squad-modal.css'
 })
-export class SocialModal {
+export class SquadModal implements OnInit {
     public socialService = inject(SocialService);
     public passportService = inject(PassportService);
     private _memberService = inject(MemberService);
@@ -27,8 +27,9 @@ export class SocialModal {
 
     constructor() {
         this.socialService.loadFriends();
-        this.socialService.loadPendingRequests();
-        this.socialService.loadInvitations();
+    }
+
+    ngOnInit(): void {
     }
 
     onClose() {
@@ -53,37 +54,6 @@ export class SocialModal {
             this._snackbar.success('Friend request sent!');
         } catch (e: any) {
             this._snackbar.error(e.error || 'Failed to send friend request');
-        }
-    }
-
-    async acceptFriend(friendId: number) {
-        try {
-            await this.socialService.acceptFriend(friendId);
-            this._snackbar.success('Friend accepted!');
-        } catch (e: any) {
-            this._snackbar.error(e.error || 'Failed to accept friend');
-        }
-    }
-
-    async rejectFriend(friendId: number) {
-        try {
-            await this.socialService.rejectFriend(friendId);
-            this._snackbar.success('Request rejected');
-        } catch (e: any) {
-            this._snackbar.error(e.error || 'Failed to reject friend');
-        }
-    }
-
-    async respondToInvite(invitationId: number, accept: boolean) {
-        try {
-            await this.socialService.respondToInvitation(invitationId, accept);
-            if (accept) {
-                this._snackbar.success('Joined mission!');
-            } else {
-                this._snackbar.success('Invitation rejected');
-            }
-        } catch (e: any) {
-            this._snackbar.error(e.error || 'Failed to respond to invitation');
         }
     }
 }

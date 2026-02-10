@@ -1,6 +1,5 @@
 pub mod authentication;
 pub mod brawlers;
-pub mod chat;
 pub mod crew_operation;
 pub mod default;
 pub mod mission_management;

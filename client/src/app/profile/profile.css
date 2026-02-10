@@ -8,7 +8,7 @@
     flex-direction: column;
     align-items: center;
     background: var(--bg-color);
-    padding: 100px 24px 48px;
+    padding: 140px 24px 48px;
 }
 
 .profile-card {
@@ -391,7 +391,7 @@
 /* Responsive */
 @media (max-width: 1024px) {
     .profile-container {
-        padding: 90px 20px 48px;
+        padding: 130px 20px 48px;
     }
 }
 
@@ -403,7 +403,7 @@
 
 @media (max-width: 480px) {
     .profile-container {
-        padding: 80px 12px 32px;
+        padding: 120px 12px 32px;
     }
 
     .display-name {

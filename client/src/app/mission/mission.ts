@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, effect, PLATFORM_ID } from '@angular/core';
+import { Component, inject, OnInit, signal, effect, PLATFORM_ID, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { MissionService } from '../_services/mission-service';
 import { PassportService } from '../_services/passport-service';
@@ -7,11 +7,10 @@ import { DatePipe } from '@angular/common';
 import { CrewMember, Mission } from '../_model/mission';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router, NavigationEnd, ActivatedRoute } from '@angular/router';
-import { filter, firstValueFrom } from 'rxjs';
+import { filter } from 'rxjs';
 import { SocialService } from '../_services/social-service';
 import { MemberService } from '../_services/member.service';
-import { RatingService } from '../_services/rating.service';
-import { MissionRatingSummary } from '../_model/rating';
+import { MissionInvitation } from '../_model/social';
 
 @Component({
   selector: 'app-mission',
@@ -19,7 +18,7 @@ import { MissionRatingSummary } from '../_model/rating';
   templateUrl: './mission.html',
   styleUrl: './mission.css',
 })
-export class MissionComponent implements OnInit {
+export class MissionComponent implements OnInit, OnDestroy {
   private _missionService = inject(MissionService);
   public passportService = inject(PassportService);
   private _snackbar = inject(SnackbarService);
@@ -27,31 +26,61 @@ export class MissionComponent implements OnInit {
   private _memberService = inject(MemberService);
   private _platformId = inject(PLATFORM_ID);
   private _router = inject(Router);
-  private _ratingService = inject(RatingService);
   private _activatedRoute = inject(ActivatedRoute);
+  private _cdr = inject(ChangeDetectorRef);
 
   constructor() {
-    // Basic effect for when passport changes
+    if (isPlatformBrowser(this._platformId)) {
+      this._timeTicker = setInterval(() => {
+        this.now.set(Date.now());
+        this._cdr.detectChanges();
+      }, 1000);
+    }
+
     effect(() => {
       if (this.passportService.data()) {
-        this.refreshAll();
+        // Wrap in setTimeout to push to next macrotask and avoid NG0100
+        setTimeout(() => {
+          this.refreshAll();
+          this._cdr.detectChanges();
+        });
       }
     });
 
-    // Handle navigation refresh
     if (isPlatformBrowser(this._platformId)) {
       this._router.events.pipe(
         filter(event => event instanceof NavigationEnd)
       ).subscribe(() => {
-        this.refreshAll();
+        setTimeout(() => {
+          this.refreshAll();
+        });
       });
+    }
+  }
 
-      // Handle tab switching via query params
-      this._activatedRoute.queryParams.subscribe(params => {
-        if (params['tab'] === 'squad') {
-          this.onTabChange(3);
-        }
-      });
+  ngOnInit(): void {
+    this._activatedRoute.queryParams.subscribe(params => {
+      const missionId = params['view'];
+      if (missionId) {
+        this.openMissionById(Number(missionId));
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this._timeTicker) clearInterval(this._timeTicker);
+    if (this.pollInterval) clearInterval(this.pollInterval);
+  }
+
+  private async openMissionById(id: number) {
+    this.isProcessing.set(true);
+    try {
+      const mission = await this._missionService.getMission(id);
+      if (mission) {
+        this.openViewModal(mission);
+      }
+    } finally {
+      this.isProcessing.set(false);
     }
   }
 
@@ -81,54 +110,28 @@ export class MissionComponent implements OnInit {
   showViewModal = signal(false);
   showEditModal = signal(false);
   showDeleteModal = signal(false);
-  showInviteModal = signal(false);
   selectedMission = signal<Mission | null>(null);
   isProcessing = signal(false);
   crewMembers = signal<CrewMember[]>([]);
+  missionInvitations = signal<MissionInvitation[]>([]);
   loadingCrew = signal(false);
+
+  // Invite cooldown tracking
+  private inviteCooldowns = new Map<number, number>(); // brawlerId -> timestamp
+  public now = signal(Date.now());
+  private _timeTicker?: any;
+
+  // Polling
+  private pollInterval?: any;
 
   // Search
   searchCode = '';
   brawlerSearchQuery = '';
   brawlerSearchResults = this._memberService.paginator;
 
-  // Rating states
-  missionRatings = signal<MissionRatingSummary | null>(null);
-  myRating = signal<number | null>(null);
-  selectedRating = signal<number>(0);
-  ratingComment = signal<string>('');
-  isSubmittingRating = signal(false);
-
-  isFriend(brawlerId: number): boolean {
-    return this.socialService.friends().some(f => f.friend_id === brawlerId);
-  }
-
-  onBrawlerSearch() {
-    const paginator = this.brawlerSearchResults();
-    paginator.pagination.query = this.brawlerSearchQuery;
-    paginator.pagination.currentPage = 1;
-    this._memberService.paginator.set(paginator);
-    this._memberService.getMember();
-  }
-
-  async addFriend(friendId: number) {
-    try {
-      await this.socialService.addFriend(friendId);
-      this._snackbar.success('Friend request sent!');
-    } catch (e: any) {
-      this._snackbar.error(e.error || 'Failed to send friend request');
-    }
-  }
-
   // Edit form
   editName = '';
   editDescription = '';
-
-  ngOnInit(): void {
-    if (isPlatformBrowser(this._platformId)) {
-      // Mission data is loaded via the effect when passport data is available
-    }
-  }
 
   loadSocialData(): void {
     this.socialService.loadFriends();
@@ -147,21 +150,21 @@ export class MissionComponent implements OnInit {
     }
   }
 
-  private loadJoinedMissions(): void {
+  loadJoinedMissions(): void {
     const passport = this.passportService.data();
     if (passport) {
       this._missionService.loadJoinedMissions(passport.id);
     }
   }
 
-  private loadMyMissions(): void {
+  loadMyMissions(): void {
     const passport = this.passportService.data();
     if (passport) {
       this._missionService.loadMyMissions(passport.id);
     }
   }
 
-  private loadFinishedMissions(): void {
+  loadFinishedMissions(): void {
     const passport = this.passportService.data();
     if (passport) {
       this._missionService.loadFinishedMissions(passport.id);
@@ -177,8 +180,6 @@ export class MissionComponent implements OnInit {
     } else if (index === 2) {
       this.loadMyMissions();
     } else if (index === 3) {
-      this.loadSocialData();
-    } else if (index === 4) {
       this.loadFinishedMissions();
     }
   }
@@ -187,107 +188,136 @@ export class MissionComponent implements OnInit {
     return `status-${status.toLowerCase()}`;
   }
 
-  // View Mission
   async openViewModal(mission: Mission): Promise<void> {
     this.selectedMission.set(mission);
     this.showViewModal.set(true);
     this.crewMembers.set([]);
+    this.missionInvitations.set([]);
     this.loadingCrew.set(true);
-    this.missionRatings.set(null);
-    this.myRating.set(null);
-    this.selectedRating.set(0);
-    this.ratingComment.set('');
-
     this.loadCrewMembers(mission.id);
-    this.loadRatings(mission.id);
+
+    // Start polling when modal opens
+    if (isPlatformBrowser(this._platformId)) {
+      this.startPolling(mission.id);
+    }
+  }
+
+  private startPolling(missionId: number) {
+    if (this.pollInterval) clearInterval(this.pollInterval);
+    this.pollInterval = setInterval(() => {
+      this.loadCrewMembers(missionId);
+      this.refreshMissionData(missionId);
+    }, 5000); // Poll every 5 seconds
+  }
+
+  private async refreshMissionData(missionId: number) {
+    const updated = await this._missionService.getMission(missionId);
+    if (updated && this.selectedMission()?.id === missionId) {
+      this.selectedMission.set(updated);
+    }
   }
 
   async loadCrewMembers(missionId: number): Promise<void> {
     try {
-      const crew = await this._missionService.getCrewMembers(missionId);
+      const [crew, invitations] = await Promise.all([
+        this._missionService.getCrewMembers(missionId),
+        this.socialService.loadMissionInvitations(missionId)
+      ]);
       this.crewMembers.set(crew);
+      this.missionInvitations.set(invitations);
     } finally {
       this.loadingCrew.set(false);
     }
   }
 
-  openImagePreview(url: string | undefined): void {
-    if (url) {
-      window.open(url, '_blank');
-    }
-  }
-
-  // Rating methods
-  async loadRatings(missionId: number): Promise<void> {
-    const ratings = await this._ratingService.getMissionRatings(missionId);
-    this.missionRatings.set(ratings);
-
-    const myRating = await this._ratingService.getMyRating(missionId);
-    this.myRating.set(myRating);
-    if (myRating) {
-      this.selectedRating.set(myRating);
-    }
-  }
-
-  setRating(rating: number): void {
-    // Don't allow changing if already rated
-    if (this.myRating() !== null) return;
-    this.selectedRating.set(rating);
-  }
-
-  async submitRating(): Promise<void> {
-    const mission = this.selectedMission();
-    const rating = this.selectedRating();
-    if (!mission || rating === 0) return;
-
-    this.isSubmittingRating.set(true);
-    const result = await this._ratingService.addRating(
-      mission.id,
-      rating,
-      this.ratingComment() || undefined
-    );
-    this.isSubmittingRating.set(false);
-
-    if (typeof result === 'string') {
-      this._snackbar.error(result);
-    } else {
-      this._snackbar.success('Rating submitted!');
-      this.loadRatings(mission.id);
-    }
-  }
-
   closeViewModal(): void {
+    if (this.pollInterval) {
+      clearInterval(this.pollInterval);
+      this.pollInterval = undefined;
+    }
     this.showViewModal.set(false);
     this.selectedMission.set(null);
     this.crewMembers.set([]);
   }
 
-  // Invitations
+  isFriend(brawlerId: number): boolean {
+    return this.socialService.friends().some(f => f.friend_id === brawlerId);
+  }
+
+  isMember(brawlerId: number): boolean {
+    return this.crewMembers().some(m => m.brawler_id === brawlerId);
+  }
+
+  isInvited(brawlerId: number): boolean {
+    return this.missionInvitations().some(i => i.invitee_id === brawlerId);
+  }
+
+  async viewCurrentMission(): Promise<void> {
+    const id = this.currentMissionId();
+    if (id === null) return;
+
+    this.isProcessing.set(true);
+    try {
+      const mission = await this._missionService.getMission(id);
+      if (mission) {
+        this.openViewModal(mission);
+      } else {
+        this._snackbar.error('Could not load current mission details');
+      }
+    } finally {
+      this.isProcessing.set(false);
+    }
+  }
+
+  async addFriend(friendId: number) {
+    try {
+      await this.socialService.addFriend(friendId);
+      this._snackbar.success('Friend request sent!');
+    } catch (e: any) {
+      this._snackbar.error(e.error || 'Failed to send friend request');
+    }
+  }
+
   async inviteFriend(friendId: number): Promise<void> {
     const mission = this.selectedMission();
     if (!mission) return;
 
+    const lastInvite = this.inviteCooldowns.get(friendId) || 0;
+    const now = Date.now();
+    if (now - lastInvite < 3000) {
+      const remaining = Math.ceil((3000 - (now - lastInvite)) / 1000);
+      this._snackbar.warning(`Please wait ${remaining}s before re-inviting.`);
+      return;
+    }
+
     try {
       await this.socialService.inviteToMission(friendId, mission.id);
       this._snackbar.success('Invitation sent!');
+      this.inviteCooldowns.set(friendId, now);
+      this.loadCrewMembers(mission.id);
     } catch (e: any) {
       this._snackbar.error(e.error || 'Failed to send invitation');
     }
   }
 
+  isInvitationInCooldown(friendId: number): boolean {
+    const lastInvite = this.inviteCooldowns.get(friendId) || 0;
+    return (this.now() - lastInvite < 3000);
+  }
+
   async respondToInvite(invitationId: number, accept: boolean): Promise<void> {
     try {
-      await this.socialService.respondToInvitation(invitationId, accept);
+      const mid = await this.socialService.respondToInvitation(invitationId, accept);
       if (accept) {
         this._snackbar.success('Joined mission!');
-        this.loadOtherMissions();
-        this.loadMyMissions();
-        this._missionService.getCurrentMission();
+        this.refreshAll();
+        this.openMissionById(mid);
       } else {
         this._snackbar.success('Invitation rejected');
       }
     } catch (e: any) {
-      this._snackbar.error(e.error || 'Failed to respond to invitation');
+      const errorMsg = e.error?.error || e.error || 'Failed to respond to invitation';
+      this._snackbar.error(errorMsg);
     }
   }
 
@@ -309,7 +339,6 @@ export class MissionComponent implements OnInit {
     }
   }
 
-  // Edit Mission
   openEditModal(mission: Mission): void {
     this.selectedMission.set(mission);
     this.editName = mission.name;
@@ -320,8 +349,6 @@ export class MissionComponent implements OnInit {
   closeEditModal(): void {
     this.showEditModal.set(false);
     this.selectedMission.set(null);
-    this.editName = '';
-    this.editDescription = '';
   }
 
   async submitEdit(): Promise<void> {
@@ -344,7 +371,6 @@ export class MissionComponent implements OnInit {
     }
   }
 
-  // Delete Mission
   openDeleteModal(mission: Mission): void {
     this.selectedMission.set(mission);
     this.showDeleteModal.set(true);
@@ -373,7 +399,6 @@ export class MissionComponent implements OnInit {
     }
   }
 
-  // Join Mission
   async joinMission(mission: Mission): Promise<void> {
     const currentMissionId = this.currentMissionId();
     if (currentMissionId !== null) {
@@ -394,7 +419,6 @@ export class MissionComponent implements OnInit {
     }
   }
 
-  // Leave Mission
   async leaveMission(mission: Mission): Promise<void> {
     this.isProcessing.set(true);
     const error = await this._missionService.leaveMission(mission.id);
@@ -404,9 +428,7 @@ export class MissionComponent implements OnInit {
       this._snackbar.error(error);
     } else {
       this._snackbar.success(`Left "${mission.name}"`);
-      this.loadOtherMissions();
-      this.loadMyMissions();
-      this._missionService.getCurrentMission();
+      this.refreshAll();
     }
   }
 
@@ -422,9 +444,7 @@ export class MissionComponent implements OnInit {
       this._snackbar.error(error);
     } else {
       this._snackbar.success('Member removed from mission');
-      // Refresh crew list
-      const crew = await this._missionService.getCrewMembers(mission.id);
-      this.crewMembers.set(crew);
+      this.loadCrewMembers(mission.id);
     }
   }
 
@@ -433,11 +453,6 @@ export class MissionComponent implements OnInit {
   }
 
   async startMission(missionId: number): Promise<void> {
-    if (!this.isLeader(this.selectedMission())) {
-      this._snackbar.error('Only the mission leader can start the mission');
-      return;
-    }
-
     this.isProcessing.set(true);
     const error = await this._missionService.startMission(missionId);
     this.isProcessing.set(false);
@@ -451,11 +466,6 @@ export class MissionComponent implements OnInit {
   }
 
   async completeMission(missionId: number): Promise<void> {
-    if (!this.isLeader(this.selectedMission())) {
-      this._snackbar.error('Only the mission leader can complete the mission');
-      return;
-    }
-
     this.isProcessing.set(true);
     const error = await this._missionService.completeMission(missionId);
     this.isProcessing.set(false);
@@ -470,11 +480,6 @@ export class MissionComponent implements OnInit {
   }
 
   async failMission(missionId: number): Promise<void> {
-    if (!this.isLeader(this.selectedMission())) {
-      this._snackbar.error('Only the mission leader can fail the mission');
-      return;
-    }
-
     this.isProcessing.set(true);
     const error = await this._missionService.failMission(missionId);
     this.isProcessing.set(false);
@@ -482,7 +487,8 @@ export class MissionComponent implements OnInit {
     if (error) {
       this._snackbar.error(error);
     } else {
-      this._snackbar.error('Mission failed. Try again!');
+      this._snackbar.warning('Mission ended (Failed).');
+      this._missionService.getCurrentMission();
       this.refreshMissionDetails(missionId);
     }
   }
@@ -493,12 +499,7 @@ export class MissionComponent implements OnInit {
   }
 
   private async refreshMissionDetails(missionId: number): Promise<void> {
-    // Reload missions to update list
-    this.loadOtherMissions();
-    this.loadJoinedMissions();
-    this.loadMyMissions();
-
-    // Update selected mission if it's the one being viewed
+    this.refreshAll();
     const selected = this.selectedMission();
     if (selected && selected.id === missionId) {
       const updatedMission = await this._missionService.getMission(missionId);
@@ -506,5 +507,13 @@ export class MissionComponent implements OnInit {
         this.selectedMission.set(updatedMission);
       }
     }
+  }
+
+  onBrawlerSearch() {
+    const paginator = this.brawlerSearchResults();
+    paginator.pagination.query = this.brawlerSearchQuery;
+    paginator.pagination.currentPage = 1;
+    this._memberService.paginator.set(paginator);
+    this._memberService.getMember();
   }
 }
