@@ -10,10 +10,11 @@ use crate::domain::{
     value_objects::{
         base64_image::Base64Image,
         mission_model::{AddMissionModel, EditMissionModel},
+        realtime::RealtimeEvent,
         uploaded_image::UploadedImage,
     },
 };
-use crate::infrastructure::cloudinary::UploadImageOptions;
+use crate::infrastructure::{cloudinary::UploadImageOptions, realtime::SharedRealtimeHub};
 
 pub struct MissionManagementUseCase<T1, T2, T3>
 where
@@ -24,6 +25,7 @@ where
     mission_management_repository: Arc<T1>,
     mission_viewing_repository: Arc<T2>,
     crew_operation_repository: Arc<T3>,
+    pub realtime_hub: SharedRealtimeHub,
 }
 
 use anyhow::Result;
@@ -37,11 +39,13 @@ where
         mission_management_repository: Arc<T1>,
         mission_viewing_repository: Arc<T2>,
         crew_operation_repository: Arc<T3>,
+        realtime_hub: SharedRealtimeHub,
     ) -> Self {
         Self {
             mission_management_repository,
             mission_viewing_repository,
             crew_operation_repository,
+            realtime_hub,
         }
     }
 
@@ -90,6 +94,11 @@ where
             })
             .await?;
 
+        self.realtime_hub.broadcast(RealtimeEvent::MissionCreated {
+            mission_id,
+            chief_id,
+        });
+
         Ok(mission_id)
     }
 
@@ -126,19 +135,18 @@ where
             .edit(mission_id, edit_mission_entity)
             .await?;
 
+        self.realtime_hub.broadcast(RealtimeEvent::MissionUpdated {
+            mission_id,
+            chief_id,
+        });
+
         Ok(result)
     }
 
     pub async fn remove(&self, mission_id: i32, chief_id: i32) -> Result<()> {
-        let crew_count = self
-            .mission_viewing_repository
-            .crew_counting(mission_id)
-            .await?;
-        if crew_count > 1 {
-            return Err(anyhow::anyhow!(
-                "Mission has other crew members. They must leave first."
-            ));
-        }
+        // Broadcast to all members that the mission is being deleted
+        self.realtime_hub
+            .broadcast(RealtimeEvent::MissionDeleted { mission_id });
 
         self.mission_management_repository
             .remove(mission_id, chief_id)

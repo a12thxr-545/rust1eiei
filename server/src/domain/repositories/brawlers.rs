@@ -28,4 +28,5 @@ pub trait BrawlerRepository {
     ) -> Result<(Vec<BrawlerEntity>, i64)>;
     async fn update_display_name(&self, brawler_id: i32, display_name: String) -> Result<()>;
     async fn update_bio(&self, brawler_id: i32, bio: String) -> Result<()>;
+    async fn get_stats(&self, brawler_id: i32) -> Result<(i64, i64)>;
 }

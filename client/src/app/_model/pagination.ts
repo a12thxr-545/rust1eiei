@@ -28,4 +28,6 @@ export interface User {
     photoOfTheDay?: string;
     bio?: string;
     age?: number;
+    joined_count?: number;
+    completed_count?: number;
 }

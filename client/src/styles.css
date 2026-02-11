@@ -12,7 +12,6 @@ body {
 }
 
 :root {
-    /* Light Theme (Default) */
     --bg-color: #f8fafc;
     --card-bg: #ffffff;
     --text-primary: #0f172a;
@@ -23,6 +22,7 @@ body {
     --nav-bg: rgba(255, 255, 255, 0.8);
     --nav-bg-rgb: 255, 255, 255;
     --accent-color: #3b82f6;
+    --accent-color-rgb: 59, 130, 246;
     --hover-bg: rgba(59, 130, 246, 0.05);
     --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     --glass-bg: rgba(255, 255, 255, 0.7);
@@ -30,7 +30,6 @@ body {
 }
 
 [data-theme='dark'] {
-    /* Dark Theme */
     --bg-color: #0a0a0a;
     --card-bg: #111111;
     --text-primary: #f8fafc;
@@ -41,6 +40,7 @@ body {
     --nav-bg: rgba(10, 10, 10, 0.8);
     --nav-bg-rgb: 10, 10, 10;
     --accent-color: #3b82f6;
+    --accent-color-rgb: 59, 130, 246;
     --hover-bg: rgba(59, 130, 246, 0.1);
     --shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     --glass-bg: rgba(15, 15, 15, 0.7);
@@ -59,8 +59,10 @@ body {
     --nav-bg: rgba(10, 38, 66, 0.95);
     --nav-bg-rgb: 10, 38, 66;
     --accent-color: #F26522;
+    --accent-color-rgb: 242, 101, 34;
     /* Orange Accent */
-    --hover-bg: rgba(242, 101, 34, 0.15);
+    --hover-bg: rgba(255, 255, 255, 0.08);
+    /* Consistent glass/navy highlight */
     --shadow: 0 4px 25px -5px rgba(0, 0, 0, 0.4);
     --glass-bg: rgba(10, 38, 66, 0.85);
     --glass-border: rgba(242, 101, 34, 0.4);
@@ -84,6 +86,7 @@ body {
     --nav-bg: rgba(13, 0, 0, 0.85);
     --nav-bg-rgb: 13, 0, 0;
     --accent-color: #c8102e;
+    --accent-color-rgb: 200, 16, 46;
     /* Liverpool Red */
     --hover-bg: rgba(200, 16, 46, 0.15);
     --shadow: 0 10px 15px -3px rgb(153 27 27 / 0.4);
@@ -158,6 +161,19 @@ body {
 .snackbar-warning .mat-mdc-button {
     color: #f59e0b !important;
     opacity: 0.7;
+}
+
+/* Paginator and Icon Button styles */
+::ng-deep .mat-mdc-paginator .mat-mdc-select-value {
+    color: var(--text-muted) !important;
+}
+
+::ng-deep .mat-mdc-icon-button {
+    color: var(--text-muted) !important;
+}
+
+::ng-deep .mat-mdc-icon-button:disabled {
+    color: var(--border-color) !important;
 }
 
 /* Info snackbar */

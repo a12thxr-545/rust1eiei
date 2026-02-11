@@ -3,6 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../environments/environment.development';
 import { PassportService } from './passport-service';
 import { SocialService } from './social-service';
+import { MissionService } from './mission-service';
 import { SnackbarService } from './snackbar.service';
 
 @Injectable({
@@ -11,6 +12,7 @@ import { SnackbarService } from './snackbar.service';
 export class RealtimeService {
     private _passportService = inject(PassportService);
     private _socialService = inject(SocialService);
+    private _missionService = inject(MissionService);
     private _snackbar = inject(SnackbarService);
     private _platformId = inject(PLATFORM_ID);
     private _zone = inject(NgZone);
@@ -66,9 +68,39 @@ export class RealtimeService {
         if (event.type === 'FriendRequest') {
             this._snackbar.info('New friend request received!');
             this._socialService.loadPendingRequests();
+        } else if (event.type === 'FriendAccepted') {
+            this._snackbar.success('Friend request accepted!');
+            this._socialService.loadFriends();
         } else if (event.type === 'MissionInvitation') {
-            this._snackbar.info(`Mission Invite: ${event.payload.mission_id}`);
+            this._snackbar.info('You have been invited to a mission!');
             this._socialService.loadInvitations();
+        } else if (event.type === 'MissionInvitationAccepted') {
+            this._snackbar.info('A brawler has joined your mission!');
+            // Potentially refresh mission crew if the user is on the mission page
+        } else if (event.type === 'MissionCreated' || event.type === 'MissionUpdated' ||
+            event.type === 'MissionDeleted' || event.type === 'MissionStatusChanged') {
+            if (event.type === 'MissionDeleted') {
+                this._snackbar.info('The mission has been terminated by the chief.');
+            }
+            // Trigger global refresh for missions via the service trigger
+            this._missionService.triggerRefresh();
+            // Also update the signals immediately
+            this.refreshMissions();
         }
+    }
+
+    private refreshMissions() {
+        const passport = this._passportService.data();
+        if (!passport) return;
+
+        // Refresh all relevant lists
+        this._missionService.loadOtherMissions({
+            exclude_chief_id: passport.id,
+            exclude_member_id: passport.id
+        });
+        this._missionService.loadMyMissions(passport.id);
+        this._missionService.loadJoinedMissions(passport.id);
+        this._missionService.loadFinishedMissions(passport.id);
+        this._missionService.getCurrentMission();
     }
 }

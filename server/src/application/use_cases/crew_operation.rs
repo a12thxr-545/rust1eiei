@@ -3,8 +3,9 @@ use crate::domain::{
     repositories::{
         crew_operation::CrewOperationRepository, mission_viewing::MissionViewingRepository,
     },
-    value_objects::mission_statuses::MissionStatuses,
+    value_objects::{mission_statuses::MissionStatuses, realtime::RealtimeEvent},
 };
+use crate::infrastructure::realtime::SharedRealtimeHub;
 use anyhow::Result;
 use std::sync::Arc;
 
@@ -15,6 +16,7 @@ where
 {
     crew_operation_repository: Arc<T1>,
     mission_viewing_repository: Arc<T2>,
+    pub realtime_hub: SharedRealtimeHub,
 }
 
 impl<T1, T2> CrewOperationUseCase<T1, T2>
@@ -22,10 +24,15 @@ where
     T1: CrewOperationRepository + Send + Sync + 'static,
     T2: MissionViewingRepository + Send + Sync,
 {
-    pub fn new(crew_operation_repository: Arc<T1>, mission_viewing_repository: Arc<T2>) -> Self {
+    pub fn new(
+        crew_operation_repository: Arc<T1>,
+        mission_viewing_repository: Arc<T2>,
+        realtime_hub: SharedRealtimeHub,
+    ) -> Self {
         Self {
             crew_operation_repository,
             mission_viewing_repository,
+            realtime_hub,
         }
     }
 
@@ -78,6 +85,11 @@ where
             })
             .await?;
 
+        self.realtime_hub.broadcast(RealtimeEvent::MissionJoined {
+            mission_id,
+            brawler_id,
+        });
+
         Ok(())
     }
 
@@ -95,6 +107,11 @@ where
                 brawler_id,
             })
             .await?;
+
+        self.realtime_hub.broadcast(RealtimeEvent::MissionLeft {
+            mission_id,
+            brawler_id,
+        });
 
         Ok(())
     }
@@ -131,6 +148,11 @@ where
                 brawler_id,
             })
             .await?;
+
+        self.realtime_hub.broadcast(RealtimeEvent::MissionLeft {
+            mission_id,
+            brawler_id,
+        });
 
         Ok(())
     }

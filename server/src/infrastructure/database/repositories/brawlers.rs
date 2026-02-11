@@ -153,4 +153,23 @@ impl BrawlerRepository for BrawlerPostgres {
 
         Ok(())
     }
+
+    async fn get_stats(&self, brawler_id: i32) -> Result<(i64, i64)> {
+        let mut connection = Arc::clone(&self.db_pool).get()?;
+        use crate::infrastructure::database::schema::{crew_memberships, missions};
+
+        let joined_count = crew_memberships::table
+            .filter(crew_memberships::brawler_id.eq(brawler_id))
+            .count()
+            .get_result::<i64>(&mut connection)?;
+
+        let completed_count = crew_memberships::table
+            .inner_join(missions::table)
+            .filter(crew_memberships::brawler_id.eq(brawler_id))
+            .filter(missions::status.eq("Completed"))
+            .count()
+            .get_result::<i64>(&mut connection)?;
+
+        Ok((joined_count, completed_count))
+    }
 }

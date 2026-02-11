@@ -41,6 +41,9 @@ where
             return Err(anyhow::anyhow!("Invalid username or password"));
         }
 
+        let (joined_count, completed_count) =
+            self.brawler_repository.get_stats(brawler_entity.id).await?;
+
         let passport = Passport::new(
             brawler_entity.id,
             brawler_entity.display_name,
@@ -48,6 +51,8 @@ where
             brawler_entity.avatar_url,
             brawler_entity.cover_url,
             brawler_entity.bio,
+            joined_count,
+            completed_count,
         );
 
         Ok(passport)

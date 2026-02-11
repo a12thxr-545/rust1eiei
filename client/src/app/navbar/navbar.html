@@ -2,9 +2,15 @@
     <div class="navbar-container">
         <!-- Left: Logo -->
         <div class="nav-left">
+            @if (isExpanded()) {
             <a routerLink="/" class="logo">
                 <span class="logo-text">YNWA</span>
             </a>
+            } @else {
+            <div class="logo">
+                <span class="logo-text">YNWA</span>
+            </div>
+            }
 
             @if (!isExpanded()) {
             <button class="expand-indicator">
@@ -33,14 +39,15 @@
 
         <!-- Right: Theme + User -->
         <div class="nav-right">
-            <!-- Eliminated theme-toggle from nav-right for cleaner look -->
-
             @if (isLoggedIn()) {
             <div class="user-section">
                 <span class="display-name">{{ display_name() }}</span>
-                <button class="avatar-btn" (click)="toggleMenu()">
+                <button class="avatar-btn" (click)="toggleMenu(); $event.stopPropagation()">
                     <img [src]="avatar_url()" (error)="$any($event.target).src = 'assets/defaultavtar.jpg'" alt="avatar"
                         class="avatar">
+                    @if (hasNotifications()) {
+                    <span class="notification-dot"></span>
+                    }
                 </button>
 
                 @if (showMenu()) {
@@ -53,7 +60,7 @@
                     </button>
                     <button class="menu-item" (click)="goToInbox()">
                         <span>Inbox</span>
-                        @if (socialService.pendingRequests().length + socialService.invitations().length > 0) {
+                        @if (hasNotifications()) {
                         <span class="badge inbox">{{ socialService.pendingRequests().length +
                             socialService.invitations().length }}</span>
                         }

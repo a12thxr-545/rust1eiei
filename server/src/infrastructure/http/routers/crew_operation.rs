@@ -22,16 +22,18 @@ use crate::{
             },
         },
         http::middleware::auth::authorization,
+        realtime::RealtimeHub,
     },
 };
 
-pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
+pub fn routes(db_pool: Arc<PgPoolSquad>, realtime_hub: Arc<RealtimeHub>) -> Router {
     let crew_operation_repository = CrewOperationPostgres::new(Arc::clone(&db_pool));
     let mission_viewing_repository = MissionViewingPostgres::new(Arc::clone(&db_pool));
 
     let use_case = CrewOperationUseCase::new(
         Arc::new(crew_operation_repository),
         Arc::new(mission_viewing_repository),
+        realtime_hub,
     );
 
     Router::new()

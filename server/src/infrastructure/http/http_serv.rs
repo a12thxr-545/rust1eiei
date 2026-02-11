@@ -41,15 +41,15 @@ fn api_serve(db_pool: Arc<PgPoolSquad>, realtime_hub: Arc<RealtimeHub>) -> Route
         )
         .nest(
             "/mission-management",
-            routers::mission_management::routes(Arc::clone(&db_pool)),
+            routers::mission_management::routes(Arc::clone(&db_pool), Arc::clone(&realtime_hub)),
         )
         .nest(
             "/crew",
-            routers::crew_operation::routes(Arc::clone(&db_pool)),
+            routers::crew_operation::routes(Arc::clone(&db_pool), Arc::clone(&realtime_hub)),
         )
         .nest(
             "/mission",
-            routers::mission_operation::routes(Arc::clone(&db_pool)),
+            routers::mission_operation::routes(Arc::clone(&db_pool), Arc::clone(&realtime_hub)),
         )
         .nest(
             "/view",

@@ -11,6 +11,7 @@ import { filter } from 'rxjs';
 import { SocialService } from '../_services/social-service';
 import { MemberService } from '../_services/member.service';
 import { MissionInvitation } from '../_model/social';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-mission',
@@ -28,6 +29,7 @@ export class MissionComponent implements OnInit, OnDestroy {
   private _router = inject(Router);
   private _activatedRoute = inject(ActivatedRoute);
   private _cdr = inject(ChangeDetectorRef);
+  private _subscriptions = new Subscription();
 
   constructor() {
     if (isPlatformBrowser(this._platformId)) {
@@ -55,6 +57,14 @@ export class MissionComponent implements OnInit, OnDestroy {
           this.refreshAll();
         });
       });
+
+      this._subscriptions.add(
+        this._missionService.refresh$.subscribe(() => {
+          setTimeout(() => {
+            this.refreshAll();
+          });
+        })
+      );
     }
   }
 
@@ -70,6 +80,7 @@ export class MissionComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this._timeTicker) clearInterval(this._timeTicker);
     if (this.pollInterval) clearInterval(this.pollInterval);
+    this._subscriptions.unsubscribe();
   }
 
   private async openMissionById(id: number) {
@@ -212,8 +223,17 @@ export class MissionComponent implements OnInit, OnDestroy {
 
   private async refreshMissionData(missionId: number) {
     const updated = await this._missionService.getMission(missionId);
-    if (updated && this.selectedMission()?.id === missionId) {
-      this.selectedMission.set(updated);
+    if (updated) {
+      if (this.selectedMission()?.id === missionId) {
+        this.selectedMission.set(updated);
+      }
+    } else {
+      // Mission was likely deleted or user was kicked
+      if (this.showViewModal() && this.selectedMission()?.id === missionId) {
+        this._snackbar.info('This mission is no longer available.');
+        this.closeViewModal();
+        this.refreshAll();
+      }
     }
   }
 

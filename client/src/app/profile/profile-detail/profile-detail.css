@@ -85,8 +85,8 @@
 
 .role-text {
     display: inline-block;
-    padding: 4px 12px;
-    background: var(--hover-bg);
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--border-color);
     border-radius: 100px;
     font-size: 13px;
@@ -185,7 +185,7 @@
 
 .stat-label {
     font-size: 12px;
-    color: #444;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-top: 4px;
@@ -225,7 +225,7 @@
     align-items: center;
     justify-content: center;
     padding: 100px 0;
-    color: #444;
+    color: var(--text-secondary);
 }
 
 .spinner {

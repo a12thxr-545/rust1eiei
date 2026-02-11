@@ -89,7 +89,15 @@ where
     }
 
     pub async fn accept_friend(&self, user_id: i32, friend_id: i32) -> Result<()> {
-        self.friendship_repo.accept(friend_id, user_id).await
+        self.friendship_repo.accept(friend_id, user_id).await?;
+
+        // Broadcast to the person who sent the request
+        self.realtime_hub.broadcast(RealtimeEvent::FriendAccepted {
+            from_id: user_id,
+            to_id: friend_id,
+        });
+
+        Ok(())
     }
 
     pub async fn reject_friend(&self, user_id: i32, friend_id: i32) -> Result<()> {
@@ -336,6 +344,15 @@ where
                 .await?;
 
             self.invitation_repo.accept(invitation_id).await?;
+
+            // Broadcast to the inviter
+            self.realtime_hub
+                .broadcast(RealtimeEvent::MissionInvitationAccepted {
+                    mission_id: invitation.mission_id,
+                    user_id,
+                    inviter_id: invitation.inviter_id,
+                });
+
             Ok(invitation.mission_id)
         } else {
             self.invitation_repo.reject(invitation_id).await?;

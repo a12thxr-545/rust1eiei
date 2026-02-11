@@ -3,7 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../environments/environment.development';
 import { AddMission, CrewMember, EditMission, Mission, MissionFilter, UploadedImage } from '../_model/mission';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -23,6 +23,13 @@ export class MissionService {
   isLoadingMyMissions = signal<boolean>(false);
   isLoadingFinishedMissions = signal<boolean>(false);
   currentMissionId = signal<number | null>(null);
+
+  private _refreshSubject = new Subject<void>();
+  refresh$ = this._refreshSubject.asObservable();
+
+  triggerRefresh() {
+    this._refreshSubject.next();
+  }
 
   async startMission(missionId: number): Promise<string | null> {
     try {

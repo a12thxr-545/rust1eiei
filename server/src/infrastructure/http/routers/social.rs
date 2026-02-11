@@ -274,6 +274,32 @@ where
                     invitee_id,
                     ..
                 } => *invitee_id == user_id,
+                crate::domain::value_objects::realtime::RealtimeEvent::FriendAccepted {
+                    to_id,
+                    ..
+                } => *to_id == user_id,
+                crate::domain::value_objects::realtime::RealtimeEvent::MissionInvitationAccepted {
+                    inviter_id,
+                    ..
+                } => *inviter_id == user_id,
+                crate::domain::value_objects::realtime::RealtimeEvent::MissionStatusChanged {
+                    ..
+                } => true,
+                crate::domain::value_objects::realtime::RealtimeEvent::MissionDeleted {
+                    ..
+                } => true,
+                crate::domain::value_objects::realtime::RealtimeEvent::MissionCreated {
+                    ..
+                } => true,
+                crate::domain::value_objects::realtime::RealtimeEvent::MissionUpdated {
+                    ..
+                } => true,
+                crate::domain::value_objects::realtime::RealtimeEvent::MissionJoined {
+                    ..
+                } => true,
+                crate::domain::value_objects::realtime::RealtimeEvent::MissionLeft {
+                    ..
+                } => true,
             };
 
             if is_relevant {

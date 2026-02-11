@@ -120,20 +120,23 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 14px 32px;
-    background: #fff;
+    padding: 16px 40px;
+    background: var(--accent-color);
     border: none;
-    border-radius: 8px;
-    color: #000;
-    font-size: 15px;
-    font-weight: 600;
+    border-radius: 14px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 25px -5px rgba(var(--accent-color-rgb, 242, 101, 34), 0.4);
+    letter-spacing: 0.5px;
 }
 
 .btn-white:hover {
-    background: #e5e5e5;
-    transform: translateY(-1px);
+    filter: brightness(1.1);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 15px 35px -8px rgba(var(--accent-color-rgb, 242, 101, 34), 0.5);
 }
 
 /* ============================================
@@ -285,7 +288,7 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: var(--hover-bg);
+    background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--border-color);
     color: var(--text-muted);
     display: flex;
@@ -352,6 +355,16 @@
 .mission-status.status-in_progress {
     background: rgba(168, 85, 247, 0.15);
     color: #a855f7;
+}
+
+.mission-status.status-failed {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+}
+
+.mission-status.status-canceled {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
 }
 
 .mission-card h3 {

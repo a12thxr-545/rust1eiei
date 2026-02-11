@@ -3,12 +3,16 @@ use crate::{
         entities::missions::{AddMissionEntity, EditMissionEntity},
         repositories::mission_management::MissionManagementRepository,
     },
-    infrastructure::database::{postgresql_connection::PgPoolSquad, schema::missions},
+    infrastructure::database::{
+        postgresql_connection::PgPoolSquad,
+        schema::{crew_memberships, missions},
+    },
 };
 use anyhow::{Ok, Result};
 use async_trait::async_trait;
 use diesel::{
-    ExpressionMethods, OptionalExtension, RunQueryDsl, dsl::now, dsl::update, insert_into,
+    Connection, ExpressionMethods, OptionalExtension, RunQueryDsl, dsl::now, dsl::update,
+    insert_into,
 };
 use std::sync::Arc;
 
@@ -58,18 +62,29 @@ impl MissionManagementRepository for MissionManagementPostgres {
     async fn remove(&self, mission_id: i32, chief_id: i32) -> Result<()> {
         let mut conn = Arc::clone(&self.db_pool).get()?;
 
-        let affected = update(missions::table)
-            .filter(missions::id.eq(mission_id))
-            .filter(missions::chief_id.eq(chief_id))
-            .filter(missions::deleted_at.is_null())
-            .set(missions::deleted_at.eq(now))
-            .execute(&mut conn)?;
+        // Use a transaction to ensure both operations succeed or fail together
+        conn.transaction::<(), anyhow::Error, _>(|c| {
+            // First delete memberships (hard delete)
+            diesel::delete(crew_memberships::table)
+                .filter(crew_memberships::mission_id.eq(mission_id))
+                .execute(c)?;
 
-        if affected == 0 {
-            return Err(anyhow::anyhow!(
-                "Mission not found or you don't have permission to delete it"
-            ));
-        }
+            // Then soft-delete the mission
+            let affected = update(missions::table)
+                .filter(missions::id.eq(mission_id))
+                .filter(missions::chief_id.eq(chief_id))
+                .filter(missions::deleted_at.is_null())
+                .set(missions::deleted_at.eq(now))
+                .execute(c)?;
+
+            if affected == 0 {
+                return Err(anyhow::anyhow!(
+                    "Mission not found or you don't have permission to delete it"
+                ));
+            }
+
+            Ok(())
+        })?;
 
         Ok(())
     }

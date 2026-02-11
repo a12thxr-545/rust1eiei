@@ -6,8 +6,9 @@ use crate::domain::{
     repositories::{
         mission_operation::MissionOperationRepository, mission_viewing::MissionViewingRepository,
     },
-    value_objects::mission_statuses::MissionStatuses,
+    value_objects::{mission_statuses::MissionStatuses, realtime::RealtimeEvent},
 };
+use crate::infrastructure::realtime::SharedRealtimeHub;
 pub struct MissionOperationUseCase<T1, T2>
 where
     T1: MissionOperationRepository + Send + Sync,
@@ -15,6 +16,7 @@ where
 {
     mission_operation_repository: Arc<T1>,
     missiom_viewing_repository: Arc<T2>,
+    pub realtime_hub: SharedRealtimeHub,
 }
 
 impl<T1, T2> MissionOperationUseCase<T1, T2>
@@ -22,10 +24,15 @@ where
     T1: MissionOperationRepository + Send + Sync,
     T2: MissionViewingRepository + Send + Sync,
 {
-    pub fn new(mission_operation_repository: Arc<T1>, missiom_viewing_repository: Arc<T2>) -> Self {
+    pub fn new(
+        mission_operation_repository: Arc<T1>,
+        missiom_viewing_repository: Arc<T2>,
+        realtime_hub: SharedRealtimeHub,
+    ) -> Self {
         Self {
             mission_operation_repository,
             missiom_viewing_repository,
+            realtime_hub,
         }
     }
 
@@ -75,6 +82,14 @@ where
             .mission_operation_repository
             .to_progress(mission_id, chief_id)
             .await?;
+
+        self.realtime_hub
+            .broadcast(RealtimeEvent::MissionStatusChanged {
+                mission_id,
+                status: MissionStatuses::InProgress.to_string(),
+                brawler_id: chief_id,
+            });
+
         Ok(result)
     }
     pub async fn to_completed(&self, mission_id: i32, chief_id: i32) -> Result<i32> {
@@ -99,6 +114,13 @@ where
             .to_completed(mission_id, chief_id)
             .await?;
 
+        self.realtime_hub
+            .broadcast(RealtimeEvent::MissionStatusChanged {
+                mission_id,
+                status: MissionStatuses::Completed.to_string(),
+                brawler_id: chief_id,
+            });
+
         Ok(result)
     }
     pub async fn to_failed(&self, mission_id: i32, chief_id: i32) -> Result<i32> {
@@ -122,6 +144,13 @@ where
             .mission_operation_repository
             .to_failed(mission_id, chief_id)
             .await?;
+
+        self.realtime_hub
+            .broadcast(RealtimeEvent::MissionStatusChanged {
+                mission_id,
+                status: MissionStatuses::Failed.to_string(),
+                brawler_id: chief_id,
+            });
 
         Ok(result)
     }

@@ -131,7 +131,7 @@
 
 .empty-state p {
     font-size: 14px;
-    color: #555;
+    color: var(--text-secondary);
     margin: 0;
 }
 

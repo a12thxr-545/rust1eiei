@@ -58,6 +58,8 @@ pub struct BrawlerProfileModel {
     pub avatar_url: Option<String>,
     pub cover_url: Option<String>,
     pub bio: Option<String>,
+    pub joined_count: i64,
+    pub completed_count: i64,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

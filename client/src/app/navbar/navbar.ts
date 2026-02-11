@@ -28,6 +28,7 @@ export class Navbar {
   display_name: Signal<string | undefined>
   avatar_url: Signal<string | undefined>
   isLoggedIn: Signal<boolean>
+  hasNotifications: Signal<boolean>
   isOnLoginPage = signal<boolean>(false);
   showMenu = signal<boolean>(false);
   showCreateModal = signal<boolean>(false);
@@ -42,6 +43,9 @@ export class Navbar {
     this.display_name = computed(() => this._passport.data()?.display_name);
     this.avatar_url = computed(() => this._passport.data()?.avatar_url || '/assets/defaultavtar.jpg');
     this.isLoggedIn = computed(() => this._passport.data() !== undefined);
+    this.hasNotifications = computed(() =>
+      (this.socialService.pendingRequests().length + this.socialService.invitations().length) > 0
+    );
 
     // Check initial route
     this.isOnLoginPage.set(this._router.url === '/login');
@@ -72,15 +76,12 @@ export class Navbar {
   }
 
   toggleExpand(event: MouseEvent): void {
-    // If clicking specifically on elements that should trigger actions, don't just toggle
-    const target = event.target as HTMLElement;
-    if (target.closest('.nav-link') || target.closest('.avatar-btn') || target.closest('.theme-toggle') || target.closest('.collapse-btn')) {
+    if (this.isExpanded()) {
       return;
     }
 
-    if (!this.isExpanded()) {
-      this.isExpanded.set(true);
-    }
+    // When collapsed, clicking anywhere expands it
+    this.isExpanded.set(true);
   }
 
   toggleMenu(): void {

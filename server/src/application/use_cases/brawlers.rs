@@ -55,6 +55,8 @@ where
             None,
             None,
             None,
+            0,
+            0,
         );
         Ok(passport)
     }
@@ -88,6 +90,7 @@ where
 
     pub async fn get_profile(&self, brawler_id: i32) -> Result<Passport> {
         let brawler_entity = self.brawler_repository.find_by_id(brawler_id).await?;
+        let (joined_count, completed_count) = self.brawler_repository.get_stats(brawler_id).await?;
 
         let passport = Passport::new(
             brawler_entity.id,
@@ -96,6 +99,8 @@ where
             brawler_entity.avatar_url,
             brawler_entity.cover_url,
             brawler_entity.bio,
+            joined_count,
+            completed_count,
         );
 
         Ok(passport)
@@ -103,6 +108,8 @@ where
 
     pub async fn get_profile_by_username(&self, username: String) -> Result<BrawlerProfileModel> {
         let brawler_entity = self.brawler_repository.find_by_username(&username).await?;
+        let (joined_count, completed_count) =
+            self.brawler_repository.get_stats(brawler_entity.id).await?;
 
         Ok(BrawlerProfileModel {
             id: brawler_entity.id,
@@ -111,6 +118,8 @@ where
             avatar_url: brawler_entity.avatar_url,
             cover_url: brawler_entity.cover_url,
             bio: brawler_entity.bio,
+            joined_count,
+            completed_count,
         })
     }
 
