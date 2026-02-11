@@ -5,12 +5,13 @@ import { PassportService } from '../_services/passport-service';
 import { MissionService } from '../_services/mission-service';
 import { SnackbarService } from '../_services/snackbar.service';
 import { ThemeService } from '../_services/theme.service';
-import { LanguageService } from '../_services/language.service';
 import { filter } from 'rxjs';
+import { SocialService } from '../_services/social-service';
+import { SocialModal } from './social-modal';
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, RouterLinkActive, ReactiveFormsModule],
+  imports: [RouterLink, RouterLinkActive, ReactiveFormsModule, SocialModal],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })
@@ -21,7 +22,7 @@ export class Navbar {
   private _snackbar = inject(SnackbarService);
   private _fb = inject(FormBuilder);
   public themeService = inject(ThemeService);
-  public lang = inject(LanguageService);
+  public socialService = inject(SocialService);
 
   display_name: Signal<string | undefined>
   avatar_url: Signal<string | undefined>
@@ -29,6 +30,7 @@ export class Navbar {
   isOnLoginPage = signal<boolean>(false);
   showMenu = signal<boolean>(false);
   showCreateModal = signal<boolean>(false);
+  showSocialModal = signal<boolean>(false);
   isLoading = signal<boolean>(false);
 
   form: FormGroup;
@@ -76,6 +78,16 @@ export class Navbar {
   goToProfile(): void {
     this.showMenu.set(false);
     this._router.navigate(['/profile']);
+  }
+
+  goToSquad(): void {
+    this.showMenu.set(false);
+    this.showSocialModal.set(true);
+  }
+
+  goToInbox(): void {
+    this.showMenu.set(false);
+    this.showSocialModal.set(true);
   }
 
   openCreateModal(): void {

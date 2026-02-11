@@ -21,6 +21,7 @@ body {
     --border-color: #e2e8f0;
     --input-bg: #ffffff;
     --nav-bg: rgba(255, 255, 255, 0.8);
+    --nav-bg-rgb: 255, 255, 255;
     --accent-color: #3b82f6;
     --hover-bg: rgba(59, 130, 246, 0.05);
     --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
@@ -38,6 +39,7 @@ body {
     --border-color: #1a1a1a;
     --input-bg: #1a1a1a;
     --nav-bg: rgba(10, 10, 10, 0.8);
+    --nav-bg-rgb: 10, 10, 10;
     --accent-color: #3b82f6;
     --hover-bg: rgba(59, 130, 246, 0.1);
     --shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
@@ -55,6 +57,7 @@ body {
     --border-color: #1e4770;
     --input-bg: #0d2d4d;
     --nav-bg: rgba(10, 38, 66, 0.95);
+    --nav-bg-rgb: 10, 38, 66;
     --accent-color: #F26522;
     /* Orange Accent */
     --hover-bg: rgba(242, 101, 34, 0.15);
@@ -79,6 +82,7 @@ body {
     --border-color: #450a0a;
     --input-bg: #2d0505;
     --nav-bg: rgba(13, 0, 0, 0.85);
+    --nav-bg-rgb: 13, 0, 0;
     --accent-color: #c8102e;
     /* Liverpool Red */
     --hover-bg: rgba(200, 16, 46, 0.15);

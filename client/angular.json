@@ -67,12 +67,16 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "port": 4000
+          },
           "configurations": {
             "production": {
               "buildTarget": "client:build:production"
             },
             "development": {
-              "buildTarget": "client:build:development"
+              "buildTarget": "client:build:development",
+              "port": 4000
             }
           },
           "defaultConfiguration": "development"

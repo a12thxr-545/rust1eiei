@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, effect, PLATFORM_ID, ViewChild, ElementRef } from '@angular/core';
+import { Component, inject, OnInit, signal, effect, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { MissionService } from '../_services/mission-service';
 import { PassportService } from '../_services/passport-service';
@@ -6,14 +6,10 @@ import { SnackbarService } from '../_services/snackbar.service';
 import { DatePipe } from '@angular/common';
 import { CrewMember, Mission } from '../_model/mission';
 import { FormsModule } from '@angular/forms';
-import { RouterLink, Router, NavigationEnd } from '@angular/router';
-import { ChatService } from '../_services/chat.service';
+import { RouterLink, Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { filter, firstValueFrom } from 'rxjs';
-import { ChatMessage } from '../_model/chat';
 import { SocialService } from '../_services/social-service';
-import { Friend, MissionInvitation } from '../_model/social';
 import { MemberService } from '../_services/member.service';
-import { User } from '../_model/pagination';
 import { RatingService } from '../_services/rating.service';
 import { MissionRatingSummary } from '../_model/rating';
 
@@ -27,12 +23,12 @@ export class MissionComponent implements OnInit {
   private _missionService = inject(MissionService);
   public passportService = inject(PassportService);
   private _snackbar = inject(SnackbarService);
-  private _chatService = inject(ChatService);
   public socialService = inject(SocialService);
   private _memberService = inject(MemberService);
   private _platformId = inject(PLATFORM_ID);
   private _router = inject(Router);
   private _ratingService = inject(RatingService);
+  private _activatedRoute = inject(ActivatedRoute);
 
   constructor() {
     // Basic effect for when passport changes
@@ -49,6 +45,13 @@ export class MissionComponent implements OnInit {
       ).subscribe(() => {
         this.refreshAll();
       });
+
+      // Handle tab switching via query params
+      this._activatedRoute.queryParams.subscribe(params => {
+        if (params['tab'] === 'squad') {
+          this.onTabChange(3);
+        }
+      });
     }
   }
 
@@ -59,15 +62,18 @@ export class MissionComponent implements OnInit {
     this.loadOtherMissions();
     this.loadMyMissions();
     this.loadJoinedMissions();
-    this.loadSocialData();
+    this.loadFinishedMissions();
     this._missionService.getCurrentMission();
+    this.loadSocialData();
   }
 
   missions = this._missionService.missions;
   myMissions = this._missionService.myMissions;
   joinedMissions = this._missionService.joinedMissions;
+  finishedMissions = this._missionService.finishedMissions;
   isLoading = this._missionService.isLoading;
   isLoadingMyMissions = this._missionService.isLoadingMyMissions;
+  isLoadingFinishedMissions = this._missionService.isLoadingFinishedMissions;
   currentMissionId = this._missionService.currentMissionId;
   selectedTabIndex = 0;
 
@@ -80,19 +86,6 @@ export class MissionComponent implements OnInit {
   isProcessing = signal(false);
   crewMembers = signal<CrewMember[]>([]);
   loadingCrew = signal(false);
-
-  // Chat states
-  chatMessages = signal<ChatMessage[]>([]);
-  newMessage = '';
-  isSendingMessage = signal(false);
-  loadingChat = signal(false);
-  chatInterval: any;
-
-  // Chat image upload
-  @ViewChild('chatImageInput') chatImageInput!: ElementRef<HTMLInputElement>;
-  chatImagePreview = signal<string | null>(null);
-  chatImageBase64 = signal<string | null>(null);
-  isUploadingChatImage = signal(false);
 
   // Search
   searchCode = '';
@@ -168,6 +161,13 @@ export class MissionComponent implements OnInit {
     }
   }
 
+  private loadFinishedMissions(): void {
+    const passport = this.passportService.data();
+    if (passport) {
+      this._missionService.loadFinishedMissions(passport.id);
+    }
+  }
+
   onTabChange(index: number): void {
     this.selectedTabIndex = index;
     if (index === 0) {
@@ -178,6 +178,8 @@ export class MissionComponent implements OnInit {
       this.loadMyMissions();
     } else if (index === 3) {
       this.loadSocialData();
+    } else if (index === 4) {
+      this.loadFinishedMissions();
     }
   }
 
@@ -196,110 +198,16 @@ export class MissionComponent implements OnInit {
     this.selectedRating.set(0);
     this.ratingComment.set('');
 
-    const crew = await this._missionService.getCrewMembers(mission.id);
-    this.crewMembers.set(crew);
-    this.loadingCrew.set(false);
-
-    // Load chat if in mission
-    if (this.isInMission(mission.id)) {
-      this.loadChat(mission.id);
-      this.chatInterval = setInterval(() => this.loadChat(mission.id), 5000);
-    }
-
-    // Load ratings
+    this.loadCrewMembers(mission.id);
     this.loadRatings(mission.id);
   }
 
-
-  async loadChat(missionId: number): Promise<void> {
-    const messages = await this._chatService.getMessages(missionId);
-    this.chatMessages.set(messages);
-  }
-
-  async sendMessage(): Promise<void> {
-    const mission = this.selectedMission();
-    const content = this.newMessage.trim();
-    const imageBase64 = this.chatImageBase64();
-
-    if (!mission || (!content && !imageBase64)) return;
-
-    this.isSendingMessage.set(true);
-
-    let imageUrl: string | undefined = undefined;
-
-    // Upload image if present
-    if (imageBase64) {
-      this.isUploadingChatImage.set(true);
-      const uploadResult = await this.uploadChatImage(imageBase64);
-      this.isUploadingChatImage.set(false);
-
-      if (!uploadResult) {
-        this.isSendingMessage.set(false);
-        return;
-      }
-      imageUrl = uploadResult;
-    }
-
-    const result = await this._chatService.sendMessage(mission.id, content, imageUrl);
-    this.isSendingMessage.set(false);
-
-    if (typeof result === 'string') {
-      this._snackbar.error(result);
-    } else {
-      this.newMessage = '';
-      this.removeChatImage();
-      this.loadChat(mission.id);
-    }
-  }
-
-  triggerChatImageInput(): void {
-    this.chatImageInput.nativeElement.click();
-  }
-
-  onChatImageSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-
-    const allowedTypes = ['image/jpeg', 'image/png'];
-    if (!allowedTypes.includes(file.type)) {
-      this._snackbar.error('Please select a JPG or PNG image');
-      return;
-    }
-
-    const maxSize = 5 * 1024 * 1024;
-    if (file.size > maxSize) {
-      this._snackbar.error('Image size must be less than 5MB');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const base64String = e.target?.result as string;
-      this.chatImagePreview.set(base64String);
-      this.chatImageBase64.set(base64String.split(',')[1] || base64String);
-    };
-    reader.readAsDataURL(file);
-    input.value = '';
-  }
-
-  removeChatImage(): void {
-    this.chatImagePreview.set(null);
-    this.chatImageBase64.set(null);
-  }
-
-  async uploadChatImage(base64String: string): Promise<string | null> {
+  async loadCrewMembers(missionId: number): Promise<void> {
     try {
-      const result = await this.passportService.uploadChatImage(base64String);
-      if (result) {
-        return result.url;
-      }
-      this._snackbar.error('Failed to upload image');
-      return null;
-    } catch (error) {
-      console.error('Error uploading chat image:', error);
-      this._snackbar.error('Failed to upload image');
-      return null;
+      const crew = await this._missionService.getCrewMembers(missionId);
+      this.crewMembers.set(crew);
+    } finally {
+      this.loadingCrew.set(false);
     }
   }
 
@@ -352,11 +260,6 @@ export class MissionComponent implements OnInit {
     this.showViewModal.set(false);
     this.selectedMission.set(null);
     this.crewMembers.set([]);
-    this.chatMessages.set([]);
-    this.newMessage = '';
-    if (this.chatInterval) {
-      clearInterval(this.chatInterval);
-    }
   }
 
   // Invitations

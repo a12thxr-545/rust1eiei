@@ -33,6 +33,12 @@
                     }}</span>
                 }
             </button>
+            <button class="tab" [class.active]="selectedTabIndex === 4" (click)="onTabChange(4)">
+                <span>History</span>
+                @if (finishedMissions().length > 0) {
+                <span class="badge history">{{ finishedMissions().length }}</span>
+                }
+            </button>
         </div>
 
         <!-- Current Mission Alert -->
@@ -392,6 +398,80 @@
                 </div>
             </div>
             }
+
+            <!-- Mission History (Finished) -->
+            @if (selectedTabIndex === 4) {
+            @if (isLoadingFinishedMissions()) {
+            <div class="loading-state">
+                <div class="spinner"></div>
+                <p>Loading mission history...</p>
+            </div>
+            } @else if (finishedMissions().length === 0) {
+            <div class="empty-state">
+                <h3>No finished missions yet</h3>
+                <p>Complete or fail missions to see them here!</p>
+            </div>
+            } @else {
+            <div class="table-wrapper">
+                <table class="finished-table">
+                    <thead>
+                        <tr>
+                            <th>Room ID</th>
+                            <th>Mission</th>
+                            <th>Status</th>
+                            <th>Crew</th>
+                            <th>Leader</th>
+                            <th>Date</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (mission of finishedMissions(); track mission.id) {
+                        <tr>
+                            <td class="code-cell">
+                                <span class="room-code">#{{ mission.code }}</span>
+                            </td>
+                            <td>
+                                <div class="mission-cell">
+                                    @if (mission.image_url) {
+                                    <div class="mission-icon has-image">
+                                        <img [src]="mission.image_url" alt="Mission" />
+                                    </div>
+                                    }
+                                    <div class="mission-info">
+                                        <span class="name">{{ mission.name }}</span>
+                                        <span class="desc">{{ mission.description || 'No description' }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status" [class]="getStatusClass(mission.status)">
+                                    {{ mission.status }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="crew">
+                                    Crew: {{ mission.crew_count }}
+                                </span>
+                            </td>
+                            <td class="leader-cell">
+                                <span class="leader-name">{{ mission.chief_name }}</span>
+                            </td>
+                            <td class="date">{{ mission.updated_at | date:'mediumDate' }}</td>
+                            <td>
+                                <div class="actions">
+                                    <button class="action-btn" title="View" (click)="openViewModal(mission)">
+                                        View
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            }
+            }
         </div>
     </div>
 </div>
@@ -509,7 +589,7 @@
             </div>
 
             <!-- Invite Friends Section -->
-            @if (isInMission(mission.id)) {
+            @if (isInMission(mission.id) || isLeader(mission)) {
             <div class="invite-section">
                 <div class="crew-header">
                     <span class="label">Invite Friends</span>
@@ -520,6 +600,10 @@
                         <img [src]="friend.avatar_url || '/assets/defaultavtar.jpg'" class="crew-avatar">
                         <span class="crew-name">{{ friend.display_name }}</span>
                         <button class="action-btn join" (click)="inviteFriend(friend.friend_id)">Invite</button>
+                    </div>
+                    } @empty {
+                    <div class="crew-empty">
+                        <span>No friends available to invite.</span>
                     </div>
                     }
                 </div>
@@ -533,7 +617,7 @@
                     <span class="label">Mission Rating</span>
                     @if (missionRatings()) {
                     <div class="rating-summary">
-                        <span class="avg-rating">{{ missionRatings()!.averageRating.toFixed(1) }}</span>
+                        <span class="avg-rating">{{ (missionRatings()!.averageRating || 0).toFixed(1) }}</span>
                         <span class="star-icon">★</span>
                         <span class="total-ratings">({{ missionRatings()!.totalRatings }} ratings)</span>
                     </div>
@@ -595,73 +679,6 @@
             </div>
             }
 
-            <!-- Chat Section -->
-
-            @if (isInMission(mission.id)) {
-            <div class="chat-section">
-                <div class="chat-header">
-                    <span class="label">Mission Canal</span>
-                </div>
-                <div class="chat-messages" #chatContainer>
-                    @if (chatMessages().length === 0) {
-                    <div class="chat-empty">
-                        <span>No messages yet. Lead the conversation!</span>
-                    </div>
-                    } @else {
-                    @for (msg of chatMessages(); track msg.id) {
-                    <div class="message" [class.own-message]="msg.brawlerId === passportService.data()?.id">
-                        <img [src]="msg.brawlerAvatar || '/assets/defaultavtar.jpg'" class="msg-avatar">
-                        <div class="msg-content">
-                            <div class="msg-info">
-                                <span class="msg-author">{{ msg.brawlerName }}</span>
-                                <span class="msg-time">{{ msg.createdAt | date:'shortTime' }}</span>
-                            </div>
-                            @if (msg.imageUrl) {
-                            <div class="msg-image">
-                                <img [src]="msg.imageUrl" alt="Shared image" (click)="openImagePreview(msg.imageUrl)">
-                            </div>
-                            }
-                            @if (msg.content) {
-                            <div class="msg-text">{{ msg.content }}</div>
-                            }
-                        </div>
-                    </div>
-                    }
-                    }
-                </div>
-                <div class="chat-input-area">
-                    @if (chatImagePreview()) {
-                    <div class="image-preview-bar">
-                        <img [src]="chatImagePreview()" alt="Preview">
-                        <button class="remove-image-btn" (click)="removeChatImage()">×</button>
-                    </div>
-                    }
-                    <div class="chat-input-row">
-                        <button class="attach-btn" (click)="triggerChatImageInput()"
-                            [disabled]="isSendingMessage() || isUploadingChatImage()">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                                <circle cx="8.5" cy="8.5" r="1.5" />
-                                <polyline points="21 15 16 10 5 21" />
-                            </svg>
-                        </button>
-                        <input type="text" [(ngModel)]="newMessage" (keyup.enter)="sendMessage()"
-                            placeholder="Type a message..." [disabled]="isSendingMessage()">
-                        <button class="send-btn" (click)="sendMessage()"
-                            [disabled]="isSendingMessage() || (!newMessage.trim() && !chatImagePreview())">
-                            {{ isSendingMessage() ? '...' : 'Send' }}
-                        </button>
-                    </div>
-                    <input type="file" #chatImageInput accept="image/jpeg,image/png"
-                        (change)="onChatImageSelected($event)" class="file-input-hidden">
-                </div>
-            </div>
-
-            } @else {
-            <div class="chat-locked">
-                <span>Join this mission to chat with the crew.</span>
-            </div>
-            }
             }
         </div>
     </div>
@@ -702,7 +719,7 @@
 <!-- Delete Modal -->
 @if (showDeleteModal()) {
 <div class="modal-overlay" (click)="closeDeleteModal()">
-    <div class="modal modal-small" (click)="$event.stopPropagation()">
+    <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h2>Delete Mission</h2>
             <button class="close-btn" (click)="closeDeleteModal()">
@@ -710,15 +727,13 @@
             </button>
         </div>
         <div class="modal-body">
-            <p class="delete-warning">
-                Are you sure you want to delete <strong>"{{ selectedMission()?.name }}"</strong>? This action cannot be
-                undone.
-            </p>
+            <p>Are you sure you want to delete mission "{{ selectedMission()?.name }}"?</p>
+            <p class="warning-text">This action cannot be undone.</p>
         </div>
         <div class="modal-footer">
             <button class="btn-secondary" (click)="closeDeleteModal()">Cancel</button>
             <button class="btn-danger" (click)="confirmDelete()" [disabled]="isProcessing()">
-                {{ isProcessing() ? 'Deleting...' : 'Delete' }}
+                {{ isProcessing() ? 'Deleting...' : 'Delete Mission' }}
             </button>
         </div>
     </div>

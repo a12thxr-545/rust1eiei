@@ -13,6 +13,7 @@ pub struct Passport {
     pub username: String,
     pub avatar_url: Option<String>,
     pub cover_url: Option<String>,
+    pub bio: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -31,6 +32,7 @@ impl Passport {
         username: String,
         avatar_url: Option<String>,
         cover_url: Option<String>,
+        bio: Option<String>,
     ) -> Self {
         let jwt_env = get_jwt_env().unwrap();
         let token_type = "Bearer".to_string();
@@ -55,6 +57,7 @@ impl Passport {
             username,
             avatar_url,
             cover_url,
+            bio,
         }
     }
 }

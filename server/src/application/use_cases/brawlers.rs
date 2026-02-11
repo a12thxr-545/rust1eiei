@@ -54,9 +54,11 @@ where
             register_model.username.clone(),
             None,
             None,
+            None,
         );
         Ok(passport)
     }
+
     pub async fn upload_avatar(
         &self,
         base64_image: String,
@@ -70,9 +72,15 @@ where
 
         let base64_image = Base64Image::new(&base64_image)?;
 
-        let uploaded_image = self
-            .brawler_repository
-            .upload_avatar(brawler_id, base64_image, option)
+        let uploaded_image =
+            crate::infrastructure::cloudinary::upload(base64_image, option).await?;
+
+        self.brawler_repository
+            .update_avatar(
+                brawler_id,
+                uploaded_image.url.clone(),
+                uploaded_image.public_id.clone(),
+            )
             .await?;
 
         Ok(uploaded_image)
@@ -87,6 +95,7 @@ where
             brawler_entity.username,
             brawler_entity.avatar_url,
             brawler_entity.cover_url,
+            brawler_entity.bio,
         );
 
         Ok(passport)
@@ -101,6 +110,7 @@ where
             display_name: brawler_entity.display_name,
             avatar_url: brawler_entity.avatar_url,
             cover_url: brawler_entity.cover_url,
+            bio: brawler_entity.bio,
         })
     }
 
@@ -117,9 +127,15 @@ where
 
         let base64_image = Base64Image::new(&base64_image)?;
 
-        let uploaded_image = self
-            .brawler_repository
-            .upload_cover(brawler_id, base64_image, option)
+        let uploaded_image =
+            crate::infrastructure::cloudinary::upload(base64_image, option).await?;
+
+        self.brawler_repository
+            .update_cover(
+                brawler_id,
+                uploaded_image.url.clone(),
+                uploaded_image.public_id.clone(),
+            )
             .await?;
 
         Ok(uploaded_image)
@@ -156,7 +172,7 @@ where
     ) -> Result<BrawlerPaginationModel> {
         let (entities, total) = self
             .brawler_repository
-            .search(query, page, page_size)
+            .search(Some(query.to_string()), page, page_size)
             .await?;
 
         let items = entities
@@ -166,6 +182,7 @@ where
                 username: e.username,
                 display_name: e.display_name,
                 avatar_url: e.avatar_url,
+                bio: e.bio,
             })
             .collect();
 
@@ -178,6 +195,7 @@ where
             items,
         })
     }
+
     pub async fn check_username(&self, username: String) -> Result<bool> {
         let exists = self
             .brawler_repository
@@ -209,5 +227,23 @@ where
 
         // Return updated passport
         self.get_profile(brawler_id).await
+    }
+
+    pub async fn update_bio(&self, brawler_id: i32, bio: String) -> Result<BrawlerProfileModel> {
+        // Limit bio length
+        if bio.len() > 500 {
+            return Err(anyhow::anyhow!("Bio is too long (max 500 characters)"));
+        }
+
+        // Update in database
+        self.brawler_repository.update_bio(brawler_id, bio).await?;
+
+        // Return updated profile
+        let username = self
+            .brawler_repository
+            .find_by_id(brawler_id)
+            .await?
+            .username;
+        self.get_profile_by_username(username).await
     }
 }

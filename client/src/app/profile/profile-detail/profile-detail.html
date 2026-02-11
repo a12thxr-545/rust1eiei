@@ -55,23 +55,10 @@
             <p class="role-text">Brawler</p>
         </div>
 
-        <!-- Stats -->
-        <div class="stats-section">
-            <div class="stat-item">
-                <span class="stat-value">{{ user()?.age || '??' }}</span>
-                <span class="stat-label">Years Old</span>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item">
-                <span class="stat-value">Brawler</span>
-                <span class="stat-label">Rank</span>
-            </div>
-        </div>
-
         <!-- Bio -->
         <div class="bio-section">
-            <h3>Interest</h3>
-            <p class="bio-text">{{ user()?.interest || 'No background shared yet. This fighter prefers to keep their
+            <h3>Bio</h3>
+            <p class="bio-text">{{ user()?.bio || 'No background shared yet. This fighter prefers to keep their
                 secrets.' }}</p>
         </div>
     </div>

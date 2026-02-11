@@ -11,8 +11,7 @@
         alt="photo of {{member().username}}">
 
     <mat-card-content>
-        <p class="interest-text">{{member().interest || 'No interest shared yet.'}}</p>
-        <p class="age-text">Age: {{member().age || '??'}} years</p>
+        <p class="interest-text">{{member().bio || 'No background shared yet.'}}</p>
     </mat-card-content>
 
     <mat-card-actions align="end">
@@ -22,6 +21,6 @@
         @if (member().id !== passportService.data()?.id) {
         <button mat-flat-button class="action-btn add-btn" (click)="addFriend()">Add Friend</button>
         }
-        <button mat-button class="action-btn detail-btn" [routerLink]="'/members/' + member().username">Detail</button>
+        <button mat-button class="action-btn detail-btn" [routerLink]="'/u/' + member().username">Detail</button>
     </mat-card-actions>
 </mat-card>

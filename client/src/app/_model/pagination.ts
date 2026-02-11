@@ -26,6 +26,6 @@ export interface User {
     avatar_url?: string;
     cover_url?: string;
     photoOfTheDay?: string;
-    interest?: string;
+    bio?: string;
     age?: number;
 }

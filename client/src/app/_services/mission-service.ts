@@ -18,8 +18,10 @@ export class MissionService {
   missions = signal<Mission[]>([]);
   myMissions = signal<Mission[]>([]);
   joinedMissions = signal<Mission[]>([]);
+  finishedMissions = signal<Mission[]>([]);
   isLoading = signal<boolean>(false);
   isLoadingMyMissions = signal<boolean>(false);
+  isLoadingFinishedMissions = signal<boolean>(false);
   currentMissionId = signal<number | null>(null);
 
   async startMission(missionId: number): Promise<string | null> {
@@ -171,7 +173,8 @@ export class MissionService {
   async loadOtherMissions(filter: MissionFilter): Promise<void> {
     this.isLoading.set(true);
     try {
-      const missions = await this.getMissions(filter);
+      // Only show Open missions in Explore
+      const missions = await this.getMissions({ ...filter, status: 'Open' });
       this.missions.set(missions);
     } catch (error) {
       console.error('Error loading other missions:', error);
@@ -183,8 +186,10 @@ export class MissionService {
   async loadMyMissions(chiefId: number): Promise<void> {
     this.isLoadingMyMissions.set(true);
     try {
-      const missions = await this.getMissions({ chief_id: chiefId });
-      this.myMissions.set(missions);
+      // Show Open and In-Progress in My Missions
+      const open = await this.getMissions({ chief_id: chiefId, status: 'Open' });
+      const inProgress = await this.getMissions({ chief_id: chiefId, status: 'InProgress' });
+      this.myMissions.set([...open, ...inProgress].sort((a, b) => b.id - a.id));
     } catch (error) {
       console.error('Error loading my missions:', error);
     } finally {
@@ -195,15 +200,41 @@ export class MissionService {
   async loadJoinedMissions(memberId: number): Promise<void> {
     this.isLoadingMyMissions.set(true);
     try {
-      const missions = await this.getMissions({
+      const open = await this.getMissions({
         member_id: memberId,
-        exclude_chief_id: memberId
+        exclude_chief_id: memberId,
+        status: 'Open'
       });
-      this.joinedMissions.set(missions);
+      const inProgress = await this.getMissions({
+        member_id: memberId,
+        exclude_chief_id: memberId,
+        status: 'InProgress'
+      });
+      this.joinedMissions.set([...open, ...inProgress]);
     } catch (error) {
       console.error('Error loading joined missions:', error);
     } finally {
       this.isLoadingMyMissions.set(false);
+    }
+  }
+
+  async loadFinishedMissions(userId: number): Promise<void> {
+    this.isLoadingFinishedMissions.set(true);
+    try {
+      // Load both completed and failed missions where user was chief or member
+      const completed = await this.getMissions({
+        member_id: userId,
+        status: 'Completed'
+      });
+      const failed = await this.getMissions({
+        member_id: userId,
+        status: 'Failed'
+      });
+      this.finishedMissions.set([...completed, ...failed].sort((a, b) => b.id - a.id));
+    } catch (error) {
+      console.error('Error loading finished missions:', error);
+    } finally {
+      this.isLoadingFinishedMissions.set(false);
     }
   }
 

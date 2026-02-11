@@ -4,8 +4,10 @@ export interface Passport {
     access_token: string;
     expires_in: number;
     display_name: string;
+    username: string;
     avatar_url?: string;
     cover_url?: string;
+    bio?: string;
 }
 
 export interface RegisterBrawlerModel {

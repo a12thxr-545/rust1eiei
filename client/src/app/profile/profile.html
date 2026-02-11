@@ -59,9 +59,8 @@
                 </button>
             </div>
             }
-            <p class="role-text">Brawler</p>
+            <p class="role-text">@{{ passport()?.username }} · Brawler</p>
         </div>
-
 
         <!-- Stats -->
         <div class="stats-section">
@@ -74,6 +73,41 @@
                 <span class="stat-value">0</span>
                 <span class="stat-label">Joined</span>
             </div>
+        </div>
+
+        <!-- Bio Section -->
+        <div class="bio-section">
+            <div class="section-header">
+                <h3>Bio</h3>
+                @if (!isEditingBio()) {
+                <button class="btn-edit-small" (click)='startEditingBio()'>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    Edit
+                </button>
+                }
+            </div>
+
+            @if (isEditingBio()) {
+            <div class="bio-edit-container">
+                <textarea class="bio-textarea" [ngModel]="editBio()" (ngModelChange)="editBio.set($event)"
+                    placeholder="Tell us about yourself..." maxlength="500" [disabled]="isSavingBio()"></textarea>
+                <div class="bio-edit-actions">
+                    <button class="btn-save" (click)="saveBio()" [disabled]="isSavingBio()">
+                        {{ isSavingBio() ? 'Saving...' : 'Save' }}
+                    </button>
+                    <button class="btn-cancel" (click)="cancelEditingBio()" [disabled]="isSavingBio()">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+            } @else {
+            <p class="bio-text">
+                {{ passport()?.bio || 'No background shared yet. This fighter prefers to keep their secrets.' }}
+            </p>
+            }
         </div>
     </div>
 </div>

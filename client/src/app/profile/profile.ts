@@ -28,6 +28,10 @@ export class Profile {
   editDisplayName = signal('');
   isSavingName = signal(false);
 
+  // Bio editing
+  isEditingBio = signal(false);
+  editBio = signal('');
+  isSavingBio = signal(false);
 
   // Default cover gradient
   private defaultCoverGradient = 'linear-gradient(135deg, #1a3a4a 0%, #0d2a35 50%, #0a1f28 100%)';
@@ -192,6 +196,32 @@ export class Profile {
     } else {
       this.snackbarService.success('Display name updated!');
       this.isEditingName.set(false);
+    }
+  }
+
+  // Bio editing methods
+  startEditingBio() {
+    this.editBio.set(this.passport()?.bio || '');
+    this.isEditingBio.set(true);
+  }
+
+  cancelEditingBio() {
+    this.isEditingBio.set(false);
+    this.editBio.set('');
+  }
+
+  async saveBio() {
+    const newBio = this.editBio().trim();
+
+    this.isSavingBio.set(true);
+    const result = await this.passportService.updateBio(newBio);
+    this.isSavingBio.set(false);
+
+    if (result) {
+      this.snackbarService.success('Bio updated!');
+      this.isEditingBio.set(false);
+    } else {
+      this.snackbarService.error('Failed to update bio');
     }
   }
 }

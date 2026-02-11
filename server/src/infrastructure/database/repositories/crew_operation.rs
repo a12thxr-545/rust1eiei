@@ -49,7 +49,7 @@ impl CrewOperationRepository for CrewOperationPostgres {
     async fn get_current_mission(&self, brawler_id: i32) -> Result<Option<i32>> {
         let mut conn = Arc::clone(&self.db_pool).get()?;
 
-        // Find mission the user is currently in that is not completed/failed
+        // Find mission the user is currently in that is active (Open/InProgress)
         let mission_id = crew_memberships::table
             .inner_join(missions::table)
             .filter(crew_memberships::brawler_id.eq(brawler_id))
@@ -57,8 +57,7 @@ impl CrewOperationRepository for CrewOperationPostgres {
             .filter(
                 missions::status
                     .eq("Open")
-                    .or(missions::status.eq("InProgress"))
-                    .or(missions::status.eq("Failed")),
+                    .or(missions::status.eq("InProgress")),
             )
             .select(crew_memberships::mission_id)
             .first::<i32>(&mut conn)

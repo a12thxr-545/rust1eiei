@@ -19,6 +19,7 @@ diesel::table! {
         cover_url -> Nullable<Varchar>,
         #[max_length = 255]
         cover_public_id -> Nullable<Varchar>,
+        bio -> Nullable<Text>,
     }
 }
 

@@ -8,14 +8,10 @@ use std::sync::Arc;
 
 use crate::{
     domain::{
-        entities::brawlers::{BrawlerEntity, RegisterBrawlerEntity},
+        entities::brawlers::{BrawlerEntity, NewBrawlerEntity},
         repositories::brawlers::BrawlerRepository,
-        value_objects::{base64_image::Base64Image, uploaded_image::UploadedImage},
     },
-    infrastructure::{
-        cloudinary::UploadImageOptions,
-        database::{postgresql_connection::PgPoolSquad, schema::brawlers},
-    },
+    infrastructure::database::{postgresql_connection::PgPoolSquad, schema::brawlers},
 };
 
 pub struct BrawlerPostgres {
@@ -30,7 +26,7 @@ impl BrawlerPostgres {
 
 #[async_trait]
 impl BrawlerRepository for BrawlerPostgres {
-    async fn register(&self, register_brawler_entity: RegisterBrawlerEntity) -> Result<i32> {
+    async fn register(&self, register_brawler_entity: NewBrawlerEntity) -> Result<i32> {
         let mut connection = Arc::clone(&self.db_pool).get()?;
 
         let user_id = insert_into(brawlers::table)
@@ -41,7 +37,7 @@ impl BrawlerRepository for BrawlerPostgres {
         Ok(user_id)
     }
 
-    async fn find_by_username(&self, username: &String) -> Result<BrawlerEntity> {
+    async fn find_by_username(&self, username: &str) -> Result<BrawlerEntity> {
         let mut connection = Arc::clone(&self.db_pool).get()?;
 
         let result = brawlers::table
@@ -62,60 +58,55 @@ impl BrawlerRepository for BrawlerPostgres {
 
         Ok(result)
     }
-    async fn upload_avatar(
+
+    async fn update_avatar(
         &self,
         brawler_id: i32,
-        base64_image: Base64Image,
-        option: UploadImageOptions,
-    ) -> Result<UploadedImage> {
-        let uploaded_image =
-            crate::infrastructure::cloudinary::upload(base64_image, option).await?;
-
+        avatar_url: String,
+        avatar_public_id: String,
+    ) -> Result<()> {
         let mut conn = Arc::clone(&self.db_pool).get()?;
 
         diesel::update(brawlers::table)
             .filter(brawlers::id.eq(brawler_id))
             .set((
-                brawlers::avatar_url.eq(uploaded_image.url.clone()),
-                brawlers::avatar_public_id.eq(uploaded_image.public_id.clone()),
+                brawlers::avatar_url.eq(avatar_url),
+                brawlers::avatar_public_id.eq(avatar_public_id),
             ))
             .execute(&mut conn)?;
 
-        Ok(uploaded_image)
+        Ok(())
     }
 
-    async fn upload_cover(
+    async fn update_cover(
         &self,
         brawler_id: i32,
-        base64_image: Base64Image,
-        option: UploadImageOptions,
-    ) -> Result<UploadedImage> {
-        let uploaded_image =
-            crate::infrastructure::cloudinary::upload(base64_image, option).await?;
-
+        cover_url: String,
+        cover_public_id: String,
+    ) -> Result<()> {
         let mut conn = Arc::clone(&self.db_pool).get()?;
 
         diesel::update(brawlers::table)
             .filter(brawlers::id.eq(brawler_id))
             .set((
-                brawlers::cover_url.eq(uploaded_image.url.clone()),
-                brawlers::cover_public_id.eq(uploaded_image.public_id.clone()),
+                brawlers::cover_url.eq(cover_url),
+                brawlers::cover_public_id.eq(cover_public_id),
             ))
             .execute(&mut conn)?;
 
-        Ok(uploaded_image)
+        Ok(())
     }
 
     async fn search(
         &self,
-        query: &str,
+        query: Option<String>,
         page: i64,
         page_size: i64,
     ) -> Result<(Vec<BrawlerEntity>, i64)> {
         let mut connection = Arc::clone(&self.db_pool).get()?;
         let offset = (page - 1) * page_size;
 
-        let search_pattern = format!("%{}%", query);
+        let search_pattern = format!("%{}%", query.unwrap_or_default());
 
         let total_count = brawlers::table
             .filter(
@@ -147,6 +138,17 @@ impl BrawlerRepository for BrawlerPostgres {
         diesel::update(brawlers::table)
             .filter(brawlers::id.eq(brawler_id))
             .set(brawlers::display_name.eq(display_name))
+            .execute(&mut conn)?;
+
+        Ok(())
+    }
+
+    async fn update_bio(&self, brawler_id: i32, bio: String) -> Result<()> {
+        let mut conn = Arc::clone(&self.db_pool).get()?;
+
+        diesel::update(brawlers::table)
+            .filter(brawlers::id.eq(brawler_id))
+            .set(brawlers::bio.eq(bio))
             .execute(&mut conn)?;
 
         Ok(())

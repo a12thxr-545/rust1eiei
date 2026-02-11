@@ -39,6 +39,7 @@ pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
         .route("/chat-image", post(upload_chat_image))
         .route("/profile", get(get_profile))
         .route("/display-name", put(update_display_name))
+        .route("/bio", put(update_bio))
         .route("/search", get(search))
         .route("/{username}", get(get_profile_by_username))
         .route_layer(axum::middleware::from_fn(authorization));
@@ -216,6 +217,29 @@ where
         Ok(passport) => (StatusCode::OK, Json(passport)).into_response(),
         Err(e) => {
             tracing::error!("Update display name error: {:?}", e);
+            (StatusCode::BAD_REQUEST, e.to_string()).into_response()
+        }
+    }
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateBioRequest {
+    pub bio: String,
+}
+
+pub async fn update_bio<T>(
+    State(brawlers_use_case): State<Arc<BrawlersUseCase<T>>>,
+    Extension(brawler_id): Extension<i32>,
+    Json(request): Json<UpdateBioRequest>,
+) -> impl IntoResponse
+where
+    T: BrawlerRepository + Send + Sync,
+{
+    match brawlers_use_case.update_bio(brawler_id, request.bio).await {
+        Ok(profile) => (StatusCode::OK, Json(profile)).into_response(),
+        Err(e) => {
+            tracing::error!("Update bio error: {:?}", e);
             (StatusCode::BAD_REQUEST, e.to_string()).into_response()
         }
     }
