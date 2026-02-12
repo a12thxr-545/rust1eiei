@@ -15,7 +15,7 @@ where
     T2: MissionViewingRepository + Send + Sync,
 {
     mission_operation_repository: Arc<T1>,
-    missiom_viewing_repository: Arc<T2>,
+    mission_viewing_repository: Arc<T2>,
     pub realtime_hub: SharedRealtimeHub,
 }
 
@@ -26,34 +26,27 @@ where
 {
     pub fn new(
         mission_operation_repository: Arc<T1>,
-        missiom_viewing_repository: Arc<T2>,
+        mission_viewing_repository: Arc<T2>,
         realtime_hub: SharedRealtimeHub,
     ) -> Self {
         Self {
             mission_operation_repository,
-            missiom_viewing_repository,
+            mission_viewing_repository,
             realtime_hub,
         }
     }
 
     pub async fn in_progress(&self, mission_id: i32, chief_id: i32) -> Result<i32> {
-        let mission = self.missiom_viewing_repository.get_one(mission_id).await?;
+        let mission = self.mission_viewing_repository.get_one(mission_id).await?;
 
         let crew_count = self
-            .missiom_viewing_repository
+            .mission_viewing_repository
             .crew_counting(mission_id)
             .await?;
 
         let is_status_open = mission.status == MissionStatuses::Open.to_string();
 
-        let max_crew_per_mission = std::env::var("MAX_CREW_PER_MISSION")
-            .expect("missing value")
-            .parse::<i64>()?;
-
-        let update_condition = is_status_open
-            && crew_count > 0
-            && crew_count < max_crew_per_mission
-            && mission.chief_id == chief_id;
+        let update_condition = is_status_open && crew_count > 0 && mission.chief_id == chief_id;
         if !update_condition {
             if !is_status_open {
                 return Err(anyhow::anyhow!(
@@ -64,12 +57,6 @@ where
             if crew_count <= 0 {
                 return Err(anyhow::anyhow!(
                     "Mission must have at least one crew member"
-                ));
-            }
-            if crew_count >= max_crew_per_mission {
-                return Err(anyhow::anyhow!(
-                    "Mission crew limit reached or exceeded (Max: {})",
-                    max_crew_per_mission
                 ));
             }
             if mission.chief_id != chief_id {
@@ -93,7 +80,7 @@ where
         Ok(result)
     }
     pub async fn to_completed(&self, mission_id: i32, chief_id: i32) -> Result<i32> {
-        let mission = self.missiom_viewing_repository.get_one(mission_id).await?;
+        let mission = self.mission_viewing_repository.get_one(mission_id).await?;
 
         let update_condition = mission.status == MissionStatuses::InProgress.to_string()
             && mission.chief_id == chief_id;
@@ -124,7 +111,7 @@ where
         Ok(result)
     }
     pub async fn to_failed(&self, mission_id: i32, chief_id: i32) -> Result<i32> {
-        let mission = self.missiom_viewing_repository.get_one(mission_id).await?;
+        let mission = self.mission_viewing_repository.get_one(mission_id).await?;
 
         let update_condition = mission.status == MissionStatuses::InProgress.to_string()
             && mission.chief_id == chief_id;

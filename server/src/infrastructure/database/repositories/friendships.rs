@@ -85,7 +85,27 @@ impl FriendshipRepository for FriendshipPostgres {
         Ok(result)
     }
 
+    async fn remove(&self, uid1: i32, uid2: i32) -> Result<()> {
+        let mut conn = Arc::clone(&self.db_pool).get()?;
+        diesel::delete(friendships::table)
+            .filter(
+                (friendships::user_id
+                    .eq(uid1)
+                    .and(friendships::friend_id.eq(uid2)))
+                .or(friendships::user_id
+                    .eq(uid2)
+                    .and(friendships::friend_id.eq(uid1))),
+            )
+            .execute(&mut conn)?;
+        Ok(())
+    }
+
     async fn check_friendship(&self, uid1: i32, uid2: i32) -> Result<Option<FriendshipEntity>> {
+        tracing::info!(
+            "Database query: checking friendship between {} and {}",
+            uid1,
+            uid2
+        );
         let mut conn = Arc::clone(&self.db_pool).get()?;
         let result = friendships::table
             .filter(
@@ -96,6 +116,7 @@ impl FriendshipRepository for FriendshipPostgres {
                     .eq(uid2)
                     .and(friendships::friend_id.eq(uid1))),
             )
+            .order_by(friendships::updated_at.desc())
             .first::<FriendshipEntity>(&mut conn)
             .optional()?;
         Ok(result)

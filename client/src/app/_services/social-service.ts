@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { environment } from '../../environments/environment.development';
-import { Friend, MissionInvitation } from '../_model/social';
+import { Friend, FriendshipStatus, MissionInvitation } from '../_model/social';
 import { lastValueFrom } from 'rxjs';
 
 @Injectable({
@@ -43,6 +43,10 @@ export class SocialService {
         return lastValueFrom(this.http.post(`${this.baseUrl}/friends/add/${friendId}`, {}));
     }
 
+    async getFriendshipStatus(otherId: number): Promise<FriendshipStatus> {
+        return lastValueFrom(this.http.get<FriendshipStatus>(`${this.baseUrl}/status/${otherId}`));
+    }
+
     async acceptFriend(friendId: number) {
         await lastValueFrom(this.http.post(`${this.baseUrl}/friends/accept/${friendId}`, {}));
         await this.loadFriends();
@@ -52,6 +56,11 @@ export class SocialService {
     async rejectFriend(friendId: number) {
         await lastValueFrom(this.http.delete(`${this.baseUrl}/friends/reject/${friendId}`));
         await this.loadPendingRequests();
+    }
+
+    async removeFriend(friendId: number) {
+        await lastValueFrom(this.http.delete(`${this.baseUrl}/friends/remove/${friendId}`));
+        await this.loadFriends();
     }
 
     async loadInvitations() {

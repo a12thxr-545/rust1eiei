@@ -9,6 +9,7 @@ pub trait FriendshipRepository {
     async fn reject(&self, user_id: i32, friend_id: i32) -> Result<()>;
     async fn get_friends(&self, user_id: i32) -> Result<Vec<FriendshipEntity>>;
     async fn get_pending_requests(&self, user_id: i32) -> Result<Vec<FriendshipEntity>>;
+    async fn remove(&self, user_id1: i32, user_id2: i32) -> Result<()>;
     async fn check_friendship(
         &self,
         user_id1: i32,

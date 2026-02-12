@@ -40,13 +40,13 @@ pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
         .route("/display-name", put(update_display_name))
         .route("/bio", put(update_bio))
         .route("/search", get(search))
-        .route("/{username}", get(get_profile_by_username))
         .route_layer(axum::middleware::from_fn(authorization));
 
     Router::new()
         .merge(protected_router)
         .route("/register", post(register))
         .route("/check-username/{username}", get(check_username))
+        .route("/{username}", get(get_profile_by_username))
         .with_state(Arc::new(brawlers_use_case))
 }
 

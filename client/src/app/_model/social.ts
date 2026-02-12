@@ -18,3 +18,9 @@ export interface MissionInvitation {
     status: string;
     created_at: string;
 }
+
+export interface FriendshipStatus {
+    friendship_id: number | null;
+    initiator_id: number | null;
+    status: string;
+}

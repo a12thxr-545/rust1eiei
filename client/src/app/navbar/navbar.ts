@@ -44,7 +44,7 @@ export class Navbar {
     this.avatar_url = computed(() => this._passport.data()?.avatar_url || '/assets/defaultavtar.jpg');
     this.isLoggedIn = computed(() => this._passport.data() !== undefined);
     this.hasNotifications = computed(() =>
-      (this.socialService.pendingRequests().length + this.socialService.invitations().length) > 0
+      this.isLoggedIn() && (this.socialService.pendingRequests().length + this.socialService.invitations().length) > 0
     );
 
     // Check initial route

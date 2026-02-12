@@ -15,10 +15,13 @@ use tokio_stream::StreamExt;
 
 use crate::{
     application::use_cases::social::SocialUseCase,
-    domain::repositories::{
-        brawlers::BrawlerRepository, crew_operation::CrewOperationRepository,
-        friendships::FriendshipRepository, mission_invitations::MissionInvitationRepository,
-        mission_viewing::MissionViewingRepository,
+    domain::{
+        repositories::{
+            brawlers::BrawlerRepository, crew_operation::CrewOperationRepository,
+            friendships::FriendshipRepository, mission_invitations::MissionInvitationRepository,
+            mission_viewing::MissionViewingRepository,
+        },
+        value_objects::social_model::FriendshipStatusModel,
     },
     infrastructure::{
         database::{
@@ -29,7 +32,7 @@ use crate::{
                 mission_viewing::MissionViewingPostgres,
             },
         },
-        http::middleware::auth::authorization,
+        http::middleware::auth::{authorization, optional_authorization},
         realtime::RealtimeHub,
     },
 };
@@ -50,13 +53,14 @@ pub fn routes(db_pool: Arc<PgPoolSquad>, realtime_hub: Arc<RealtimeHub>) -> Rout
         Arc::clone(&realtime_hub),
     );
 
-    Router::new()
+    let protected_routes = Router::new()
         .route("/events", get(get_realtime_events))
         .route("/friends", get(get_friends))
         .route("/friends/requests", get(get_pending_requests))
         .route("/friends/add/{friend_id}", post(add_friend))
         .route("/friends/accept/{friend_id}", post(accept_friend))
         .route("/friends/reject/{friend_id}", delete(reject_friend))
+        .route("/friends/remove/{friend_id}", delete(remove_friend))
         .route("/invite/{invitee_id}/{mission_id}", post(invite_to_mission))
         .route("/invitations", get(get_my_invitations))
         .route(
@@ -67,7 +71,14 @@ pub fn routes(db_pool: Arc<PgPoolSquad>, realtime_hub: Arc<RealtimeHub>) -> Rout
             "/invitations/respond/{invitation_id}",
             post(respond_to_invitation),
         )
-        .route_layer(axum::middleware::from_fn(authorization))
+        .route_layer(axum::middleware::from_fn(authorization));
+
+    Router::new()
+        .route(
+            "/status/{other_id}",
+            get(get_friendship_status).layer(axum::middleware::from_fn(optional_authorization)),
+        )
+        .merge(protected_routes)
         .with_state(Arc::new(use_case))
 }
 
@@ -250,9 +261,67 @@ where
     }
 }
 
-pub async fn get_realtime_events<T1, T2, T3, T4, T5>(
+pub async fn get_friendship_status<T1, T2, T3, T4, T5>(
+    Path(other_id): Path<i32>,
+    State(use_case): State<Arc<SocialUseCase<T1, T2, T3, T4, T5>>>,
+    user_id_ext: Option<Extension<i32>>,
+) -> impl IntoResponse
+where
+    T1: FriendshipRepository + Send + Sync,
+    T2: MissionInvitationRepository + Send + Sync,
+    T3: BrawlerRepository + Send + Sync,
+    T4: MissionViewingRepository + Send + Sync,
+    T5: CrewOperationRepository + Send + Sync,
+{
+    let user_id = user_id_ext.map(|Extension(id)| id).unwrap_or(0);
+
+    if user_id == 0 {
+        return (
+            StatusCode::OK,
+            Json(FriendshipStatusModel {
+                friendship_id: None,
+                initiator_id: None,
+                status: "none".to_string(),
+            }),
+        )
+            .into_response();
+    }
+
+    match use_case.get_friendship_status(user_id, other_id).await {
+        Ok(status) => (StatusCode::OK, Json(status)).into_response(),
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
+    }
+}
+
+pub async fn remove_friend<T1, T2, T3, T4, T5>(
+    Path(friend_id): Path<i32>,
     State(use_case): State<Arc<SocialUseCase<T1, T2, T3, T4, T5>>>,
     Extension(user_id): Extension<i32>,
+) -> impl IntoResponse
+where
+    T1: FriendshipRepository + Send + Sync,
+    T2: MissionInvitationRepository + Send + Sync,
+    T3: BrawlerRepository + Send + Sync,
+    T4: MissionViewingRepository + Send + Sync,
+    T5: CrewOperationRepository + Send + Sync,
+{
+    tracing::info!(
+        "Removing friendship: user_id={}, friend_id={}",
+        user_id,
+        friend_id
+    );
+    match use_case.remove_friend(user_id, friend_id).await {
+        Ok(_) => StatusCode::NO_CONTENT.into_response(),
+        Err(e) => {
+            tracing::error!("Failed to remove friendship: {:?}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response()
+        }
+    }
+}
+
+pub async fn get_realtime_events<T1, T2, T3, T4, T5>(
+    State(use_case): State<Arc<SocialUseCase<T1, T2, T3, T4, T5>>>,
+    user_id_ext: Option<Extension<i32>>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>>
 where
     T1: FriendshipRepository + Send + Sync,
@@ -261,6 +330,13 @@ where
     T4: MissionViewingRepository + Send + Sync,
     T5: CrewOperationRepository + Send + Sync,
 {
+    let user_id = user_id_ext.map(|Extension(id)| id).unwrap_or(0);
+
+    if user_id == 0 {
+        tracing::error!("Realtime connection attempted without authorization");
+    }
+
+    tracing::info!("User {} connected to realtime events", user_id);
     let rx = use_case.realtime_hub.tx.subscribe();
     let stream = tokio_stream::wrappers::BroadcastStream::new(rx).filter_map(move |event| {
         if let Ok(event) = event {

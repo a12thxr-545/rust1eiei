@@ -1,9 +1,13 @@
 <div class="social-overlay" (click)="onClose()">
-    <div class="social-modal inbox-only" (click)="$event.stopPropagation()">
+    <div class="social-modal" (click)="$event.stopPropagation()">
         <!-- Header -->
         <div class="social-header">
             <div class="header-main">
                 <div class="title-with-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="title-icon">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                        <polyline points="22,6 12,13 2,6" />
+                    </svg>
                     <h2>Inbox</h2>
                 </div>
                 <p>Manage your mission invitations and friend requests</p>
@@ -18,11 +22,12 @@
 
         <div class="social-content">
             <div class="inbox-full-view">
-                <div class="social-grid single-col">
+                <div class="social-grid">
+                    <!-- Left Column: Friend Requests -->
                     <div class="social-col">
-                        <!-- Friend Requests -->
                         <div class="social-section">
                             <div class="section-header">
+                                <div class="dot pulse"></div>
                                 <h3>Friend Requests</h3>
                                 <span class="count-pill">{{ socialService.pendingRequests().length }}</span>
                             </div>
@@ -36,7 +41,7 @@
                                         <a [routerLink]="['/u', req.username]" (click)="onClose()" class="user-link">
                                             <span class="user-name">{{ req.display_name }}</span>
                                         </a>
-                                        <span class="action-text">sent you a friend request</span>
+                                        <span class="action-text">sent you a request</span>
                                     </div>
                                     <div class="item-actions">
                                         <button class="icon-btn success" (click)="acceptFriend(req.friend_id)"
@@ -61,10 +66,13 @@
                                 }
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Mission Invitations -->
+                    <!-- Right Column: Mission Invitations -->
+                    <div class="social-col">
                         <div class="social-section">
                             <div class="section-header">
+                                <div class="dot pulse pulse-badge"></div>
                                 <h3>Mission Invitations</h3>
                                 <span class="count-pill">{{ socialService.invitations().length }}</span>
                             </div>

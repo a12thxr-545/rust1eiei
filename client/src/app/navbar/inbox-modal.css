@@ -14,7 +14,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2000;
+    z-index: 11000;
     padding: 24px;
     animation: fadeInOverlay 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }

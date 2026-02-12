@@ -8,7 +8,7 @@ use crate::domain::{
     value_objects::{
         mission_statuses::MissionStatuses,
         realtime::RealtimeEvent,
-        social_model::{FriendModel, MissionInvitationModel},
+        social_model::{FriendModel, FriendshipStatusModel, MissionInvitationModel},
     },
 };
 use crate::infrastructure::realtime::SharedRealtimeHub;
@@ -104,6 +104,10 @@ where
         self.friendship_repo.reject(friend_id, user_id).await
     }
 
+    pub async fn remove_friend(&self, user_id: i32, friend_id: i32) -> Result<()> {
+        self.friendship_repo.remove(user_id, friend_id).await
+    }
+
     pub async fn get_friends(&self, user_id: i32) -> Result<Vec<FriendModel>> {
         let friendships = self.friendship_repo.get_friends(user_id).await?;
         let mut result = Vec::new();
@@ -157,8 +161,35 @@ where
             .friendship_repo
             .check_friendship(inviter_id, invitee_id)
             .await?;
+
         if friendship.is_none() || friendship.unwrap().status != "accepted" {
             return Err(anyhow!("You can only invite friends to your mission"));
+        }
+
+        // Check if mission is active
+        let mission = self.mission_repo.get_one(mission_id).await?;
+        let mission_status_condition = mission.status == MissionStatuses::Open.to_string()
+            || mission.status == MissionStatuses::InProgress.to_string()
+            || mission.status == MissionStatuses::Failed.to_string();
+
+        if !mission_status_condition {
+            return Err(anyhow!(
+                "You can only invite members to Open or In Progress missions"
+            ));
+        }
+
+        // Check if inviter has permission (is a member of the mission)
+        let is_inviter_member = self.crew_repo.is_member(mission_id, inviter_id).await?;
+        if !is_inviter_member {
+            return Err(anyhow!(
+                "You must be a member of the mission to invite others"
+            ));
+        }
+
+        // Check if invitee is already a member
+        let is_invitee_member = self.crew_repo.is_member(mission_id, invitee_id).await?;
+        if is_invitee_member {
+            return Err(anyhow!("This friend is already in your crew!"));
         }
 
         // Clear any existing invitation to avoid unique constraint violation
@@ -277,10 +308,6 @@ where
         }
 
         if accept {
-            let max_crew_per_mission = std::env::var("MAX_CREW_PER_MISSION")
-                .unwrap_or("4".to_string())
-                .parse::<i64>()?;
-
             let mission = self.mission_repo.get_one(invitation.mission_id).await?;
 
             if mission.chief_id == user_id {
@@ -312,26 +339,14 @@ where
                 ));
             }
 
-            let crew_count = self
-                .mission_repo
-                .crew_counting(invitation.mission_id)
-                .await?;
-
             let joinable = mission.status == MissionStatuses::Open.to_string()
+                || mission.status == MissionStatuses::InProgress.to_string()
                 || mission.status == MissionStatuses::Failed.to_string();
 
             if !joinable {
                 return Err(anyhow!(
                     "Mission is no longer joinable (Status: {})",
                     mission.status
-                ));
-            }
-
-            if crew_count >= max_crew_per_mission {
-                return Err(anyhow!(
-                    "Mission is full ({} / {} members)",
-                    crew_count,
-                    max_crew_per_mission
                 ));
             }
 
@@ -357,6 +372,30 @@ where
         } else {
             self.invitation_repo.reject(invitation_id).await?;
             Ok(invitation.mission_id)
+        }
+    }
+
+    pub async fn get_friendship_status(
+        &self,
+        user_id: i32,
+        other_id: i32,
+    ) -> Result<FriendshipStatusModel> {
+        let friendship = self
+            .friendship_repo
+            .check_friendship(user_id, other_id)
+            .await?;
+
+        match friendship {
+            Some(f) => Ok(FriendshipStatusModel {
+                friendship_id: Some(f.id),
+                initiator_id: Some(f.user_id),
+                status: f.status,
+            }),
+            None => Ok(FriendshipStatusModel {
+                friendship_id: None,
+                initiator_id: None,
+                status: "none".to_string(),
+            }),
         }
     }
 }

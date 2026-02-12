@@ -102,6 +102,28 @@
     gap: 12px;
 }
 
+.actions-skeleton {
+    width: 120px;
+    height: 42px;
+    background: var(--hover-bg);
+    border-radius: 12px;
+    animation: skeleton-pulse 1.5s infinite;
+}
+
+@keyframes skeleton-pulse {
+    0% {
+        opacity: 0.5;
+    }
+
+    50% {
+        opacity: 0.8;
+    }
+
+    100% {
+        opacity: 0.5;
+    }
+}
+
 .add-friend-btn {
     display: flex;
     align-items: center;
@@ -118,7 +140,7 @@
 }
 
 .add-friend-btn:hover {
-    background: #e5e5e5;
+    filter: brightness(1.1);
     transform: translateY(-2px);
 }
 
@@ -140,7 +162,86 @@
     font-weight: 600;
 }
 
+.actions-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.remove-friend-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    background: rgba(244, 63, 94, 0.1);
+    border: 1px solid rgba(244, 63, 94, 0.2);
+    border-radius: 12px;
+    color: #f43f5e;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.remove-friend-btn:hover:not(:disabled) {
+    background: #f43f5e;
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.remove-friend-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.remove-friend-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
 .friend-badge svg {
+    width: 18px;
+    height: 18px;
+}
+
+.pending-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.2);
+    border-radius: 12px;
+    color: #fbbf24;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.pending-badge svg {
+    width: 18px;
+    height: 18px;
+}
+
+.accept-friend-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #22c55e;
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.accept-friend-btn:hover {
+    background: #16a34a;
+    transform: translateY(-2px);
+}
+
+.accept-friend-btn svg {
     width: 18px;
     height: 18px;
 }

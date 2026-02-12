@@ -22,3 +22,10 @@ pub struct MissionInvitationModel {
     pub status: String,
     pub created_at: String,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FriendshipStatusModel {
+    pub friendship_id: Option<i32>,
+    pub initiator_id: Option<i32>,
+    pub status: String, // "none", "pending", "accepted"
+}
