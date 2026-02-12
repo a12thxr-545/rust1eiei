@@ -9,6 +9,9 @@
             } @else {
             <div class="logo">
                 <span class="logo-text">YNWA</span>
+                @if (hasNotifications()) {
+                <span class="notification-dot collapsed"></span>
+                }
             </div>
             }
 
@@ -42,9 +45,17 @@
             @if (isLoggedIn()) {
             <div class="user-section">
                 <span class="display-name">{{ display_name() }}</span>
-                <button class="avatar-btn" (click)="toggleMenu(); $event.stopPropagation()">
+                <button class="avatar-btn" (click)="goToProfile(); $event.stopPropagation()">
                     <img [src]="avatar_url()" (error)="$any($event.target).src = 'assets/defaultavtar.jpg'" alt="avatar"
                         class="avatar">
+                </button>
+
+                <button class="burger-btn" (click)="toggleMenu(); $event.stopPropagation()" [class.active]="showMenu()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
                     @if (hasNotifications()) {
                     <span class="notification-dot"></span>
                     }

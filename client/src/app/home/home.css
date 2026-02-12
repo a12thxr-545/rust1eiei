@@ -457,7 +457,7 @@
 
     .hero {
         min-height: auto;
-        padding: 90px 20px 50px;
+        padding: calc(90px + var(--safe-area-top, 0px)) 20px 50px;
     }
 
     .hero h1 {

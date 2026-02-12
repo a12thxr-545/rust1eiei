@@ -24,9 +24,9 @@ pub fn routes(db_pool: Arc<PgPoolSquad>) -> Router {
     let use_case = MissionViewingUseCase::new(Arc::new(mission_viewing_repository));
 
     Router::new()
-        .route("/{mission_id}", get(view_details))
         .route("/gets", get(gets))
         .route("/count/{mission_id}", get(get_mission_count))
+        .route("/{mission_id}", get(view_details))
         .with_state(Arc::new(use_case))
 }
 

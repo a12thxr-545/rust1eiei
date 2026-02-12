@@ -97,6 +97,7 @@ where
         let mission = self.mission_viewing_repository.get_one(mission_id).await?;
 
         let leaving_condition = mission.status == MissionStatuses::Open.to_string()
+            || mission.status == MissionStatuses::InProgress.to_string()
             || mission.status == MissionStatuses::Failed.to_string();
         if !leaving_condition {
             return Err(anyhow::anyhow!("Mission is not leavable"));
@@ -134,11 +135,12 @@ where
         }
 
         let kicking_condition = mission.status == MissionStatuses::Open.to_string()
+            || mission.status == MissionStatuses::InProgress.to_string()
             || mission.status == MissionStatuses::Failed.to_string();
 
         if !kicking_condition {
             return Err(anyhow::anyhow!(
-                "Members can only be kicked from open or failed missions"
+                "Members can only be kicked from open, in-progress or failed missions"
             ));
         }
 

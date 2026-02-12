@@ -97,7 +97,7 @@
                                     Crew: {{ mission.crew_count }}
                                 </span>
                             </td>
-                            <td class="date">{{ mission.created_at | date:'mediumDate' }}</td>
+                            <td class="date">{{ mission.created_at | date:'d MMM yyyy, h:mm a':'+0700' }}</td>
                             <td>
                                 <div class="actions">
                                     <button class="action-btn" title="View" (click)="openViewModal(mission)">
@@ -309,7 +309,7 @@
                                     Crew: {{ mission.crew_count }}
                                 </span>
                             </td>
-                            <td class="date">{{ mission.created_at | date:'mediumDate' }}</td>
+                            <td class="date">{{ mission.created_at | date:'d MMM yyyy, h:mm a':'+0700' }}</td>
                             <td>
                                 <div class="actions">
                                     <button class="action-btn" title="View" (click)="openViewModal(mission)">
@@ -414,7 +414,7 @@
                             <td class="leader-cell">
                                 <span class="leader-name">{{ mission.chief_name }}</span>
                             </td>
-                            <td class="date">{{ mission.updated_at | date:'mediumDate' }}</td>
+                            <td class="date">{{ mission.updated_at | date:'d MMM yyyy, h:mm a':'+0700' }}</td>
                             <td>
                                 <div class="actions">
                                     <button class="action-btn" title="View" (click)="openViewModal(mission)">
@@ -494,7 +494,7 @@
                     <div class="info-item">
                         <div class="info-text">
                             <span class="info-label">Created</span>
-                            <span class="info-value">{{ mission.created_at | date:'MMM d, HH:mm' }}</span>
+                            <span class="info-value">{{ mission.created_at | date:'d MMM yyyy, h:mm a':'+0700' }}</span>
                         </div>
                     </div>
                 </div>
@@ -555,7 +555,8 @@
                                 <span class="member-stats">{{ member.mission_success_count }}W · {{
                                     member.mission_joined_count }}J</span>
                             </div>
-                            @if (isLeader(mission) && member.brawler_id !== mission.chief_id) {
+                            @if (isLeader(mission) && member.brawler_id !== mission.chief_id && mission.status !==
+                            'Completed' && mission.status !== 'Failed') {
                             <button class="kick-btn-minimal" (click)="kickMember(member.brawler_id)"
                                 title="Kick member">×</button>
                             }

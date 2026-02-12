@@ -12,6 +12,10 @@ body {
 }
 
 :root {
+    --safe-area-top: env(safe-area-inset-top);
+    --safe-area-bottom: env(safe-area-inset-bottom);
+    --safe-area-left: env(safe-area-inset-left);
+    --safe-area-right: env(safe-area-inset-right);
     --bg-color: #f8fafc;
     --card-bg: #ffffff;
     --text-primary: #0f172a;
@@ -107,10 +111,16 @@ body {
    ============================================ */
 
 /* Base snackbar styling */
+.cdk-global-overlay-wrapper,
+.cdk-overlay-pane {
+    pointer-events: none !important;
+}
+
 .mat-mdc-snack-bar-container {
     --mdc-snackbar-container-color: var(--card-bg);
     --mat-snack-bar-button-color: var(--accent-color);
     margin-top: 70px !important;
+    pointer-events: auto !important;
 }
 
 .mat-mdc-snack-bar-container .mdc-snackbar__surface {
@@ -119,6 +129,7 @@ body {
     border-radius: 12px !important;
     box-shadow: var(--shadow) !important;
     padding: 4px 8px !important;
+    pointer-events: auto !important;
 }
 
 /* Success snackbar */

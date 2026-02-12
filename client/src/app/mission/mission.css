@@ -19,7 +19,7 @@
 
 @media (max-width: 768px) {
     .missions-page {
-        padding: 120px 16px 40px;
+        padding: calc(120px + var(--safe-area-top, 0px)) 16px 40px;
     }
 }
 
@@ -914,6 +914,8 @@ tr:last-child td {
     gap: 8px;
     overflow-y: auto;
     padding-right: 8px;
+    flex: 1;
+    min-height: 0;
 }
 
 /* Scrollbar Style */
@@ -1129,7 +1131,7 @@ tr:last-child td {
     display: none;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 1100px) {
     .desktop-only {
         display: none !important;
     }

@@ -8,7 +8,7 @@
     flex-direction: column;
     align-items: center;
     background: var(--bg-color);
-    padding: 140px 24px 48px;
+    padding: calc(140px + var(--safe-area-top, 0px)) 24px 48px;
 }
 
 .profile-card {
@@ -403,7 +403,7 @@
 
 @media (max-width: 480px) {
     .profile-container {
-        padding: 120px 12px 32px;
+        padding: calc(120px + var(--safe-area-top, 0px)) 12px 32px;
     }
 
     .display-name {

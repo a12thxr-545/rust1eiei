@@ -63,7 +63,7 @@
                     <span class="crew-count">
                         Crew: {{ mission.crew_count }}
                     </span>
-                    <span class="mission-date">{{ mission.created_at | date:'mediumDate' }}</span>
+                    <span class="mission-date">{{ mission.created_at | date:'d MMM yyyy, h:mm a':'+0700' }}</span>
                 </div>
             </div>
             }
