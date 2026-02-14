@@ -28,7 +28,8 @@ export class CreateMissionDialog {
 
   form = new FormGroup({
     name: new FormControl('', [Validators.required, Validators.minLength(3)]),
-    description: new FormControl('')
+    description: new FormControl(''),
+    maxParticipants: new FormControl(0, [Validators.required, Validators.min(0)])
   });
 
   isLoading = signal(false);
@@ -71,7 +72,8 @@ export class CreateMissionDialog {
       const error = await this.missionService.createMission({
         name: this.form.controls.name.value!,
         description: this.form.controls.description.value || undefined,
-        image_url: imageUrl
+        image_url: imageUrl,
+        max_participants: this.form.controls.maxParticipants.value || 0
       });
 
       if (error) {

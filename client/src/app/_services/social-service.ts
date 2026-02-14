@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../environments/environment.development';
 import { Friend, FriendshipStatus, MissionInvitation } from '../_model/social';
 import { lastValueFrom } from 'rxjs';
@@ -10,6 +11,7 @@ import { lastValueFrom } from 'rxjs';
 export class SocialService {
     private http = inject(HttpClient);
     private baseUrl = environment.base_url + '/api/social';
+    private platformId = inject(PLATFORM_ID);
 
     friends = signal<Friend[]>([]);
     pendingRequests = signal<Friend[]>([]);
@@ -19,6 +21,7 @@ export class SocialService {
     isLoadingInvitations = signal(false);
 
     async loadFriends() {
+        if (!isPlatformBrowser(this.platformId)) return;
         this.isLoadingFriends.set(true);
         try {
             const friends = await lastValueFrom(this.http.get<Friend[]>(`${this.baseUrl}/friends`));
@@ -31,6 +34,7 @@ export class SocialService {
     }
 
     async loadPendingRequests() {
+        if (!isPlatformBrowser(this.platformId)) return;
         try {
             const requests = await lastValueFrom(this.http.get<Friend[]>(`${this.baseUrl}/friends/requests`));
             this.pendingRequests.set(requests || []);
@@ -64,6 +68,7 @@ export class SocialService {
     }
 
     async loadInvitations() {
+        if (!isPlatformBrowser(this.platformId)) return;
         this.isLoadingInvitations.set(true);
         try {
             const invitations = await lastValueFrom(this.http.get<MissionInvitation[]>(`${this.baseUrl}/invitations`));
@@ -86,6 +91,7 @@ export class SocialService {
     }
 
     async loadMissionInvitations(missionId: number): Promise<MissionInvitation[]> {
+        if (!isPlatformBrowser(this.platformId)) return [];
         try {
             return await lastValueFrom(this.http.get<MissionInvitation[]>(`${this.baseUrl}/mission/${missionId}/invitations`));
         } catch (e) {

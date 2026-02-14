@@ -588,6 +588,21 @@
     font-family: inherit;
 }
 
+.numeric-input {
+    appearance: none;
+    -moz-appearance: textfield;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-weight: 700 !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.numeric-input::-webkit-outer-spin-button,
+.numeric-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
 .form-group input:focus,
 .form-group textarea:focus {
     outline: none;
@@ -645,6 +660,22 @@
 .btn-primary:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.btn-primary.danger {
+    background: #ef4444;
+    border-color: #ef4444;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.btn-primary.danger:hover {
+    background: #dc2626;
+}
+
+.confirm-modal .modal-body p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
 }
 
 /* ============================================

@@ -104,6 +104,15 @@
 
                     <div class="menu-divider"></div>
 
+                    <button class="menu-item" (click)="confirmClearCache()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="menu-icon">
+                            <path d="M19 6L13 12L19 18M11 6L5 12L11 18" />
+                        </svg>
+                        <span>Clear Cache</span>
+                    </button>
+
+                    <div class="menu-divider"></div>
+
                     <button class="menu-item logout" (click)="logout()">
                         <span>Logout</span>
                     </button>
@@ -155,6 +164,10 @@
                 <textarea id="mission-desc" formControlName="description" placeholder="Enter mission description"
                     rows="4"></textarea>
             </div>
+            <div class="form-group">
+                <label for="mission-max">Max Participants (0 for unlimited)</label>
+                <input type="number" id="mission-max" formControlName="max_participants" min="0" class="numeric-input">
+            </div>
         </form>
         <div class="modal-footer">
             <button class="btn-secondary" type="button" (click)="closeCreateModal()">Cancel</button>
@@ -172,4 +185,26 @@
 
 @if (showInboxModal()) {
 <app-inbox-modal (close)="showInboxModal.set(false)"></app-inbox-modal>
+}
+
+<!-- Clear Cache Confirmation Modal -->
+@if (showClearCacheConfirm()) {
+<div class="modal-overlay" (click)="showClearCacheConfirm.set(false)">
+    <div class="modal confirm-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>Clear Cache</h2>
+            <button class="close-btn" (click)="showClearCacheConfirm.set(false)">
+                <span>X</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to clear the local cache? This will force the application to fetch fresh data from
+                the server.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" (click)="showClearCacheConfirm.set(false)">Cancel</button>
+            <button class="btn-primary danger" (click)="performClearCache()">Clear Cache</button>
+        </div>
+    </div>
+</div>
 }

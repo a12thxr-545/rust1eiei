@@ -9,6 +9,7 @@ import { filter } from 'rxjs';
 import { SocialService } from '../_services/social-service';
 import { SquadModal } from './squad-modal';
 import { InboxModal } from './inbox-modal';
+import { CacheManager } from '../_helpers/cache.helper';
 
 @Component({
   selector: 'app-navbar',
@@ -34,6 +35,7 @@ export class Navbar {
   showCreateModal = signal<boolean>(false);
   showSquadModal = signal<boolean>(false);
   showInboxModal = signal<boolean>(false);
+  showClearCacheConfirm = signal<boolean>(false);
   isLoading = signal<boolean>(false);
   isExpanded = signal<boolean>(false);
 
@@ -61,6 +63,7 @@ export class Navbar {
     this.form = this._fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
       description: [''],
+      max_participants: [0, [Validators.required, Validators.min(0)]]
     });
   }
 
@@ -113,6 +116,19 @@ export class Navbar {
     this.showCreateModal.set(true);
   }
 
+  confirmClearCache(): void {
+    this.showMenu.set(false);
+    this.showClearCacheConfirm.set(true);
+  }
+
+  performClearCache(): void {
+    CacheManager.clear();
+    this.showClearCacheConfirm.set(false);
+    this._snackbar.success('Cache cleared successfully!');
+    // Reload data if needed
+    this.missionService.triggerRefresh();
+  }
+
   closeCreateModal(): void {
     this.showCreateModal.set(false);
     this.form.reset();
@@ -125,6 +141,7 @@ export class Navbar {
     const error = await this.missionService.createMission({
       name: this.form.value.name,
       description: this.form.value.description || undefined,
+      max_participants: this.form.value.max_participants || 0
     });
     this.isLoading.set(false);
 

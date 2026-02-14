@@ -8,6 +8,7 @@ pub struct FriendModel {
     pub username: String,
     pub avatar_url: Option<String>,
     pub status: String,
+    pub current_mission_id: Option<i32>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

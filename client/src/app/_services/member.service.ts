@@ -1,5 +1,6 @@
 import { HttpClient } from "@angular/common/http";
-import { inject, Injectable, signal } from "@angular/core";
+import { inject, Injectable, signal, PLATFORM_ID } from "@angular/core";
+import { isPlatformBrowser } from "@angular/common";
 import { environment } from "../../environments/environment.development";
 import { default_pagination, Pagination, User, UserPagination } from "../_model/pagination";
 import { CacheManager } from "../_helpers/cache.helper";
@@ -13,6 +14,7 @@ type dataType = 'members' | 'followers' | 'following';
 export class MemberService {
     private _http = inject(HttpClient);
     private apiUrl = environment.base_url + '/api/';
+    private _platformId = inject(PLATFORM_ID);
 
     paginator = signal<Pagination<UserPagination, User>>(default_pagination);
 
@@ -29,6 +31,7 @@ export class MemberService {
     }
 
     private getData(opt: dataType) {
+        if (!isPlatformBrowser(this._platformId)) return;
         const pagination = this.paginator().pagination;
         let key = CacheManager.createKey(pagination);
 

@@ -45,19 +45,15 @@ where
             ));
         }
 
-        // Check if user is already in a mission
+        // Check if user is already in any mission
         let current_mission = self
             .crew_operation_repository
             .get_current_mission(brawler_id)
             .await?;
-        if let Some(current_id) = current_mission {
-            if current_id != mission_id {
-                return Err(anyhow::anyhow!(
-                    "You are already in another mission. Leave it first before joining a new one."
-                ));
-            } else {
-                return Err(anyhow::anyhow!("You are already in this mission"));
-            }
+        if current_mission.is_some() {
+            return Err(anyhow::anyhow!(
+                "You are already in an active mission. Leave it first."
+            ));
         }
 
         let mission_status_condition = mission.status == MissionStatuses::Open.to_string()
@@ -65,6 +61,20 @@ where
             || mission.status == MissionStatuses::Failed.to_string();
         if !mission_status_condition {
             return Err(anyhow::anyhow!("Mission is not joinable"));
+        }
+
+        // Check max participants
+        if mission.max_participants > 0 {
+            let crew_count = self
+                .mission_viewing_repository
+                .crew_counting(mission_id)
+                .await?;
+            if crew_count >= mission.max_participants as i64 {
+                return Err(anyhow::anyhow!(
+                    "Mission is full (Max {} members)",
+                    mission.max_participants
+                ));
+            }
         }
 
         self.crew_operation_repository
@@ -91,9 +101,7 @@ where
             ));
         }
 
-        let leaving_condition = mission.status == MissionStatuses::Open.to_string()
-            || mission.status == MissionStatuses::InProgress.to_string()
-            || mission.status == MissionStatuses::Failed.to_string();
+        let leaving_condition = mission.status == MissionStatuses::Open.to_string();
         if !leaving_condition {
             return Err(anyhow::anyhow!("Mission is not leavable"));
         }

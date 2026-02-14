@@ -120,6 +120,12 @@ where
             };
             let brawler = self.brawlers_repo.find_by_id(friend_id).await?;
 
+            let current_mission_id = self
+                .crew_repo
+                .get_current_mission(friend_id)
+                .await
+                .unwrap_or(None);
+
             result.push(FriendModel {
                 friendship_id: f.id,
                 friend_id,
@@ -127,6 +133,7 @@ where
                 username: brawler.username,
                 avatar_url: brawler.avatar_url,
                 status: f.status,
+                current_mission_id,
             });
         }
         Ok(result)
@@ -138,6 +145,12 @@ where
 
         for r in requests {
             let brawler = self.brawlers_repo.find_by_id(r.user_id).await?;
+            let current_mission_id = self
+                .crew_repo
+                .get_current_mission(r.user_id)
+                .await
+                .unwrap_or(None);
+
             result.push(FriendModel {
                 friendship_id: r.id,
                 friend_id: r.user_id,
@@ -145,6 +158,7 @@ where
                 username: brawler.username,
                 avatar_url: brawler.avatar_url,
                 status: r.status,
+                current_mission_id,
             });
         }
         Ok(result)
@@ -186,10 +200,21 @@ where
             ));
         }
 
-        // Check if invitee is already a member
-        let is_invitee_member = self.crew_repo.is_member(mission_id, invitee_id).await?;
-        if is_invitee_member {
-            return Err(anyhow!("This friend is already in your crew!"));
+        // Check max participants before inviting
+        if mission.max_participants > 0 {
+            let crew_count = self.mission_repo.crew_counting(mission_id).await?;
+            if crew_count >= mission.max_participants as i64 {
+                return Err(anyhow!(
+                    "Mission is full (Max {} members). Increase the limit to invite more.",
+                    mission.max_participants
+                ));
+            }
+        }
+
+        // Check if invitee is already in any mission
+        let invitee_current_mission = self.crew_repo.get_current_mission(invitee_id).await?;
+        if invitee_current_mission.is_some() {
+            return Err(anyhow!("This friend is already in an active mission!"));
         }
 
         // Clear any existing invitation to avoid unique constraint violation
@@ -316,26 +341,11 @@ where
                 ));
             }
 
-            // Check if user is already a member of *this* mission
-            let already_member = self
-                .crew_repo
-                .is_member(invitation.mission_id, user_id)
-                .await?;
-
-            if already_member {
-                // Already in this mission, just accept invitation and return success
-                self.invitation_repo.accept(invitation_id).await?;
-                return Ok(invitation.mission_id);
-            }
-
-            // Check if user is already in another *active* mission (Open/InProgress)
+            // Check if user is already in any mission
             let current_mission = self.crew_repo.get_current_mission(user_id).await?;
-            if let Some(current_id) = current_mission {
-                let current_mission_entity = self.mission_repo.get_one(current_id).await?;
+            if current_mission.is_some() {
                 return Err(anyhow!(
-                    "You are already in another active mission: '{}' (#{}). Leave or end it first before joining a new one.",
-                    current_mission_entity.name,
-                    current_mission_entity.code
+                    "You are already in an active mission. Leave it first before joining."
                 ));
             }
 
@@ -348,6 +358,20 @@ where
                     "Mission is no longer joinable (Status: {})",
                     mission.status
                 ));
+            }
+
+            // Check max participants before joining via invitation
+            if mission.max_participants > 0 {
+                let crew_count = self
+                    .mission_repo
+                    .crew_counting(invitation.mission_id)
+                    .await?;
+                if crew_count >= mission.max_participants as i64 {
+                    return Err(anyhow!(
+                        "Mission is full (Max {} members)",
+                        mission.max_participants
+                    ));
+                }
             }
 
             // Add to crew

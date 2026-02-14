@@ -19,6 +19,7 @@ pub struct MissionEntity {
     pub deleted_at: Option<NaiveDateTime>,
     pub image_url: Option<String>,
     pub code: String,
+    pub max_participants: i32,
 }
 
 impl MissionEntity {
@@ -33,8 +34,9 @@ impl MissionEntity {
             crew_count,
             image_url: self.image_url.clone(),
             code: self.code.clone(),
-            created_at: self.created_at,
-            updated_at: self.updated_at,
+            max_participants: self.max_participants,
+            created_at: self.created_at.and_utc(),
+            updated_at: self.updated_at.and_utc(),
         }
     }
 }
@@ -48,6 +50,7 @@ pub struct AddMissionEntity {
     pub description: Option<String>,
     pub image_url: Option<String>,
     pub code: String,
+    pub max_participants: i32,
 }
 
 #[derive(Debug, Clone, AsChangeset)]
@@ -56,4 +59,5 @@ pub struct EditMissionEntity {
     pub chief_id: i32,
     pub name: Option<String>,
     pub description: Option<String>,
+    pub max_participants: Option<i32>,
 }

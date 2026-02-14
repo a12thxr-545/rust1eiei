@@ -46,7 +46,11 @@ where
 
         let is_status_open = mission.status == MissionStatuses::Open.to_string();
 
-        let update_condition = is_status_open && crew_count > 0 && mission.chief_id == chief_id;
+        let is_over_limit =
+            mission.max_participants > 0 && crew_count > mission.max_participants as i64;
+
+        let update_condition =
+            is_status_open && crew_count > 0 && mission.chief_id == chief_id && !is_over_limit;
         if !update_condition {
             if !is_status_open {
                 return Err(anyhow::anyhow!(
@@ -57,6 +61,13 @@ where
             if crew_count <= 0 {
                 return Err(anyhow::anyhow!(
                     "Mission must have at least one crew member"
+                ));
+            }
+            if is_over_limit {
+                return Err(anyhow::anyhow!(
+                    "Cannot start: Crew members ({}) exceed the limit ({})",
+                    crew_count,
+                    mission.max_participants
                 ));
             }
             if mission.chief_id != chief_id {

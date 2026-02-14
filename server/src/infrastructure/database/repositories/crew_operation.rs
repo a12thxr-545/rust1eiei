@@ -49,8 +49,8 @@ impl CrewOperationRepository for CrewOperationPostgres {
     async fn get_current_mission(&self, brawler_id: i32) -> Result<Option<i32>> {
         let mut conn = Arc::clone(&self.db_pool).get()?;
 
-        // Find mission the user is currently in that is active (Open/InProgress)
-        let mission_id = crew_memberships::table
+        // 1. Check if user is a crew member in any active mission
+        let crew_mission_id = crew_memberships::table
             .inner_join(missions::table)
             .filter(crew_memberships::brawler_id.eq(brawler_id))
             .filter(missions::deleted_at.is_null())
@@ -63,7 +63,24 @@ impl CrewOperationRepository for CrewOperationPostgres {
             .first::<i32>(&mut conn)
             .optional()?;
 
-        Ok(mission_id)
+        if crew_mission_id.is_some() {
+            return Ok(crew_mission_id);
+        }
+
+        // 2. Check if user is the chief of any active mission
+        let chief_mission_id = missions::table
+            .filter(missions::chief_id.eq(brawler_id))
+            .filter(missions::deleted_at.is_null())
+            .filter(
+                missions::status
+                    .eq("Open")
+                    .or(missions::status.eq("InProgress")),
+            )
+            .select(missions::id)
+            .first::<i32>(&mut conn)
+            .optional()?;
+
+        Ok(chief_mission_id)
     }
 
     async fn is_member(&self, mission_id: i32, brawler_id: i32) -> Result<bool> {

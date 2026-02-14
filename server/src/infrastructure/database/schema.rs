@@ -20,6 +20,12 @@ diesel::table! {
         #[max_length = 255]
         cover_public_id -> Nullable<Varchar>,
         bio -> Nullable<Text>,
+        age -> Nullable<Int4>,
+        #[max_length = 10]
+        gender -> Nullable<Varchar>,
+        missions_completed -> Nullable<Int4>,
+        missions_joined -> Nullable<Int4>,
+        is_active -> Bool,
     }
 }
 
@@ -93,6 +99,7 @@ diesel::table! {
         image_url -> Nullable<Varchar>,
         #[max_length = 5]
         code -> Varchar,
+        max_participants -> Int4,
     }
 }
 

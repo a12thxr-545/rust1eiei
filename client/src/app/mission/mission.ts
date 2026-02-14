@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, effect, PLATFORM_ID, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, effect, PLATFORM_ID, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { MissionService } from '../_services/mission-service';
 import { PassportService } from '../_services/passport-service';
@@ -130,6 +130,13 @@ export class MissionComponent implements OnInit, OnDestroy {
   // Invite cooldown tracking
   private inviteCooldowns = new Map<number, number>(); // brawlerId -> timestamp
   public now = signal(Date.now());
+  public friendsWithCooldown = computed(() => {
+    const now = this.now();
+    return this.socialService.friends().map(f => ({
+      ...f,
+      isCooldown: now - (this.inviteCooldowns.get(f.friend_id) || 0) < 3000
+    }));
+  });
   private _timeTicker?: any;
 
   // Polling
@@ -143,6 +150,7 @@ export class MissionComponent implements OnInit, OnDestroy {
   // Edit form
   editName = '';
   editDescription = '';
+  editMaxParticipants = 0;
 
   loadSocialData(): void {
     this.socialService.loadFriends();
@@ -363,6 +371,7 @@ export class MissionComponent implements OnInit, OnDestroy {
     this.selectedMission.set(mission);
     this.editName = mission.name;
     this.editDescription = mission.description || '';
+    this.editMaxParticipants = mission.max_participants;
     this.showEditModal.set(true);
   }
 
@@ -379,6 +388,7 @@ export class MissionComponent implements OnInit, OnDestroy {
     const error = await this._missionService.editMission(mission.id, {
       name: this.editName || undefined,
       description: this.editDescription || undefined,
+      max_participants: this.editMaxParticipants
     });
     this.isProcessing.set(false);
 
@@ -420,11 +430,6 @@ export class MissionComponent implements OnInit, OnDestroy {
   }
 
   async joinMission(mission: Mission): Promise<void> {
-    const currentMissionId = this.currentMissionId();
-    if (currentMissionId !== null) {
-      this._snackbar.warning('You are already in a mission. Leave it first before joining another.');
-      return;
-    }
 
     this.isProcessing.set(true);
     const error = await this._missionService.joinMission(mission.id);
@@ -470,6 +475,14 @@ export class MissionComponent implements OnInit, OnDestroy {
 
   isInMission(missionId: number): boolean {
     return this.currentMissionId() === missionId;
+  }
+
+  isFull(mission: Mission): boolean {
+    return mission.max_participants > 0 && mission.crew_count >= mission.max_participants;
+  }
+
+  isOverLimit(mission: Mission): boolean {
+    return mission.max_participants > 0 && mission.crew_count > mission.max_participants;
   }
 
   async startMission(missionId: number): Promise<void> {

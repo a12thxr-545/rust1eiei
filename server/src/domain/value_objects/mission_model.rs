@@ -1,4 +1,4 @@
-use chrono::NaiveDateTime;
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 use crate::domain::{
@@ -17,8 +17,9 @@ pub struct MissionModel {
     pub crew_count: i64,
     pub image_url: Option<String>,
     pub code: String,
-    pub created_at: NaiveDateTime,
-    pub updated_at: NaiveDateTime,
+    pub max_participants: i32,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -26,19 +27,10 @@ pub struct AddMissionModel {
     pub name: String,
     pub description: Option<String>,
     pub image_url: Option<String>,
+    pub max_participants: i32,
 }
 
 impl AddMissionModel {
-    pub fn to_entity(&self, chief_id: i32) -> AddMissionEntity {
-        AddMissionEntity {
-            name: self.name.clone(),
-            description: self.description.clone(),
-            status: MissionStatuses::Open.to_string(),
-            chief_id,
-            image_url: self.image_url.clone(),
-            code: "".to_string(), // Will be set in use case
-        }
-    }
     pub fn to_entity_with_code(&self, chief_id: i32, code: String) -> AddMissionEntity {
         AddMissionEntity {
             name: self.name.clone(),
@@ -47,6 +39,7 @@ impl AddMissionModel {
             chief_id,
             image_url: self.image_url.clone(),
             code,
+            max_participants: self.max_participants,
         }
     }
 }
@@ -55,6 +48,7 @@ impl AddMissionModel {
 pub struct EditMissionModel {
     pub name: Option<String>,
     pub description: Option<String>,
+    pub max_participants: Option<i32>,
 }
 
 impl EditMissionModel {
@@ -63,6 +57,7 @@ impl EditMissionModel {
             name: self.name.clone(),
             description: self.description.clone(),
             chief_id,
+            max_participants: self.max_participants,
         }
     }
 }

@@ -56,20 +56,6 @@ where
             ));
         }
 
-        // Check if chief is already in a mission
-        let current_mission = self
-            .crew_operation_repository
-            .get_current_mission(chief_id)
-            .await?;
-        if let Some(mid) = current_mission {
-            let mission = self.mission_viewing_repository.get_one(mid).await?;
-            return Err(anyhow::anyhow!(
-                "You are already in an active mission: '{}' (#{}). Leave or end it first before creating a new one.",
-                mission.name,
-                mission.code
-            ));
-        }
-
         add_mission_model.description = add_mission_model.description.and_then(|s| {
             if s.trim().is_empty() {
                 None

@@ -56,7 +56,10 @@ where
             });
             (StatusCode::CREATED, axum::Json(json_value)).into_response()
         }
-        Err(e) => (StatusCode::BAD_REQUEST, e.to_string()).into_response(),
+        Err(e) => {
+            tracing::error!("Add mission error: {}", e);
+            (StatusCode::BAD_REQUEST, e.to_string()).into_response()
+        }
     }
 }
 

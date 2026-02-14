@@ -93,8 +93,9 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="crew">
-                                    Crew: {{ mission.crew_count }}
+                                <span class="crew" [class.full]="isFull(mission)">
+                                    Crew: {{ mission.crew_count }}{{ mission.max_participants > 0 ? ' / ' +
+                                    mission.max_participants : '' }}
                                 </span>
                             </td>
                             <td class="date">{{ mission.created_at | date:'d MMM yyyy, h:mm a':'+0700' }}</td>
@@ -105,12 +106,14 @@
                                     </button>
                                     @if (isInMission(mission.id)) {
                                     <button class="action-btn leave" title="Leave" (click)="leaveMission(mission)"
-                                        [disabled]="isProcessing()">
+                                        [disabled]="isProcessing() || mission.status !== 'Open'"
+                                        [title]="mission.status !== 'Open' ? 'Cannot leave once started' : 'Leave'">
                                         Leave
                                     </button>
                                     } @else {
                                     <button class="action-btn join" title="Join" (click)="joinMission(mission)"
-                                        [disabled]="isProcessing() || currentMissionId() !== null">
+                                        [disabled]="isProcessing() || currentMissionId() !== null"
+                                        [title]="currentMissionId() !== null ? 'Already in a mission' : 'Join'">
                                         Join
                                     </button>
                                     }
@@ -136,11 +139,13 @@
                         </div>
                     </div>
                     <div class="card-bottom">
-                        <span class="crew">Crew: {{ mission.crew_count }}</span>
+                        <span class="crew" [class.full]="isFull(mission)">Crew: {{ mission.crew_count }}{{
+                            mission.max_participants > 0 ? ' / ' +
+                            mission.max_participants : '' }}</span>
                         <div class="card-actions" (click)="$event.stopPropagation()">
                             @if (isInMission(mission.id)) {
                             <button class="action-btn leave" (click)="leaveMission(mission)"
-                                [disabled]="isProcessing()">Leave</button>
+                                [disabled]="isProcessing() || mission.status !== 'Open'">Leave</button>
                             } @else {
                             <button class="action-btn join" (click)="joinMission(mission)"
                                 [disabled]="isProcessing() || currentMissionId() !== null">Join</button>
@@ -203,8 +208,9 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="crew">
-                                    Crew: {{ mission.crew_count }}
+                                <span class="crew" [class.full]="isFull(mission)">
+                                    Crew: {{ mission.crew_count }}{{ mission.max_participants > 0 ? ' / ' +
+                                    mission.max_participants : '' }}
                                 </span>
                             </td>
                             <td class="leader-cell">
@@ -216,7 +222,8 @@
                                         View
                                     </button>
                                     <button class="action-btn leave" title="Leave" (click)="leaveMission(mission)"
-                                        [disabled]="isProcessing()">
+                                        [disabled]="isProcessing() || mission.status !== 'Open'"
+                                        [title]="mission.status !== 'Open' ? 'Cannot leave once started' : 'Leave'">
                                         Leave
                                     </button>
                                 </div>
@@ -241,7 +248,9 @@
                         </div>
                     </div>
                     <div class="card-bottom">
-                        <span class="crew">Crew: {{ mission.crew_count }}</span>
+                        <span class="crew" [class.full]="isFull(mission)">Crew: {{ mission.crew_count }}{{
+                            mission.max_participants > 0 ? ' / ' +
+                            mission.max_participants : '' }}</span>
                         <span class="leader-name">{{ mission.chief_name }}</span>
                         <div class="card-actions" (click)="$event.stopPropagation()">
                             <button class="action-btn" (click)="openViewModal(mission)">View</button>
@@ -305,8 +314,9 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="crew">
-                                    Crew: {{ mission.crew_count }}
+                                <span class="crew" [class.full]="isFull(mission)">
+                                    Crew: {{ mission.crew_count }}{{ mission.max_participants > 0 ? ' / ' +
+                                    mission.max_participants : '' }}
                                 </span>
                             </td>
                             <td class="date">{{ mission.created_at | date:'d MMM yyyy, h:mm a':'+0700' }}</td>
@@ -343,7 +353,9 @@
                         </div>
                     </div>
                     <div class="card-bottom">
-                        <span class="crew">Crew: {{ mission.crew_count }}</span>
+                        <span class="crew" [class.full]="isFull(mission)">Crew: {{ mission.crew_count }}{{
+                            mission.max_participants > 0 ? ' / ' +
+                            mission.max_participants : '' }}</span>
                         <div class="card-actions" (click)="$event.stopPropagation()">
                             <button class="action-btn" (click)="openViewModal(mission)">View</button>
                             <button class="action-btn edit" (click)="openEditModal(mission)">Edit</button>
@@ -407,8 +419,9 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="crew">
-                                    Crew: {{ mission.crew_count }}
+                                <span class="crew" [class.full]="isFull(mission)">
+                                    Crew: {{ mission.crew_count }}{{ mission.max_participants > 0 ? ' / ' +
+                                    mission.max_participants : '' }}
                                 </span>
                             </td>
                             <td class="leader-cell">
@@ -442,7 +455,9 @@
                         </div>
                     </div>
                     <div class="card-bottom">
-                        <span class="crew">Crew: {{ mission.crew_count }}</span>
+                        <span class="crew" [class.full]="isFull(mission)">Crew: {{ mission.crew_count }}{{
+                            mission.max_participants > 0 ? ' / ' +
+                            mission.max_participants : '' }}</span>
                         <span class="leader-name">{{ mission.chief_name }}</span>
                     </div>
                 </div>
@@ -506,7 +521,8 @@
                     <div class="op-actions">
                         @if (mission.status === 'Open') {
                         <button class="btn-premium-op start" (click)="startMission(mission.id)"
-                            [disabled]="isProcessing() || mission.crew_count === 0">
+                            [disabled]="isProcessing() || mission.crew_count === 0 || isOverLimit(mission)"
+                            [title]="isOverLimit(mission) ? 'Cannot start: Crew exceeds limit' : ''">
                             Start Mission
                         </button>
                         } @else if (mission.status === 'InProgress') {
@@ -530,7 +546,10 @@
                 <div class="social-card">
                     <div class="card-header">
                         <h3>Crew Members</h3>
-                        <span class="member-count">{{ mission.crew_count }} Active</span>
+                        <span class="member-count" [class.is-over]="isFull(mission)">
+                            {{ mission.crew_count }}{{ mission.max_participants > 0 ? ' / ' +
+                            mission.max_participants : '' }} Active
+                        </span>
                     </div>
 
                     <div class="member-list-scroll">
@@ -578,7 +597,7 @@
                     </div>
 
                     <div class="member-list-scroll">
-                        @for (friend of socialService.friends(); track friend.friend_id) {
+                        @for (friend of friendsWithCooldown(); track friend.friend_id) {
                         <div class="invite-card-premium">
                             <img [src]="friend.avatar_url || 'assets/defaultavtar.jpg'"
                                 (error)="$any($event.target).src = 'assets/defaultavtar.jpg'"
@@ -589,15 +608,18 @@
                                 @if (isMember(friend.friend_id)) {
                                 <span class="pill pill-joined">In Crew</span>
                                 } @else if (isInvited(friend.friend_id)) {
-                                @if (isInvitationInCooldown(friend.friend_id)) {
+                                @if (friend.isCooldown) {
                                 <span class="pill pill-pending">Pending...</span>
                                 } @else {
                                 <button class="btn-invite-premium retry"
                                     (click)="inviteFriend(friend.friend_id)">Resend</button>
                                 }
                                 } @else {
-                                <button class="btn-invite-premium"
-                                    (click)="inviteFriend(friend.friend_id)">Invite</button>
+                                <button class="btn-invite-premium" (click)="inviteFriend(friend.friend_id)"
+                                    [disabled]="isFull(mission) || friend.current_mission_id !== null"
+                                    [title]="friend.current_mission_id !== null ? 'Friend is in another mission' : (isFull(mission) ? 'Mission is full' : 'Invite')">
+                                    {{ friend.current_mission_id !== null ? 'Occupied' : 'Invite' }}
+                                </button>
                                 }
                             </div>
                         </div>
@@ -633,6 +655,14 @@
                 <label for="edit-desc">Description</label>
                 <textarea id="edit-desc" [(ngModel)]="editDescription" placeholder="Enter description"
                     rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="edit-max">Max Participants (0 for unlimited)</label>
+                <div class="numeric-input-wrapper">
+                    <input type="number" id="edit-max" [(ngModel)]="editMaxParticipants" min="0"
+                        class="numeric-input" />
+                    <div class="numeric-hint">Enter 0 for no limit</div>
+                </div>
             </div>
         </div>
         <div class="modal-footer">

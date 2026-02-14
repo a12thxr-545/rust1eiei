@@ -13,6 +13,7 @@ export interface Mission {
     crew_count: number;
     image_url?: string;
     code: string;
+    max_participants: number;
     created_at: string;
     updated_at: string;
 }
@@ -21,11 +22,13 @@ export interface AddMission {
     name: string;
     description?: string;
     image_url?: string;
+    max_participants: number;
 }
 
 export interface EditMission {
     name?: string;
     description?: string;
+    max_participants?: number;
 }
 
 export interface MissionFilter {

@@ -5,6 +5,7 @@ export interface Friend {
     username: string;
     avatar_url: string | null;
     status: string;
+    current_mission_id: number | null;
 }
 
 export interface MissionInvitation {

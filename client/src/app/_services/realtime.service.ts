@@ -74,11 +74,10 @@ export class RealtimeService {
         } else if (event.type === 'MissionInvitation') {
             this._snackbar.info('You have been invited to a mission!');
             this._socialService.loadInvitations();
-        } else if (event.type === 'MissionInvitationAccepted') {
-            this._snackbar.info('A brawler has joined your mission!');
-            // Potentially refresh mission crew if the user is on the mission page
         } else if (event.type === 'MissionCreated' || event.type === 'MissionUpdated' ||
-            event.type === 'MissionDeleted' || event.type === 'MissionStatusChanged') {
+            event.type === 'MissionDeleted' || event.type === 'MissionStatusChanged' ||
+            event.type === 'MissionJoined' || event.type === 'MissionLeft' ||
+            event.type === 'MissionInvitationAccepted') {
             if (event.type === 'MissionDeleted') {
                 this._snackbar.info('The mission has been terminated by the chief.');
             }
@@ -102,5 +101,10 @@ export class RealtimeService {
         this._missionService.loadJoinedMissions(passport.id);
         this._missionService.loadFinishedMissions(passport.id);
         this._missionService.getCurrentMission();
+
+        // Also refresh social data to update friends' mission status
+        this._socialService.loadFriends();
+        this._socialService.loadPendingRequests();
+        this._socialService.loadInvitations();
     }
 }

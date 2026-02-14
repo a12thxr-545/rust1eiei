@@ -40,6 +40,15 @@
             <textarea matInput formControlName="description" placeholder="Enter mission description"
                 rows="4"></textarea>
         </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Max Participants</mat-label>
+            <input matInput type="number" formControlName="maxParticipants" min="0">
+            <mat-hint>Set to 0 for unlimited members</mat-hint>
+            @if (form.controls.maxParticipants.hasError('min')) {
+            <mat-error>Max participants cannot be negative</mat-error>
+            }
+        </mat-form-field>
     </form>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
