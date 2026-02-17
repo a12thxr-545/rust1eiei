@@ -27,7 +27,6 @@ export class SocialService {
             const friends = await lastValueFrom(this.http.get<Friend[]>(`${this.baseUrl}/friends`));
             this.friends.set(friends || []);
         } catch (e) {
-            console.error(e);
         } finally {
             this.isLoadingFriends.set(false);
         }
@@ -39,7 +38,6 @@ export class SocialService {
             const requests = await lastValueFrom(this.http.get<Friend[]>(`${this.baseUrl}/friends/requests`));
             this.pendingRequests.set(requests || []);
         } catch (e) {
-            console.error(e);
         }
     }
 
@@ -74,7 +72,6 @@ export class SocialService {
             const invitations = await lastValueFrom(this.http.get<MissionInvitation[]>(`${this.baseUrl}/invitations`));
             this.invitations.set(invitations || []);
         } catch (e) {
-            console.error(e);
         } finally {
             this.isLoadingInvitations.set(false);
         }
@@ -95,7 +92,6 @@ export class SocialService {
         try {
             return await lastValueFrom(this.http.get<MissionInvitation[]>(`${this.baseUrl}/mission/${missionId}/invitations`));
         } catch (e) {
-            console.error(e);
             return [];
         }
     }

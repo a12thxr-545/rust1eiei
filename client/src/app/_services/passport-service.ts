@@ -159,7 +159,6 @@ export class PassportService {
             this.data.set(freshPassport)
             this.savePassportToLocalStorage()
         } catch (error) {
-            console.error('Failed to sync profile:', error)
             if (error instanceof HttpErrorResponse && error.status === 401) {
                 this.removePassport();
                 this._router.navigate(['/login']);
@@ -173,7 +172,6 @@ export class PassportService {
             const result = this._http.get<boolean>(api_url)
             return await firstValueFrom(result)
         } catch (error) {
-            console.error('Check username error:', error)
             return false
         }
     }
@@ -190,7 +188,6 @@ export class PassportService {
 
             return null // Success
         } catch (error) {
-            console.error('Update display name error:', error)
             if (error instanceof HttpErrorResponse) {
                 return error.error || error.message
             }
@@ -204,7 +201,6 @@ export class PassportService {
             const result = this._http.post<UploadedImage>(api_url, { base64_string: base64String })
             return await firstValueFrom(result)
         } catch (error) {
-            console.error('Upload chat image error:', error)
             return null
         }
     }
@@ -225,7 +221,6 @@ export class PassportService {
 
             return true
         } catch (error) {
-            console.error('Update bio error:', error)
             return false
         }
     }

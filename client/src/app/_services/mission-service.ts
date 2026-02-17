@@ -84,7 +84,6 @@ export class MissionService {
       const result = this._http.post<UploadedImage>(`${this._management_url}/image`, { base64_string: base64String });
       return await firstValueFrom(result);
     } catch (error) {
-      console.error('Upload mission image error:', error);
       return null;
     }
   }
@@ -158,7 +157,6 @@ export class MissionService {
       this.currentMissionId.set(response.mission_id);
       return response.mission_id;
     } catch (error) {
-      console.error('Error getting current mission:', error);
       return null;
     }
   }
@@ -169,7 +167,6 @@ export class MissionService {
       const missions = await this.getMissions(filter);
       this.missions.set(missions);
     } catch (error) {
-      console.error('Error loading missions:', error);
     } finally {
       this.isLoading.set(false);
     }
@@ -182,7 +179,6 @@ export class MissionService {
       const missions = await this.getMissions({ ...filter, status: 'Open' });
       this.missions.set(missions);
     } catch (error) {
-      console.error('Error loading other missions:', error);
     } finally {
       this.isLoading.set(false);
     }
@@ -196,7 +192,6 @@ export class MissionService {
       const inProgress = await this.getMissions({ chief_id: chiefId, status: 'InProgress' });
       this.myMissions.set([...open, ...inProgress].sort((a, b) => b.id - a.id));
     } catch (error) {
-      console.error('Error loading my missions:', error);
     } finally {
       this.isLoadingMyMissions.set(false);
     }
@@ -217,7 +212,6 @@ export class MissionService {
       });
       this.joinedMissions.set([...open, ...inProgress]);
     } catch (error) {
-      console.error('Error loading joined missions:', error);
     } finally {
       this.isLoadingMyMissions.set(false);
     }
@@ -237,7 +231,6 @@ export class MissionService {
       });
       this.finishedMissions.set([...completed, ...failed].sort((a, b) => b.id - a.id));
     } catch (error) {
-      console.error('Error loading finished missions:', error);
     } finally {
       this.isLoadingFinishedMissions.set(false);
     }
@@ -260,7 +253,6 @@ export class MissionService {
     try {
       return await firstValueFrom(this._http.get<Mission>(`${this._view_url}/${missionId}`));
     } catch (error) {
-      console.error('Error fetching mission details:', error);
       return null;
     }
   }
@@ -269,7 +261,6 @@ export class MissionService {
     try {
       return await firstValueFrom(this._http.get<CrewMember[]>(`${this._view_url}/count/${missionId}`));
     } catch (error) {
-      console.error('Error fetching crew members:', error);
       return [];
     }
   }

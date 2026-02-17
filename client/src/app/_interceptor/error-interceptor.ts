@@ -10,9 +10,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
     return next(req).pipe(
         catchError((error: HttpErrorResponse) => {
-            if (error.status === 401) {
-                // Unauthorized - token might be expired or invalid
-                console.warn('Unauthorized request detected. Logging out user...');
+            // Don't log 401/400 to console, and skip global 401 handling for login endpoint
+            if (error.status === 401 && !req.url.includes('/authentication/login')) {
                 passportService.removePassport();
                 router.navigate(['/login']);
             }

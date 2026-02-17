@@ -15,7 +15,6 @@ use crate::{
         repositories::{
             crew_operation::CrewOperationRepository,
             mission_management::MissionManagementRepository,
-            mission_viewing::MissionViewingRepository,
         },
         value_objects::{
             mission_model::{AddMissionModel, EditMissionModel},
@@ -28,7 +27,6 @@ use crate::{
             repositories::{
                 crew_operation::CrewOperationPostgres,
                 mission_management::MissionManagementPostgres,
-                mission_viewing::MissionViewingPostgres,
             },
         },
         http::middleware::auth::authorization,
@@ -36,14 +34,13 @@ use crate::{
     },
 };
 
-pub async fn add<T1, T2, T3>(
-    State(mission_management_use_case): State<Arc<MissionManagementUseCase<T1, T2, T3>>>,
+pub async fn add<T1, T3>(
+    State(mission_management_use_case): State<Arc<MissionManagementUseCase<T1, T3>>>,
     Extension(brawler_id): Extension<i32>,
     Json(add_mission_model): Json<AddMissionModel>,
 ) -> impl IntoResponse
 where
     T1: MissionManagementRepository + Send + Sync,
-    T2: MissionViewingRepository + Send + Sync,
     T3: CrewOperationRepository + Send + Sync,
 {
     match mission_management_use_case
@@ -63,15 +60,14 @@ where
     }
 }
 
-pub async fn edit<T1, T2, T3>(
-    State(mission_management_use_case): State<Arc<MissionManagementUseCase<T1, T2, T3>>>,
+pub async fn edit<T1, T3>(
+    State(mission_management_use_case): State<Arc<MissionManagementUseCase<T1, T3>>>,
     Extension(brawler_id): Extension<i32>,
     Path(mission_id): Path<i32>,
     Json(edit_mission_model): Json<EditMissionModel>,
 ) -> impl IntoResponse
 where
     T1: MissionManagementRepository + Send + Sync,
-    T2: MissionViewingRepository + Send + Sync,
     T3: CrewOperationRepository + Send + Sync,
 {
     match mission_management_use_case
@@ -86,14 +82,13 @@ where
     }
 }
 
-pub async fn remove<T1, T2, T3>(
-    State(mission_management_use_case): State<Arc<MissionManagementUseCase<T1, T2, T3>>>,
+pub async fn remove<T1, T3>(
+    State(mission_management_use_case): State<Arc<MissionManagementUseCase<T1, T3>>>,
     Extension(brawler_id): Extension<i32>,
     Path(mission_id): Path<i32>,
 ) -> impl IntoResponse
 where
     T1: MissionManagementRepository + Send + Sync,
-    T2: MissionViewingRepository + Send + Sync,
     T3: CrewOperationRepository + Send + Sync,
 {
     match mission_management_use_case
@@ -108,14 +103,13 @@ where
     }
 }
 
-pub async fn upload_image<T1, T2, T3>(
-    State(mission_management_use_case): State<Arc<MissionManagementUseCase<T1, T2, T3>>>,
+pub async fn upload_image<T1, T3>(
+    State(mission_management_use_case): State<Arc<MissionManagementUseCase<T1, T3>>>,
     Extension(brawler_id): Extension<i32>,
     Json(upload_image): Json<UploadedAvartar>,
 ) -> impl IntoResponse
 where
     T1: MissionManagementRepository + Send + Sync,
-    T2: MissionViewingRepository + Send + Sync,
     T3: CrewOperationRepository + Send + Sync,
 {
     match mission_management_use_case
@@ -132,12 +126,10 @@ where
 
 pub fn routes(db_pool: Arc<PgPoolSquad>, realtime_hub: Arc<RealtimeHub>) -> Router {
     let mission_management_repository = MissionManagementPostgres::new(Arc::clone(&db_pool));
-    let mission_viewing_repository = MissionViewingPostgres::new(Arc::clone(&db_pool));
     let crew_operation_repository = CrewOperationPostgres::new(Arc::clone(&db_pool));
 
     let mission_management_use_case = MissionManagementUseCase::new(
         Arc::new(mission_management_repository),
-        Arc::new(mission_viewing_repository),
         Arc::new(crew_operation_repository),
         realtime_hub,
     );

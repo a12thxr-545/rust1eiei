@@ -5,7 +5,6 @@ use crate::domain::{
     entities::crew_memberships::CrewMemberShips,
     repositories::{
         crew_operation::CrewOperationRepository, mission_management::MissionManagementRepository,
-        mission_viewing::MissionViewingRepository,
     },
     value_objects::{
         base64_image::Base64Image,
@@ -16,34 +15,29 @@ use crate::domain::{
 };
 use crate::infrastructure::{cloudinary::UploadImageOptions, realtime::SharedRealtimeHub};
 
-pub struct MissionManagementUseCase<T1, T2, T3>
+pub struct MissionManagementUseCase<T1, T3>
 where
     T1: MissionManagementRepository + Send + Sync,
-    T2: MissionViewingRepository + Send + Sync,
     T3: CrewOperationRepository + Send + Sync,
 {
     mission_management_repository: Arc<T1>,
-    mission_viewing_repository: Arc<T2>,
     crew_operation_repository: Arc<T3>,
     pub realtime_hub: SharedRealtimeHub,
 }
 
 use anyhow::Result;
-impl<T1, T2, T3> MissionManagementUseCase<T1, T2, T3>
+impl<T1, T3> MissionManagementUseCase<T1, T3>
 where
     T1: MissionManagementRepository + Send + Sync,
-    T2: MissionViewingRepository + Send + Sync,
     T3: CrewOperationRepository + Send + Sync,
 {
     pub fn new(
         mission_management_repository: Arc<T1>,
-        mission_viewing_repository: Arc<T2>,
         crew_operation_repository: Arc<T3>,
         realtime_hub: SharedRealtimeHub,
     ) -> Self {
         Self {
             mission_management_repository,
-            mission_viewing_repository,
             crew_operation_repository,
             realtime_hub,
         }

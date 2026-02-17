@@ -1,14 +1,40 @@
-/* You can add global styles to this file, and also import other style files */
 html,
-body {
-    overflow-x: hidden;
-    width: 100%;
+body,
+app-root {
     margin: 0;
     padding: 0;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: 100%;
+    overflow-x: hidden;
+    position: relative;
+    -webkit-text-size-adjust: 100%;
+    display: block;
+    box-sizing: border-box;
+}
+
+html {
+    overflow-x: hidden;
+}
+
+body {
+    min-height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    /* Disable horizontal swipe gestures for scrolling */
 }
 
 * {
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
 }
 
 :root {
@@ -99,10 +125,12 @@ body {
 }
 
 body {
+    min-height: 100%;
     background-color: var(--bg-color);
     color: var(--text-primary);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     margin: 0;
+    padding: 0;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
