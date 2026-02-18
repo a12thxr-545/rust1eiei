@@ -40,17 +40,73 @@
             <!-- Other Missions -->
             @if (selectedTabIndex === 0) {
             <div class="search-container">
-                <div class="search-box">
-                    <input type="text" [(ngModel)]="searchCode" (ngModelChange)="loadOtherMissions()"
-                        placeholder="Search by Room ID (e.g. AB123)..." maxlength="5">
+                <div class="search-row">
+                    <!-- Search Box -->
+                    <div class="search-box">
+                        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="m21 21-4.35-4.35" />
+                        </svg>
+                        <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+                            placeholder="Search by name or Room ID...">
+                        @if (searchQuery()) {
+                        <button class="search-clear-btn" (click)="searchQuery.set('')" title="Clear search">×</button>
+                        }
+                    </div>
+
+                    <!-- Filter Button -->
+                    <button class="filter-toggle-btn" [class.has-filter]="activeFilterCount() > 0"
+                        (click)="showFilterPanel.set(!showFilterPanel())">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+                        </svg>
+                        Filter
+                        @if (activeFilterCount() > 0) {
+                        <span class="filter-badge">{{ activeFilterCount() }}</span>
+                        }
+                    </button>
                 </div>
+
+                <!-- Filter Dropdown Panel -->
+                @if (showFilterPanel()) {
+                <div class="filter-panel">
+                    <div class="filter-panel-header">
+                        <span class="filter-panel-title">Filter Missions</span>
+                        @if (activeFilterCount() > 0) {
+                        <button class="clear-filter-btn" (click)="clearFilters()">✕ Clear all</button>
+                        }
+                    </div>
+
+                    <!-- Alphabet Filter -->
+                    <div class="filter-section">
+                        <span class="filter-label">Name starts with</span>
+                        <div class="alphabet-pills">
+                            @for (letter of alphabet; track letter) {
+                            <button class="alpha-pill" [class.active]="filterLetter() === letter"
+                                (click)="setFilterLetter(letter)">{{ letter }}</button>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Available Only -->
+                    <div class="filter-section">
+                        <span class="filter-label">Availability</span>
+                        <button class="available-toggle" [class.active]="filterNotFull()"
+                            (click)="toggleFilterNotFull()">
+                            <span class="avail-dot"></span>
+                            Available Only
+                        </button>
+                    </div>
+                </div>
+                }
             </div>
+
             @if (isLoading()) {
             <div class="loading-state">
                 <div class="spinner"></div>
                 <p>Loading missions...</p>
             </div>
-            } @else if (missions().length === 0) {
+            } @else if (filteredMissions().length === 0) {
             <div class="empty-state">
                 <h3>No missions from others yet</h3>
                 <p>Wait for other users to create missions!</p>
@@ -69,7 +125,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @for (mission of missions(); track mission.id) {
+                        @for (mission of filteredMissions(); track mission.id) {
                         <tr [class.in-mission]="isInMission(mission.id)">
                             <td class="code-cell">
                                 <span class="room-code">#{{ mission.code }}</span>
@@ -126,7 +182,7 @@
             </div>
 
             <div class="mobile-grid">
-                @for (mission of missions(); track mission.id) {
+                @for (mission of filteredMissions(); track mission.id) {
                 <div class="mission-card-mobile" (click)="openViewModal(mission)">
                     <div class="card-top">
                         <span class="room-code">#{{ mission.code }}</span>
@@ -381,6 +437,24 @@
                 <p>Complete or fail missions to see them here!</p>
             </div>
             } @else {
+            <!-- History Filter Bar -->
+            <div class="history-filter-bar">
+                <button class="history-filter-btn" [class.active]="historyFilter() === 'all'"
+                    (click)="historyFilter.set('all')">
+                    All
+                    <span class="hf-count">{{ finishedMissions().length }}</span>
+                </button>
+                <button class="history-filter-btn completed" [class.active]="historyFilter() === 'Completed'"
+                    (click)="historyFilter.set('Completed')">
+                    ✓ Completed
+                    <span class="hf-count">{{ historyCompletedCount() }}</span>
+                </button>
+                <button class="history-filter-btn failed" [class.active]="historyFilter() === 'Failed'"
+                    (click)="historyFilter.set('Failed')">
+                    ✕ Failed
+                    <span class="hf-count">{{ historyFailedCount() }}</span>
+                </button>
+            </div>
             <div class="table-wrapper desktop-only">
                 <table class="finished-table">
                     <thead>
@@ -395,7 +469,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @for (mission of finishedMissions(); track mission.id) {
+                        @for (mission of filteredHistory(); track mission.id) {
                         <tr>
                             <td class="code-cell">
                                 <span class="room-code">#{{ mission.code }}</span>
@@ -442,7 +516,7 @@
             </div>
 
             <div class="mobile-grid">
-                @for (mission of finishedMissions(); track mission.id) {
+                @for (mission of filteredHistory(); track mission.id) {
                 <div class="mission-card-mobile" (click)="openViewModal(mission)">
                     <div class="card-top">
                         <span class="room-code">#{{ mission.code }}</span>

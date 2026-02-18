@@ -17,6 +17,13 @@
     .missions-page {
         padding: calc(120px + var(--safe-area-top, 0px)) 16px 40px;
     }
+
+    .filter-panel {
+        min-width: unset;
+        max-width: calc(100vw - 32px);
+        left: 0;
+        right: 0;
+    }
 }
 
 .page-header {
@@ -130,11 +137,30 @@
 
 .search-container {
     margin-bottom: 24px;
+    position: relative;
+}
+
+.search-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .search-box {
     position: relative;
+    flex: 1;
     max-width: 400px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: var(--text-muted);
+    pointer-events: none;
 }
 
 .search-box input {
@@ -142,10 +168,11 @@
     background: var(--input-bg);
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    padding: 12px 14px;
+    padding: 12px 14px 12px 38px;
     color: var(--text-primary);
     font-size: 14px;
     transition: all 0.2s ease;
+    box-sizing: border-box;
 }
 
 .search-box input:focus {
@@ -154,6 +181,245 @@
     background: var(--card-bg);
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
+
+.search-clear-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: none;
+    background: var(--text-muted);
+    color: var(--card-bg);
+    font-size: 14px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.15s ease;
+    padding: 0;
+}
+
+.search-clear-btn:hover {
+    opacity: 1;
+}
+
+/* Filter Toggle Button */
+.filter-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 11px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.filter-toggle-btn svg {
+    width: 15px;
+    height: 15px;
+}
+
+.filter-toggle-btn:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    background: rgba(59, 130, 246, 0.06);
+}
+
+.filter-toggle-btn.has-filter {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    background: rgba(59, 130, 246, 0.08);
+}
+
+.filter-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+/* Filter Dropdown Panel */
+.filter-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 200;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+    min-width: 480px;
+    max-width: 700px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: filterPanelIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes filterPanelIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.filter-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.filter-panel-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+/* ── Filter Sections (inside panel) ── */
+.filter-section {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+
+.filter-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    min-width: 72px;
+    padding-top: 5px;
+    flex-shrink: 0;
+}
+
+.alphabet-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.alpha-pill {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    letter-spacing: 0;
+}
+
+.alpha-pill:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    background: rgba(59, 130, 246, 0.08);
+}
+
+.alpha-pill.active {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+}
+
+
+.clear-filter-btn {
+    align-self: flex-start;
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.06);
+    color: #ef4444;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.clear-filter-btn:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: #ef4444;
+}
+
+.available-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.available-toggle:hover {
+    border-color: #22c55e;
+    color: #22c55e;
+    background: rgba(34, 197, 94, 0.06);
+}
+
+.available-toggle.active {
+    background: rgba(34, 197, 94, 0.12);
+    border-color: #22c55e;
+    color: #22c55e;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);
+}
+
+.avail-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    transition: background 0.15s ease;
+    flex-shrink: 0;
+}
+
+.available-toggle.active .avail-dot {
+    background: #22c55e;
+    box-shadow: 0 0 6px #22c55e;
+}
+
 
 .table-wrapper {
     background: var(--card-bg);
@@ -680,6 +946,84 @@ tr:last-child td {
 
 .empty-state p {
     color: var(--text-muted);
+}
+
+/* ── History Filter Bar ── */
+.history-filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.history-filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.history-filter-btn:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    background: rgba(59, 130, 246, 0.06);
+}
+
+.history-filter-btn.active {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+.history-filter-btn.completed:hover,
+.history-filter-btn.completed.active {
+    border-color: #22c55e;
+    color: #22c55e;
+    background: rgba(34, 197, 94, 0.08);
+}
+
+.history-filter-btn.failed:hover,
+.history-filter-btn.failed.active {
+    border-color: #ef4444;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.08);
+}
+
+.hf-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 9px;
+    background: var(--border-color);
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.history-filter-btn.active .hf-count {
+    background: var(--accent-color);
+    color: #fff;
+}
+
+.history-filter-btn.completed.active .hf-count {
+    background: #22c55e;
+    color: #fff;
+}
+
+.history-filter-btn.failed.active .hf-count {
+    background: #ef4444;
+    color: #fff;
 }
 
 .modal-premium {

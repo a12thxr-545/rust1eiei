@@ -144,8 +144,74 @@ export class MissionComponent implements OnInit, OnDestroy {
 
   // Search
   searchCode = '';
+  searchQuery = signal<string>(''); // client-side name search
   brawlerSearchQuery = '';
   brawlerSearchResults = this._memberService.paginator;
+
+  // Filter
+  showFilterPanel = signal<boolean>(false);
+  filterLetter = signal<string>('');
+  filterNotFull = signal<boolean>(false); // true = show only missions with space
+  historyFilter = signal<'all' | 'Completed' | 'Failed'>('all');
+  readonly alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+
+  filteredHistory = computed(() => {
+    const f = this.historyFilter();
+    if (f === 'all') return this.finishedMissions();
+    return this.finishedMissions().filter(m => m.status === f);
+  });
+
+  historyCompletedCount = computed(() =>
+    this.finishedMissions().filter(m => m.status === 'Completed').length
+  );
+
+  historyFailedCount = computed(() =>
+    this.finishedMissions().filter(m => m.status === 'Failed').length
+  );
+
+  activeFilterCount = computed(() => {
+    let count = 0;
+    if (this.filterLetter()) count++;
+    if (this.filterNotFull()) count++;
+    return count;
+  });
+
+  filteredMissions = computed(() => {
+    let list = this.missions();
+    const letter = this.filterLetter();
+    const notFull = this.filterNotFull();
+    const query = this.searchQuery().trim().toLowerCase();
+
+    if (query) {
+      list = list.filter(m =>
+        m.name.toLowerCase().includes(query) ||
+        m.code.toLowerCase().includes(query)
+      );
+    }
+    if (letter) {
+      list = list.filter(m => m.name.toUpperCase().startsWith(letter));
+    }
+    if (notFull) {
+      list = list.filter(m => {
+        if (m.max_participants <= 0) return true; // unlimited = always has space
+        return m.crew_count < m.max_participants;
+      });
+    }
+    return list;
+  });
+
+  setFilterLetter(letter: string): void {
+    this.filterLetter.set(this.filterLetter() === letter ? '' : letter);
+  }
+
+  toggleFilterNotFull(): void {
+    this.filterNotFull.set(!this.filterNotFull());
+  }
+
+  clearFilters(): void {
+    this.filterLetter.set('');
+    this.filterNotFull.set(false);
+  }
 
   // Edit form
   editName = '';
@@ -192,6 +258,7 @@ export class MissionComponent implements OnInit, OnDestroy {
 
   onTabChange(index: number): void {
     this.selectedTabIndex = index;
+    this.showFilterPanel.set(false); // ปิด filter dropdown เมื่อเปลี่ยน tab
     if (index === 0) {
       this.loadOtherMissions();
     } else if (index === 1) {
