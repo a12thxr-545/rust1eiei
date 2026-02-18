@@ -1,16 +1,24 @@
 import { Component, AfterViewInit, OnDestroy } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 
 declare var Snap: any;
 declare var mina: any;
 
 @Component({
   selector: 'app-not-found',
-  imports: [],
+  standalone: true,
+  imports: [RouterLink],
   templateUrl: './not-found.html',
   styleUrl: './not-found.css',
 })
 export class NotFound implements AfterViewInit, OnDestroy {
   private intervalId: any;
+
+  constructor(private router: Router) { }
+
+  returnToBase() {
+    this.router.navigate(['/']);
+  }
 
   ngAfterViewInit() {
     // Check if Snap is available (loaded from CDN or assets)

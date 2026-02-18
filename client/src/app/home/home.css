@@ -1,17 +1,9 @@
-/* ============================================
-   MINIMAL HOME PAGE
-   ============================================ */
-
 .home-page {
     min-height: 100vh;
     background: var(--bg-color);
     color: var(--text-primary);
     transition: background 0.3s ease, color 0.3s ease;
 }
-
-/* ============================================
-   HERO SECTION
-   ============================================ */
 
 .hero {
     min-height: 70vh;
@@ -58,10 +50,6 @@
     justify-content: center;
     gap: 16px;
 }
-
-/* ============================================
-   BUTTONS
-   ============================================ */
 
 .btn-primary {
     display: inline-flex;
@@ -139,10 +127,6 @@
     box-shadow: 0 15px 35px -8px rgba(var(--accent-color-rgb, 242, 101, 34), 0.5);
 }
 
-/* ============================================
-   STATS SECTION
-   ============================================ */
-
 .stats {
     padding: 60px 24px;
     border-bottom: 1px solid var(--border-color);
@@ -187,10 +171,6 @@
     opacity: 0.5;
 }
 
-/* ============================================
-   FEATURES SECTION
-   ============================================ */
-
 .features {
     padding: 80px 24px;
     border-bottom: 1px solid var(--border-color);
@@ -232,10 +212,6 @@
     line-height: 1.5;
     margin: 0;
 }
-
-/* ============================================
-   MISSIONS SECTION
-   ============================================ */
 
 .missions {
     padding: 80px 24px;
@@ -405,10 +381,6 @@
     height: 14px;
 }
 
-/* ============================================
-   CTA SECTION
-   ============================================ */
-
 .cta {
     padding: 100px 24px;
     text-align: center;
@@ -429,10 +401,6 @@
     color: var(--text-secondary);
     margin: 0 0 32px 0;
 }
-
-/* ============================================
-   RESPONSIVE
-   ============================================ */
 
 @media (max-width: 900px) {
     .features-grid {

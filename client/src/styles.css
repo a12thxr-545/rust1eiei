@@ -24,7 +24,6 @@ body {
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
-    /* Disable horizontal swipe gestures for scrolling */
 }
 
 * {
@@ -78,7 +77,6 @@ img {
 }
 
 [data-theme='orange'] {
-    /* Orange + Deep Navy Theme (#0a2642) */
     --bg-color: #0a2642;
     --card-bg: #143454;
     --text-primary: #ffffff;
@@ -90,22 +88,13 @@ img {
     --nav-bg-rgb: 10, 38, 66;
     --accent-color: #F26522;
     --accent-color-rgb: 242, 101, 34;
-    /* Orange Accent */
     --hover-bg: rgba(255, 255, 255, 0.08);
-    /* Consistent glass/navy highlight */
     --shadow: 0 4px 25px -5px rgba(0, 0, 0, 0.4);
     --glass-bg: rgba(10, 38, 66, 0.85);
     --glass-border: rgba(242, 101, 34, 0.4);
 }
 
-
-
-
-
-
-
 [data-theme='red'] {
-    /* Liverpool Theme */
     --bg-color: #0d0000;
     --card-bg: #1a0202;
     --text-primary: #fff1f1;
@@ -117,7 +106,6 @@ img {
     --nav-bg-rgb: 13, 0, 0;
     --accent-color: #c8102e;
     --accent-color-rgb: 200, 16, 46;
-    /* Liverpool Red */
     --hover-bg: rgba(200, 16, 46, 0.15);
     --shadow: 0 10px 15px -3px rgb(153 27 27 / 0.4);
     --glass-bg: rgba(26, 2, 2, 0.7);
@@ -134,11 +122,6 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* ============================================
-   SNACKBAR STYLES - MINIMAL DARK THEME
-   ============================================ */
-
-/* Base snackbar styling */
 .cdk-global-overlay-wrapper,
 .cdk-overlay-pane {
     pointer-events: none !important;
@@ -160,7 +143,6 @@ body {
     pointer-events: auto !important;
 }
 
-/* Success snackbar */
 .snackbar-success .mdc-snackbar__surface {
     border-left: 3px solid #22c55e !important;
 }
@@ -174,7 +156,6 @@ body {
     opacity: 0.7;
 }
 
-/* Error snackbar */
 .snackbar-error .mdc-snackbar__surface {
     border-left: 3px solid #ef4444 !important;
 }
@@ -188,7 +169,6 @@ body {
     opacity: 0.7;
 }
 
-/* Warning snackbar */
 .snackbar-warning .mdc-snackbar__surface {
     border-left: 3px solid #f59e0b !important;
 }
@@ -202,7 +182,6 @@ body {
     opacity: 0.7;
 }
 
-/* Paginator and Icon Button styles */
 ::ng-deep .mat-mdc-paginator .mat-mdc-select-value {
     color: var(--text-muted) !important;
 }
@@ -215,7 +194,6 @@ body {
     color: var(--border-color) !important;
 }
 
-/* Info snackbar */
 .snackbar-info .mdc-snackbar__surface {
     border-left: 3px solid #3b82f6 !important;
 }
@@ -229,7 +207,6 @@ body {
     opacity: 0.7;
 }
 
-/* Snackbar text styling */
 .mat-mdc-snack-bar-container .mdc-snackbar__label {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-weight: 500;
@@ -237,7 +214,6 @@ body {
     letter-spacing: 0.2px;
 }
 
-/* Snackbar button styling */
 .mat-mdc-snack-bar-container .mat-mdc-button {
     font-weight: 500;
     font-size: 12px;
@@ -250,10 +226,6 @@ body {
 .mat-mdc-snack-bar-container .mat-mdc-button:hover {
     opacity: 1 !important;
 }
-
-/* ============================================
-   LOADING OVERLAY STYLES
-   ============================================ */
 
 .loading-overlay {
     position: fixed;
@@ -301,13 +273,11 @@ body {
     }
 }
 
-/* NGX Spinner customization */
 .ngx-spinner-overlay {
     backdrop-filter: blur(4px) !important;
     background-color: var(--nav-bg) !important;
 }
 
-/* Custom Scrollbar */
 ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
