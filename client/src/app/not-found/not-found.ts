@@ -7,7 +7,6 @@ declare var mina: any;
 @Component({
   selector: 'app-not-found',
   standalone: true,
-  imports: [RouterLink],
   templateUrl: './not-found.html',
   styleUrl: './not-found.css',
 })

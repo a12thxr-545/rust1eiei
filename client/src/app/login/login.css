@@ -5,6 +5,7 @@
     justify-content: center;
     background: var(--bg-color);
     padding: 24px;
+    padding-top: 80px;
     transition: background 0.3s ease;
 }
 
