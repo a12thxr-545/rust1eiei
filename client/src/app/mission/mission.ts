@@ -143,8 +143,7 @@ export class MissionComponent implements OnInit, OnDestroy {
   private pollInterval?: any;
 
   // Search
-  searchCode = '';
-  searchQuery = signal<string>(''); // client-side name search
+  searchQuery = signal<string>(''); // client-side name/code search
   brawlerSearchQuery = '';
   brawlerSearchResults = this._memberService.paginator;
 
@@ -225,7 +224,6 @@ export class MissionComponent implements OnInit, OnDestroy {
       this._missionService.loadOtherMissions({
         exclude_chief_id: passport.id,
         exclude_member_id: passport.id,
-        code: this.searchCode || undefined
       });
     }
   }
