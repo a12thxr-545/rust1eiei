@@ -18,13 +18,37 @@
         padding: calc(120px + var(--safe-area-top, 0px)) 16px 40px;
     }
 
-    .filter-panel {
-        min-width: unset;
-        max-width: calc(100vw - 32px);
-        left: 0;
-        right: 0;
+    /* alphabet pills เล็กลงบน mobile */
+    .alpha-pill {
+        width: 24px;
+        height: 24px;
+        font-size: 10px;
+        border-radius: 5px;
+    }
+
+    .alphabet-pills {
+        gap: 3px;
+    }
+
+    .filter-label {
+        min-width: 60px;
+        font-size: 10px;
     }
 }
+
+
+@keyframes filterPanelUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 
 .page-header {
     max-width: 1100px;
@@ -51,6 +75,7 @@
     max-width: 1100px;
     margin: 0 auto;
     width: 100%;
+    position: relative;
 }
 
 .tabs {
@@ -149,7 +174,7 @@
 .search-box {
     position: relative;
     flex: 1;
-    max-width: 400px;
+    min-width: 0;
 }
 
 .search-icon {
@@ -256,22 +281,51 @@
     font-weight: 800;
 }
 
+/* Filter backdrop (mobile) */
+.filter-backdrop {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .filter-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+        backdrop-filter: blur(2px);
+    }
+}
+
+/* Drag handle */
+.filter-drag-handle {
+    display: none;
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border-color);
+    margin: 0 auto 4px;
+}
+
+@media (max-width: 768px) {
+    .filter-drag-handle {
+        display: block;
+    }
+}
+
 /* Filter Dropdown Panel */
 .filter-panel {
-    position: absolute;
-    top: calc(100% + 8px);
-    left: 0;
-    z-index: 200;
+    position: relative;
+    z-index: 10;
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 16px;
     padding: 20px;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
-    min-width: 480px;
-    max-width: 700px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     display: flex;
     flex-direction: column;
     gap: 16px;
+    margin-top: 10px;
     animation: filterPanelIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -357,6 +411,44 @@
     border-color: var(--accent-color);
     color: #fff;
     box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+}
+
+/* Filter text input (Name starts with) */
+.filter-input-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    max-width: 280px;
+}
+
+.filter-text-input {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 9px 36px 9px 14px;
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.filter-text-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    background: var(--card-bg);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.filter-text-input::placeholder {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+@media (max-width: 768px) {
+    .filter-input-wrap {
+        max-width: 100%;
+    }
 }
 
 

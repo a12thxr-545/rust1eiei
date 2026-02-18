@@ -151,9 +151,8 @@ export class MissionComponent implements OnInit, OnDestroy {
   // Filter
   showFilterPanel = signal<boolean>(false);
   filterLetter = signal<string>('');
-  filterNotFull = signal<boolean>(false); // true = show only missions with space
+  filterNotFull = signal<boolean>(false);
   historyFilter = signal<'all' | 'Completed' | 'Failed'>('all');
-  readonly alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
   filteredHistory = computed(() => {
     const f = this.historyFilter();
@@ -171,14 +170,14 @@ export class MissionComponent implements OnInit, OnDestroy {
 
   activeFilterCount = computed(() => {
     let count = 0;
-    if (this.filterLetter()) count++;
+    if (this.filterLetter().trim()) count++;
     if (this.filterNotFull()) count++;
     return count;
   });
 
   filteredMissions = computed(() => {
     let list = this.missions();
-    const letter = this.filterLetter();
+    const prefix = this.filterLetter().trim().toUpperCase();
     const notFull = this.filterNotFull();
     const query = this.searchQuery().trim().toLowerCase();
 
@@ -188,21 +187,17 @@ export class MissionComponent implements OnInit, OnDestroy {
         m.code.toLowerCase().includes(query)
       );
     }
-    if (letter) {
-      list = list.filter(m => m.name.toUpperCase().startsWith(letter));
+    if (prefix) {
+      list = list.filter(m => m.name.toUpperCase().startsWith(prefix));
     }
     if (notFull) {
       list = list.filter(m => {
-        if (m.max_participants <= 0) return true; // unlimited = always has space
+        if (m.max_participants <= 0) return true;
         return m.crew_count < m.max_participants;
       });
     }
     return list;
   });
-
-  setFilterLetter(letter: string): void {
-    this.filterLetter.set(this.filterLetter() === letter ? '' : letter);
-  }
 
   toggleFilterNotFull(): void {
     this.filterNotFull.set(!this.filterNotFull());

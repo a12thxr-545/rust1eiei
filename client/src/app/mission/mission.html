@@ -67,7 +67,7 @@
                     </button>
                 </div>
 
-                <!-- Filter Dropdown Panel -->
+                <!-- Filter Panel (inline, below search row) -->
                 @if (showFilterPanel()) {
                 <div class="filter-panel">
                     <div class="filter-panel-header">
@@ -77,13 +77,14 @@
                         }
                     </div>
 
-                    <!-- Alphabet Filter -->
+                    <!-- Name prefix text input -->
                     <div class="filter-section">
                         <span class="filter-label">Name starts with</span>
-                        <div class="alphabet-pills">
-                            @for (letter of alphabet; track letter) {
-                            <button class="alpha-pill" [class.active]="filterLetter() === letter"
-                                (click)="setFilterLetter(letter)">{{ letter }}</button>
+                        <div class="filter-input-wrap">
+                            <input class="filter-text-input" type="text" maxlength="20" [ngModel]="filterLetter()"
+                                (ngModelChange)="filterLetter.set($event)" placeholder="e.g. A, Au, Audit...">
+                            @if (filterLetter()) {
+                            <button class="search-clear-btn" (click)="filterLetter.set('')">×</button>
                             }
                         </div>
                     </div>
@@ -100,6 +101,7 @@
                 </div>
                 }
             </div>
+
 
             @if (isLoading()) {
             <div class="loading-state">
