@@ -1,6 +1,7 @@
 import { Component, inject, signal, computed, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Location } from '@angular/common';
 import { PassportService } from '../_services/passport-service';
 import { SnackbarService } from '../_services/snackbar.service';
 
@@ -16,6 +17,11 @@ export class Profile {
 
   private passportService = inject(PassportService);
   private snackbarService = inject(SnackbarService);
+  private location = inject(Location);
+
+  goBack(): void {
+    this.location.back();
+  }
 
   passport = this.passportService.data;
   isUploading = signal(false);
