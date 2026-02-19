@@ -93,4 +93,14 @@ impl CrewOperationRepository for CrewOperationPostgres {
             .is_some();
         Ok(exists)
     }
+
+    async fn get_members_ordered_by_joined_at(&self, mission_id: i32) -> Result<Vec<i32>> {
+        let mut conn = Arc::clone(&self.db_pool).get()?;
+        let ids = crew_memberships::table
+            .filter(crew_memberships::mission_id.eq(mission_id))
+            .order_by(crew_memberships::joined_at.asc())
+            .select(crew_memberships::brawler_id)
+            .load::<i32>(&mut conn)?;
+        Ok(ids)
+    }
 }

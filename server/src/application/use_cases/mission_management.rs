@@ -115,6 +115,38 @@ where
             .edit(mission_id, edit_mission_entity)
             .await?;
 
+        // Logic to kick out excess participants if max_participants is reduced
+        if let Some(new_max) = edit_mission_model.max_participants {
+            if new_max > 0 {
+                let members = self
+                    .crew_operation_repository
+                    .get_members_ordered_by_joined_at(mission_id)
+                    .await?;
+
+                if members.len() > new_max as usize {
+                    let to_kick = &members[new_max as usize..];
+                    for &brawler_id in to_kick {
+                        // Don't kick the chief (though chief should be the first one usually)
+                        if brawler_id == chief_id {
+                            continue;
+                        }
+
+                        self.crew_operation_repository
+                            .leave(CrewMemberShips {
+                                mission_id,
+                                brawler_id,
+                            })
+                            .await?;
+
+                        self.realtime_hub.broadcast(RealtimeEvent::MissionLeft {
+                            mission_id,
+                            brawler_id,
+                        });
+                    }
+                }
+            }
+        }
+
         self.realtime_hub.broadcast(RealtimeEvent::MissionUpdated {
             mission_id,
             chief_id,

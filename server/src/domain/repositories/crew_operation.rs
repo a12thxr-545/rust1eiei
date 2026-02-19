@@ -9,4 +9,5 @@ pub trait CrewOperationRepository {
     async fn leave(&self, crew_member_ships: CrewMemberShips) -> Result<()>;
     async fn get_current_mission(&self, brawler_id: i32) -> Result<Option<i32>>;
     async fn is_member(&self, mission_id: i32, brawler_id: i32) -> Result<bool>;
+    async fn get_members_ordered_by_joined_at(&self, mission_id: i32) -> Result<Vec<i32>>;
 }

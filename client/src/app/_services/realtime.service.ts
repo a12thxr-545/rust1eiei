@@ -76,14 +76,19 @@ export class RealtimeService {
             this._socialService.loadInvitations();
         } else if (event.type === 'MissionCreated' || event.type === 'MissionUpdated' ||
             event.type === 'MissionDeleted' || event.type === 'MissionStatusChanged' ||
-            event.type === 'MissionJoined' || event.type === 'MissionLeft' ||
+            event.type === 'MissionJoined' ||
             event.type === 'MissionInvitationAccepted') {
             if (event.type === 'MissionDeleted') {
                 this._snackbar.info('The mission has been terminated by the chief.');
             }
-            // Trigger global refresh for missions via the service trigger
             this._missionService.triggerRefresh();
-            // Also update the signals immediately
+            this.refreshMissions();
+        } else if (event.type === 'MissionLeft') {
+            const passport = this._passportService.data();
+            if (passport && event.payload.brawler_id === passport.id) {
+                this._snackbar.warning('System Alert: You have been removed from the mission deployment.');
+            }
+            this._missionService.triggerRefresh();
             this.refreshMissions();
         }
     }
