@@ -10,7 +10,7 @@ services:
       - key: STAGE
         value: Production
       - key: DATABASE_URL
-        value: postgresql://postgres:atichatdecho@db.efeisqqzrcvqnztsiiin.supabase.co:5432/postgres
+        value: postgresql://postgres.efeisqqzrcvqnztsiiin:atichatdecho@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true
       - key: JWT_USER_SECRET
         generateValue: true
       - key: SERVER_BODY_LIMIT
