@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { inject, Injectable, signal, PLATFORM_ID } from "@angular/core";
 import { isPlatformBrowser } from "@angular/common";
-import { environment } from "../../environments/environment.development";
+import { environment } from '../../environments/environment';
 import { default_pagination, Pagination, User, UserPagination } from "../_model/pagination";
 import { CacheManager } from "../_helpers/cache.helper";
 import { parseQuery } from "../_helpers/query.helper";

@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: the-convergence
+    runtime: image
+    image:
+      url: docker.io/arthurm0rgan545/the-convergence:latest
+    envVars:
+      - key: SERVER_PORT
+        value: 10000
+      - key: STAGE
+        value: Production
+      - key: DATABASE_URL
+        value: postgresql://postgres:[YOUR-PASSWORD]@db.efeisqqzrcvqnztsiiin.supabase.co:5432/postgres
+      - key: JWT_USER_SECRET
+        generateValue: true
+      - key: SERVER_BODY_LIMIT
+        value: "15"
+      - key: SERVER_TIMEOUT
+        value: "30"
+      - key: CLOUDINARY_CLOUD_NAME
+        value: "dtqrphm2b"
+      - key: CLOUDINARY_API_KEY
+        value: "332441267638168"
+      - key: CLOUDINARY_API_SECRET
+        value: "esTSyyi2tudHGwUnnX-zxdnOAxU"

@@ -1,7 +1,7 @@
 import { inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
-import { environment } from '../../environments/environment.development';
+import { environment } from '../../environments/environment';
 import { AddMission, CrewMember, EditMission, Mission, MissionFilter, UploadedImage } from '../_model/mission';
 import { firstValueFrom, Subject } from 'rxjs';
 

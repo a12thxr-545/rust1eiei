@@ -1,6 +1,6 @@
 import { Injectable, inject, PLATFORM_ID, NgZone, effect } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { environment } from '../../environments/environment.development';
+import { environment } from '../../environments/environment';
 import { PassportService } from './passport-service';
 import { SocialService } from './social-service';
 import { MissionService } from './mission-service';

@@ -1,0 +1,21 @@
+# Rust build artifacts
+target/
+
+# Git
+.git
+.gitignore
+
+# Environment files (inject via -e or --env-file at runtime)
+.env
+
+# Editor / OS
+.DS_Store
+*.swp
+*.swo
+
+# API tests
+api-tests/
+
+# Cargo cache
+**/.cargo/registry
+**/.cargo/git

@@ -1,5 +1,5 @@
 import { HttpClient, HttpErrorResponse } from "@angular/common/http"
-import { environment } from "../../environments/environment.development"
+import { environment } from '../../environments/environment'
 import { inject, Injectable, PLATFORM_ID, signal } from "@angular/core"
 import { LoginModel, Passport, RegisterBrawlerModel } from "../_model/passport"
 import { firstValueFrom } from "rxjs"
