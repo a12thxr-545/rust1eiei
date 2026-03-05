@@ -1,13 +1,11 @@
-use std::{net::SocketAddr, sync::Arc, time::Duration};
+use std::{net::SocketAddr, sync::Arc};
 
-use anyhow::{Ok, Result};
+use anyhow::Result;
 use axum::{Router, http::StatusCode, routing::get};
 use tokio::net::TcpListener;
 use tower_http::{
     cors::CorsLayer,
-    limit::RequestBodyLimitLayer,
     services::{ServeDir, ServeFile},
-    trace::TraceLayer,
 };
 use tracing::info;
 
@@ -20,9 +18,7 @@ use crate::{
 
 fn static_serve() -> Router {
     let dir = "statics";
-
     let service = ServeDir::new(dir).not_found_service(ServeFile::new(format!("{dir}/index.html")));
-
     Router::new().fallback_service(service)
 }
 
@@ -66,9 +62,6 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
         .layer(tower_http::trace::TraceLayer::new_for_http())
         .layer(CorsLayer::permissive());
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], config.server.port));
-    let listener = TcpListener::bind(addr).await?;
-
     // Bind to [::] to support both IPv4 and IPv6 (Dual-stack)
     // This is more robust for cloud proxies that might try to connect via IPv6
     let addr = SocketAddr::new(
@@ -91,7 +84,6 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
 
 async fn shutdown_signal() {
     let ctrl_c = async { tokio::signal::ctrl_c().await.expect("Fail ctrl + c") };
-
     let terminate = std::future::pending::<()>();
 
     tokio::select! {
