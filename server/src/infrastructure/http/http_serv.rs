@@ -72,11 +72,14 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
         .layer(middleware::from_fn(request_logger))
         .layer(
             CorsLayer::new()
-                .allow_origin(
+                .allow_origin([
                     "https://rust1eiei-cxoxu4uzr-a12thxr545s-projects.vercel.app"
-                        .parse::<axum::http::HeaderValue>()
+                        .parse()
                         .unwrap(),
-                )
+                    "https://rust1eiei-a12thxr545s-projects.vercel.app"
+                        .parse()
+                        .unwrap(),
+                ])
                 .allow_methods(tower_http::cors::Any)
                 .allow_headers(tower_http::cors::Any),
         );
