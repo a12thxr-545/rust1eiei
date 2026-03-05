@@ -20,13 +20,20 @@ async fn main() {
         }
     };
 
-    info!(".ENV LOADED. Port: {}", dotenvy_env.server.port);
+    if dotenvy_env.database.url.is_empty() {
+        error!("❌ DATABASE_URL is missing! Please set it in Railway Variables.");
+        std::process::exit(1);
+    }
 
+    info!("Connecting to database...");
     let postgres_pool = match postgresql_connection::establish_connection(&dotenvy_env.database.url)
     {
         Ok(pool) => pool,
         Err(err) => {
-            error!("Fail to connect: {}", err);
+            error!(
+                "❌ Database connection failed: {}. Ensure your DATABASE_URL is correct.",
+                err
+            );
             std::process::exit(1)
         }
     };
