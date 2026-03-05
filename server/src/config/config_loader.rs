@@ -11,7 +11,7 @@ pub fn load() -> Result<DotEnvyConfig> {
     let server = Server {
         port: std::env::var("PORT")
             .or_else(|_| std::env::var("SERVER_PORT"))
-            .unwrap_or_else(|_| "8080".to_string())
+            .unwrap_or_else(|_| "80".to_string())
             .parse()?,
         body_limit: std::env::var("SERVER_BODY_LIMIT")
             .unwrap_or_else(|_| "2".to_string())

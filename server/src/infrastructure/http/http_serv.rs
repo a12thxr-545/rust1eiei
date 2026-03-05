@@ -69,8 +69,8 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
     let addr = SocketAddr::from(([0, 0, 0, 0], config.server.port));
     let listener = TcpListener::bind(addr).await?;
 
-    info!("🚀 SERVER READY");
-    info!("Listening on: {}", addr);
+    info!("✅ SEVER READY AND WAITING FOR CONNECTIONS");
+    info!("Address: {}", addr);
     info!("Railway Port Var: {:?}", std::env::var("PORT").ok());
 
     axum::serve(listener, app)
