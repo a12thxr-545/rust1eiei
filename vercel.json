@@ -3,17 +3,10 @@
     "buildCommand": "cd client && npm install && npm run build",
     "outputDirectory": "client/dist/client/browser",
     "installCommand": "echo skip",
-    "framework": null,
-    "builds": [
+    "rewrites": [
         {
-            "src": "client/dist/client/server/server.mjs",
-            "use": "@vercel/node"
-        }
-    ],
-    "routes": [
-        {
-            "src": "/(.*)",
-            "dest": "client/dist/client/server/server.mjs"
+            "source": "/(.*)",
+            "destination": "/index.html"
         }
     ]
 }
