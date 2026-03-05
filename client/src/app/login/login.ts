@@ -203,9 +203,10 @@ export class Login {
           display_name: this.form.value.displayName
         });
         if (error) {
-          const msg = error.includes('already taken') ? 'Username already taken' : 'Registration failed';
+          const errorStr = (typeof error === 'string') ? error : (error as any).message || JSON.stringify(error);
+          const msg = errorStr.includes('already taken') ? 'Username already taken' : 'Registration failed';
           this.snackbarService.error(msg);
-          if (error.includes('already taken')) {
+          if (errorStr.includes('already taken')) {
             this.errorMsg.username.set('Username already taken');
           }
           return;
