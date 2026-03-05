@@ -78,16 +78,9 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
         ))
         .layer(
             CorsLayer::new()
-                .allow_methods([
-                    Method::GET,
-                    Method::POST,
-                    Method::PUT,
-                    Method::PATCH,
-                    Method::DELETE,
-                    Method::OPTIONS,
-                ])
+                .allow_methods(Any)
                 .allow_origin(Any)
-                .allow_headers([AUTHORIZATION, CONTENT_TYPE]),
+                .allow_headers(Any),
         )
         .layer(TraceLayer::new_for_http());
 
