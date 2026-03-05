@@ -76,13 +76,8 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
         .layer(RequestBodyLimitLayer::new(
             (config.server.body_limit * 1024 * 1024).try_into()?,
         ))
-        .layer(
-            CorsLayer::new()
-                .allow_methods(Any)
-                .allow_origin(Any)
-                .allow_headers(Any),
-        )
-        .layer(TraceLayer::new_for_http());
+        .layer(TraceLayer::new_for_http())
+        .layer(CorsLayer::permissive());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], config.server.port));
     let listener = TcpListener::bind(addr).await?;
