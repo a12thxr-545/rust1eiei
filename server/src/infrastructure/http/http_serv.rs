@@ -1,16 +1,10 @@
 use std::{net::SocketAddr, sync::Arc, time::Duration};
 
 use anyhow::{Ok, Result};
-use axum::{
-    Router,
-    http::{
-        Method, StatusCode,
-        header::{AUTHORIZATION, CONTENT_TYPE},
-    },
-};
+use axum::{Router, http::StatusCode, routing::get};
 use tokio::net::TcpListener;
 use tower_http::{
-    cors::{Any, CorsLayer},
+    cors::CorsLayer,
     limit::RequestBodyLimitLayer,
     services::{ServeDir, ServeFile},
     trace::TraceLayer,
@@ -67,8 +61,9 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
     let realtime_hub = Arc::new(RealtimeHub::new());
 
     let app = Router::new()
+        .route("/", get(|| async { "Backend is alive!" }))
         .nest("/api", api_serve(Arc::clone(&db_pool), realtime_hub))
-        .merge(static_serve())
+        .fallback_service(static_serve())
         .layer(tower_http::timeout::TimeoutLayer::with_status_code(
             StatusCode::REQUEST_TIMEOUT,
             Duration::from_secs(config.server.timeout),
@@ -82,7 +77,11 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
     let addr = SocketAddr::from(([0, 0, 0, 0], config.server.port));
     let listener = TcpListener::bind(addr).await?;
 
-    info!("Server start on port {}", config.server.port);
+    info!(
+        "Server listening on {} (PORT environment variable: {})",
+        addr,
+        std::env::var("PORT").unwrap_or_default()
+    );
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
         .await?;
