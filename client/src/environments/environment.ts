@@ -1,4 +1,4 @@
 export const environment = {
-    base_url: 'http://localhost:8000'
+    base_url: 'https://rust1eiei-production-5a75.up.railway.app'
 };
 
