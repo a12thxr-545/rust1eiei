@@ -64,23 +64,15 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
         .route("/", get(|| async { "Backend is alive!" }))
         .nest("/api", api_serve(Arc::clone(&db_pool), realtime_hub))
         .layer(tower_http::trace::TraceLayer::new_for_http())
-        .layer(CorsLayer::permissive())
-        .layer(RequestBodyLimitLayer::new(
-            (config.server.body_limit * 1024 * 1024).try_into()?,
-        ))
-        .layer(tower_http::timeout::TimeoutLayer::with_status_code(
-            StatusCode::REQUEST_TIMEOUT,
-            Duration::from_secs(config.server.timeout),
-        ));
+        .layer(CorsLayer::permissive());
 
     let addr = SocketAddr::from(([0, 0, 0, 0], config.server.port));
     let listener = TcpListener::bind(addr).await?;
 
-    info!(
-        "Server listening on {} (PORT environment variable: {})",
-        addr,
-        std::env::var("PORT").unwrap_or_default()
-    );
+    info!("🚀 SERVER READY");
+    info!("Listening on: {}", addr);
+    info!("Railway Port Var: {:?}", std::env::var("PORT").ok());
+
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
         .await?;
