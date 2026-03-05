@@ -69,7 +69,16 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
     let addr = SocketAddr::from(([0, 0, 0, 0], config.server.port));
     let listener = TcpListener::bind(addr).await?;
 
-    info!("✅ SEVER READY AND WAITING FOR CONNECTIONS");
+    // Bind to [::] to support both IPv4 and IPv6 (Dual-stack)
+    // This is more robust for cloud proxies that might try to connect via IPv6
+    let addr = SocketAddr::new(
+        std::net::IpAddr::V6(std::net::Ipv6Addr::UNSPECIFIED),
+        config.server.port,
+    );
+
+    let listener = TcpListener::bind(addr).await?;
+
+    info!("✅ SERVER READY AND WAITING FOR CONNECTIONS");
     info!("Address: {}", addr);
     info!("Railway Port Var: {:?}", std::env::var("PORT").ok());
 
