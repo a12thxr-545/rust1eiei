@@ -22,13 +22,11 @@ pub fn load() -> Result<DotEnvyConfig> {
     };
 
     let database = Database {
-        url: std::env::var("DATABASE_URL")
-            .expect("DATABASE_URL is valid")
-            .parse()?,
+        url: std::env::var("DATABASE_URL").unwrap_or_default().parse()?,
     };
 
     let secret = std::env::var("JWT_USER_SECRET")
-        .expect("SECRET is valid")
+        .unwrap_or_else(|_| "default_secret_for_railway".to_string())
         .parse()?;
 
     let config = DotEnvyConfig {
@@ -51,10 +49,12 @@ pub fn get_jwt_env() -> Result<JwtEnv> {
     dotenvy::dotenv().ok();
 
     let secret = std::env::var("JWT_USER_SECRET")
-        .expect("JWT_USER_SECRET is valid")
+        .unwrap_or_else(|_| "default_secret_for_railway".to_string())
         .parse()?;
 
-    let life_time_days = std::env::var("JWT_LIFE_TIME_DAYS")?.parse::<i64>()?;
+    let life_time_days = std::env::var("JWT_LIFE_TIME_DAYS")
+        .unwrap_or_else(|_| "7".to_string())
+        .parse::<i64>()?;
 
     Ok(JwtEnv {
         secret,
