@@ -48,7 +48,7 @@ COPY --from=builder /app/target/release/server ./server
 # Copy Angular static files
 COPY statics ./statics
 
-# Port 80 for HTTP
-EXPOSE 80
+# Railway sets $PORT dynamically; expose 8080 as default
+EXPOSE 8080
 
 CMD ["./server"]

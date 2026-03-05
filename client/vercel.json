@@ -1,0 +1,19 @@
+{
+    "version": 2,
+    "buildCommand": "npm run build",
+    "outputDirectory": "dist/client",
+    "installCommand": "npm install",
+    "framework": null,
+    "builds": [
+        {
+            "src": "dist/client/server/server.mjs",
+            "use": "@vercel/node"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "dist/client/server/server.mjs"
+        }
+    ]
+}
