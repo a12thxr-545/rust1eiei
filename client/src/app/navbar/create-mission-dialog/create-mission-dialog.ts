@@ -6,7 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MissionService } from '../../_services/mission-service';
 import { SnackbarService } from '../../_services/snackbar.service';
-import { NgxSpinnerService } from 'ngx-spinner';
+import { NgxSpinnerService } from '../../_services/spinner.service';
 
 @Component({
   selector: 'app-create-mission-dialog',

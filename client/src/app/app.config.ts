@@ -7,7 +7,7 @@ import { errorInterceptor } from './_interceptor/error-interceptor';
 import { routes } from './app.routes';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { NgxSpinnerModule } from 'ngx-spinner';
+import { NgxSpinnerModule } from './_services/ngx-spinner.module';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 export const appConfig: ApplicationConfig = {

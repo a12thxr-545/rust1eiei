@@ -1,6 +1,6 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { NgxSpinnerService } from 'ngx-spinner';
+import { NgxSpinnerService } from '../_services/spinner.service';
 import { finalize } from 'rxjs/operators';
 
 let requestCount = 0;

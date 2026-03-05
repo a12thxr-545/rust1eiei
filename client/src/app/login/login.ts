@@ -2,7 +2,7 @@ import { Component, inject, PLATFORM_ID, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PasswordMatchValidator, passwordValidator } from '../_helpers/passpword-vaidator';
-import { NgxSpinnerModule, NgxSpinnerService } from 'ngx-spinner';
+import { NgxSpinnerModule, NgxSpinnerService } from '../_services/ngx-spinner.module';
 import { PassportService } from '../_services/passport-service';
 import { SnackbarService } from '../_services/snackbar.service';
 import { Router } from '@angular/router';

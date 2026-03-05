@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { NgxSpinnerService } from 'ngx-spinner';
+import { NgxSpinnerService } from './spinner.service';
 @Injectable({
   providedIn: 'root',
 })
