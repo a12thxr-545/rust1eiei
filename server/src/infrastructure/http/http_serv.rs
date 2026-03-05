@@ -1,12 +1,15 @@
 use std::{net::SocketAddr, sync::Arc};
 
 use anyhow::Result;
-use axum::{Router, http::StatusCode, routing::get};
-use tokio::net::TcpListener;
-use tower_http::{
-    cors::CorsLayer,
-    services::{ServeDir, ServeFile},
+use axum::{
+    Router,
+    http::{Request, StatusCode},
+    middleware::{self, Next},
+    response::Response,
+    routing::get,
 };
+use tokio::net::TcpListener;
+use tower_http::cors::CorsLayer;
 use tracing::info;
 
 use crate::{
@@ -16,10 +19,17 @@ use crate::{
     },
 };
 
-fn static_serve() -> Router {
-    let dir = "statics";
-    let service = ServeDir::new(dir).not_found_service(ServeFile::new(format!("{dir}/index.html")));
-    Router::new().fallback_service(service)
+async fn request_logger(req: Request<axum::body::Body>, next: Next) -> Response {
+    let method = req.method().clone();
+    let path = req.uri().path().to_string();
+
+    info!("--> {} {}", method, path);
+
+    let response = next.run(req).await;
+
+    info!("<-- {} {} (Status: {})", method, path, response.status());
+
+    response
 }
 
 fn api_serve(db_pool: Arc<PgPoolSquad>, realtime_hub: Arc<RealtimeHub>) -> Router {
@@ -59,21 +69,17 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
     let app = Router::new()
         .route("/", get(|| async { "Backend is alive!" }))
         .nest("/api", api_serve(Arc::clone(&db_pool), realtime_hub))
-        .layer(tower_http::trace::TraceLayer::new_for_http())
+        .layer(middleware::from_fn(request_logger))
         .layer(CorsLayer::permissive());
 
-    // Bind to [::] to support both IPv4 and IPv6 (Dual-stack)
-    // This is more robust for cloud proxies that might try to connect via IPv6
-    let addr = SocketAddr::new(
-        std::net::IpAddr::V6(std::net::Ipv6Addr::UNSPECIFIED),
-        config.server.port,
-    );
+    // Bind to 0.0.0.0 to be safe, but use the port from config
+    let addr = SocketAddr::from(([0, 0, 0, 0], config.server.port));
 
     let listener = TcpListener::bind(addr).await?;
 
-    info!("✅ SERVER READY AND WAITING FOR CONNECTIONS");
-    info!("Address: {}", addr);
-    info!("Railway Port Var: {:?}", std::env::var("PORT").ok());
+    info!("🚀 SERVER STARTING...");
+    info!("Binding to: {}", addr);
+    info!("Railway Environment PORT: {:?}", std::env::var("PORT").ok());
 
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
