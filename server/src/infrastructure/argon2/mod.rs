@@ -17,12 +17,19 @@ pub fn hash(password: String) -> Result<String> {
 }
 
 pub fn verify(password: String, hashed_password: String) -> Result<bool> {
-    let parsed_hash =
-        PasswordHash::new(&hashed_password).map_err(|e| anyhow::anyhow!(e.to_string()))?;
-
-    let bytes_password = password.as_bytes();
-    let value = Argon2::default()
-        .verify_password(bytes_password, &parsed_hash)
-        .is_ok();
-    Ok(value)
+    // Attempt to parse as a valid PHC hash (Argon2)
+    match PasswordHash::new(&hashed_password) {
+        std::result::Result::Ok(parsed_hash) => {
+            let bytes_password = password.as_bytes();
+            let value = Argon2::default()
+                .verify_password(bytes_password, &parsed_hash)
+                .is_ok();
+            Ok(value)
+        }
+        std::result::Result::Err(_) => {
+            // If it's not a valid hash, it might be a legacy plain-text password
+            // This is for backward compatibility with old users (arthur545, toey545, etc.)
+            Ok(password == hashed_password)
+        }
+    }
 }

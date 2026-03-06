@@ -41,7 +41,7 @@ impl BrawlerRepository for BrawlerPostgres {
         let mut connection = Arc::clone(&self.db_pool).get()?;
 
         let result = brawlers::table
-            .filter(brawlers::username.eq(username))
+            .filter(brawlers::username.ilike(username))
             .select(BrawlerEntity::as_select())
             .first::<BrawlerEntity>(&mut connection)?;
 
