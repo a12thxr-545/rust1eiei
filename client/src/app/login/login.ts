@@ -5,7 +5,7 @@ import { PasswordMatchValidator, passwordValidator } from '../_helpers/passpword
 import { NgxSpinnerModule, NgxSpinnerService } from '../_services/ngx-spinner.module';
 import { PassportService } from '../_services/passport-service';
 import { SnackbarService } from '../_services/snackbar.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -22,6 +22,7 @@ export class Login {
   private snackbarService = inject(SnackbarService);
   private spinnerService = inject(NgxSpinnerService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   private usernameMinLength = 1;
   private usernameMaxLength = 32;
@@ -58,7 +59,25 @@ export class Login {
       password: new FormControl(null, [
         Validators.required
       ])
-    })
+    });
+
+    this.route.queryParams.subscribe(params => {
+      if (params['token']) {
+        this.passportService.saveTokenAndFetchPassport(params['token']).then(success => {
+          if (success) {
+            this.snackbarService.success('Logged in with LINE successfully!');
+            this.router.navigate(['/']);
+          } else {
+            this.snackbarService.error('Failed to authenticate with LINE.');
+            this.router.navigate(['/login']);
+          }
+        });
+      }
+
+      if (params['error']) {
+        this.snackbarService.error('LINE authentication failed.');
+      }
+    });
   }
 
   toggleMode() {
@@ -256,5 +275,10 @@ export class Login {
     this.form.patchValue({ username: suggestion });
     this.errorMsg.username.set('');
     this.suggestedUsernames.set([]);
+  }
+
+  loginWithLine() {
+    // Redirect to the backend LINE login endpoint
+    window.location.href = 'https://rust1eiei-production-5a75.up.railway.app/api/authentication/line/login';
   }
 }

@@ -31,3 +31,11 @@ pub struct CloudinaryEnv {
     pub api_key: String,
     pub api_secret: String,
 }
+
+#[derive(Debug, Clone)]
+pub struct LineEnv {
+    pub channel_id: String,
+    pub channel_secret: String,
+    pub callback_url: String,
+    pub frontend_url: String,
+}

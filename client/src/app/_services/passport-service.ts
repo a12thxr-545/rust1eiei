@@ -60,6 +60,39 @@ export class PassportService {
         this.loadPassportFromLocalStorage()
     }
 
+    async saveTokenAndFetchPassport(token: string): Promise<boolean> {
+        try {
+            // Because token is usually saved in cookies, but HttpOnly cookies from external redirect 
+            // might not be available if not set from same origin. Wait, if LINE redirects to frontend, 
+            // frontend has the token in URL. The backend didn't set cookie yet. 
+            // Actually, backend sets cookie for origin. Wait, LINE redirect is `callback`, the `/callback` 
+            // returns Redirect with Set-Cookie? No, token is returned in query string. 
+            // To make HTTP requests with this token, since we use HttpInterceptor using localStorage?
+            // Actually, our API uses Cookie `token=...` OR Authorization header. 
+            // Let's rely on the token query string and pass it as Authorization header.
+
+            // Wait, does the frontend have AuthInterceptor?
+            // I'll just use the token explicitly to fetch /me.
+            const api_url = this._base_url + '/authentication/me';
+            const result = this._http.get<Passport>(api_url, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const passport = await firstValueFrom(result);
+
+            // Assuming the JWT uses cookies but for LINE we might need to store token in localStorage if interceptor reads it.
+            // Let's just set the passport token properties inside the model.
+            passport.access_token = token;
+            passport.token_type = "Bearer";
+
+            this.data.set(passport);
+            this.savePassportToLocalStorage();
+            return true;
+        } catch (error) {
+            console.error('Fetch passport with token error', error);
+            return false;
+        }
+    }
+
     async get(login: LoginModel): Promise<null | string> {
         try {
             const api_url = this._base_url + '/authentication/login'

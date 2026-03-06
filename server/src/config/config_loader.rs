@@ -90,3 +90,18 @@ pub fn get_cloundinary_env() -> Result<CloudinaryEnv> {
         api_secret,
     })
 }
+
+pub fn get_line_env() -> Result<crate::config::config_model::LineEnv> {
+    dotenvy::dotenv().ok();
+
+    Ok(crate::config::config_model::LineEnv {
+        channel_id: std::env::var("LINE_CHANNEL_ID").unwrap_or_default(),
+        channel_secret: std::env::var("LINE_CHANNEL_SECRET").unwrap_or_default(),
+        callback_url: std::env::var("LINE_CALLBACK_URL").unwrap_or_else(|_| {
+            "https://rust1eiei-production-5a75.up.railway.app/api/authentication/line/callback"
+                .to_string()
+        }),
+        frontend_url: std::env::var("FRONTEND_URL")
+            .unwrap_or_else(|_| "https://rust1eiei-a12thxr545s-projects.vercel.app".to_string()),
+    })
+}

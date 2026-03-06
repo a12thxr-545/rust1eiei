@@ -91,6 +91,15 @@
                 <span>or</span>
             </div>
 
+            <!-- Login with LINE -->
+            <button type="button" class="line-btn" (click)="loginWithLine()">
+                <div class="line-icon-wrapper">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg" alt="LINE"
+                        class="line-icon" />
+                </div>
+                <span>Continue with LINE</span>
+            </button>
+
             <!-- Toggle Mode -->
             <p class="toggle-text">
                 @if (mode === 'login') {
