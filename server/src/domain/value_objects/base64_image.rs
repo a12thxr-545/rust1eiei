@@ -1,8 +1,6 @@
 use anyhow::Result;
 use base64::{Engine, engine::general_purpose};
 
-
-
 #[derive(Debug, Clone)]
 pub struct Base64Image(String);
 
@@ -12,23 +10,31 @@ impl Base64Image {
             return Err(anyhow::anyhow!("Base64Image is empty !!"));
         }
 
-        let bytes = match general_purpose::STANDARD.decode(data) {
+        // Strip the data URL prefix if it exists
+        let clean_data = if let Some(idx) = data.find("base64,") {
+            &data[idx + 7..]
+        } else {
+            data.as_str()
+        };
+
+        let bytes = match general_purpose::STANDARD.decode(clean_data) {
             Ok(bs) => bs,
             Err(_) => return Err(anyhow::anyhow!("Invalid base64 image data.")),
         };
         let file_type = match infer::get(&bytes) {
-            Some(t) => if t.mime_type() == "image/png" || t.mime_type() == "image/jpeg" {
-                t.mime_type()
-            } else {
-                return Err(anyhow::anyhow!("Invalid base64 image data."));
-            },
+            Some(t) => {
+                if t.mime_type() == "image/png" || t.mime_type() == "image/jpeg" {
+                    t.mime_type()
+                } else {
+                    return Err(anyhow::anyhow!("Invalid base64 image data."));
+                }
+            }
             _ => return Err(anyhow::anyhow!("Invalid base64 image data.")),
         };
 
-        Ok(Self(format!("data:{};base64,{}", file_type, &data)))
-    }   
+        Ok(Self(format!("data:{};base64,{}", file_type, clean_data)))
+    }
     pub fn into_inner(self) -> String {
         self.0
     }
 }
-
