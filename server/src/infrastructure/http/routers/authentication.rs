@@ -211,10 +211,44 @@ where
                 redirect_url.push('/');
             }
 
+            // Build cookies (Same as standard login)
+            let mut token_cookie = Cookie::build(("token", passport.access_token.clone()))
+                .path("/")
+                .same_site(cookie::SameSite::Lax)
+                .http_only(true)
+                .max_age(Duration::days(7));
+
+            let mut refresh_token_cookie =
+                Cookie::build(("refresh_token", passport.token_type.clone()))
+                    .path("/")
+                    .same_site(cookie::SameSite::Lax)
+                    .http_only(true)
+                    .max_age(Duration::days(7));
+
+            if get_stage() == Stage::Production {
+                token_cookie = token_cookie.secure(true);
+                refresh_token_cookie = refresh_token_cookie.secure(true);
+            }
+
             // Redirect to frontend with token in query string
             redirect_url.push_str(&format!("login?token={}", passport.access_token));
 
-            Redirect::temporary(&redirect_url).into_response()
+            let mut headers = HeaderMap::new();
+            headers.append(
+                header::SET_COOKIE,
+                HeaderValue::from_str(&token_cookie.to_string()).unwrap(),
+            );
+            headers.append(
+                header::SET_COOKIE,
+                HeaderValue::from_str(&refresh_token_cookie.to_string()).unwrap(),
+            );
+
+            (
+                StatusCode::TEMPORARY_REDIRECT,
+                headers,
+                Redirect::temporary(&redirect_url),
+            )
+                .into_response()
         }
         Err(e) => {
             tracing::error!("LINE login error: {:?}", e);
