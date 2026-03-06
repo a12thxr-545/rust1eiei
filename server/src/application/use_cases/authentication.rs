@@ -75,10 +75,20 @@ where
 
         // Try to find brawler by line username
         let username = format!("line_{}", profile.user_id);
+        tracing::info!("LINE login attempt for username: {}", username);
 
         let brawler_entity = match self.brawler_repository.find_by_username(&username).await {
-            std::result::Result::Ok(existing) => existing,
-            std::result::Result::Err(_) => {
+            std::result::Result::Ok(existing) => {
+                tracing::info!("Found existing LINE user: {}", existing.id);
+                existing
+            }
+            std::result::Result::Err(e) => {
+                tracing::info!(
+                    "Brawler not found by username {} or other error: {:?}. Attempting registration.",
+                    username,
+                    e
+                );
+
                 // Not found, register new brawler
                 let random_password = format!("line_pwd_{}", uuid::Uuid::new_v4());
                 let hashed_password = infrastructure::argon2::hash(random_password)?;
@@ -89,18 +99,33 @@ where
                     display_name: profile.display_name.clone(),
                 };
 
-                let brawler_id = self.brawler_repository.register(new_brawler).await?;
+                match self.brawler_repository.register(new_brawler).await {
+                    std::result::Result::Ok(brawler_id) => {
+                        tracing::info!("Successfully registered new LINE user: {}", brawler_id);
+                        // Update avatar if provided
+                        if let Some(picture_url) = profile.picture_url {
+                            let _ = self
+                                .brawler_repository
+                                .update_avatar(brawler_id, picture_url, "".to_string())
+                                .await;
+                        }
 
-                // Update avatar if provided
-                if let Some(picture_url) = profile.picture_url {
-                    let _ = self
-                        .brawler_repository
-                        .update_avatar(brawler_id, picture_url, "".to_string())
-                        .await;
+                        // Fetch the newly created entity
+                        self.brawler_repository.find_by_username(&username).await?
+                    }
+                    std::result::Result::Err(reg_err) => {
+                        let err_msg = reg_err.to_string();
+                        if err_msg.contains("unique_username") {
+                            tracing::warn!(
+                                "Conflict for username {} during LINE registration. Row likely exists. Retrying find.",
+                                username
+                            );
+                            self.brawler_repository.find_by_username(&username).await?
+                        } else {
+                            return Err(reg_err);
+                        }
+                    }
                 }
-
-                // Fetch the newly created entity
-                self.brawler_repository.find_by_username(&username).await?
             }
         };
 
