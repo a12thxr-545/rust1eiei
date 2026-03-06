@@ -57,8 +57,11 @@ pub async fn check_username<T>(
 where
     T: BrawlerRepository + Send + Sync,
 {
-    match brawlers_use_case.check_username(username).await {
-        Ok(available) => (StatusCode::OK, Json(available)).into_response(),
+    match brawlers_use_case.check_username(username.clone()).await {
+        Ok(available) => {
+            tracing::info!("Username check: {} -> available: {}", username, available);
+            (StatusCode::OK, Json(available)).into_response()
+        }
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
     }
 }

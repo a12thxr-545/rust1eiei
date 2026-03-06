@@ -13,8 +13,8 @@
         <!-- Auth Card -->
         <div class="auth-card">
             <h2>{{ mode === 'login' ? 'Welcome back' : 'Create account' }}</h2>
-            <p class="subtitle">{{ mode === 'login' ? 'Enter your credentials to continue' : 'Fill in your details to
-                get started' }}</p>
+            <p class="subtitle">{{ mode === 'login' ? 'Enter your credentials (v2.1)' : 'Fill in your details (v2.1)' }}
+            </p>
 
             <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off">
                 <!-- Username -->

@@ -26,8 +26,8 @@ export class Login {
 
   private usernameMinLength = 1;
   private usernameMaxLength = 32;
-  private passwordMinLength = 8;
-  private passwordMaxLength = 16;
+  private passwordMinLength = 1;
+  private passwordMaxLength = 32;
   private displayNameMinLength = 1;
 
   mode: 'login' | 'regis' = 'login';
@@ -234,12 +234,13 @@ export class Login {
 
   async checkUsernameAvailability() {
     const ctrl = this.form.get('username');
-    const username = ctrl?.value;
+    let username = ctrl?.value;
     if (!username || ctrl?.invalid) {
       this.suggestedUsernames.set([]);
       return;
     }
 
+    username = username.trim();
     const isAvailable = await this.passportService.checkUsername(username);
     if (!isAvailable) {
       if (this.errorMsg.username() === '') {
