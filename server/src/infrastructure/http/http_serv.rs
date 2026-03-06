@@ -70,7 +70,23 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
         .route("/", get(|| async { "Backend is alive!" }))
         .nest("/api", api_serve(Arc::clone(&db_pool), realtime_hub))
         .layer(middleware::from_fn(request_logger))
-        .layer(CorsLayer::permissive());
+        .layer(
+            CorsLayer::new()
+                .allow_origin([
+                    "https://rust1eiei-cxoxu4uzr-a12thxr545s-projects.vercel.app"
+                        .parse()
+                        .unwrap(),
+                    "https://rust1eiei-a12thxr545s-projects.vercel.app"
+                        .parse()
+                        .unwrap(),
+                    "https://rust1eiei-8vnkk506c-a12thxr545s-projects.vercel.app"
+                        .parse()
+                        .unwrap(),
+                ])
+                .allow_methods(tower_http::cors::Any)
+                .allow_headers(tower_http::cors::Any)
+                .allow_credentials(true),
+        );
 
     // Bind to 0.0.0.0 to be safe, but use the port from config
     let addr = SocketAddr::from(([0, 0, 0, 0], config.server.port));
