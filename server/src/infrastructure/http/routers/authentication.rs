@@ -154,14 +154,12 @@ where
 
 pub async fn get_me<T>(
     State(authentication_use_case): State<Arc<AuthenticationUseCase<T>>>,
-    axum::extract::Extension(claims): axum::extract::Extension<
-        crate::infrastructure::jwt::jwt_model::Claims,
-    >,
+    axum::extract::Extension(brawler_id): axum::extract::Extension<i32>,
 ) -> impl IntoResponse
 where
     T: BrawlerRepository + Send + Sync,
 {
-    match authentication_use_case.get_me(claims.sub).await {
+    match authentication_use_case.get_me(brawler_id).await {
         Ok(passport) => (StatusCode::OK, Json(passport)).into_response(),
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
     }
