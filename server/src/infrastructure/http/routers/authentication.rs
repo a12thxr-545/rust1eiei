@@ -225,7 +225,10 @@ where
             if !redirect_url.ends_with('/') {
                 redirect_url.push('/');
             }
-            redirect_url.push_str("login?error=line_auth_failed");
+            redirect_url.push_str(&format!(
+                "login?error=line_auth_failed&detail={}",
+                urlencoding::encode(&e.to_string())
+            ));
             Redirect::temporary(&redirect_url).into_response()
         }
     }
