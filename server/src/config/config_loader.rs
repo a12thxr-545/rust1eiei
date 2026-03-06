@@ -14,7 +14,7 @@ pub fn load() -> Result<DotEnvyConfig> {
             .unwrap_or_else(|_| "80".to_string())
             .parse()?,
         body_limit: std::env::var("SERVER_BODY_LIMIT")
-            .unwrap_or_else(|_| "2".to_string())
+            .unwrap_or_else(|_| "10485760".to_string())
             .parse()?,
         timeout: std::env::var("SERVER_TIMEOUT")
             .unwrap_or_else(|_| "30".to_string())

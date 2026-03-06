@@ -1,6 +1,7 @@
 use std::{net::SocketAddr, sync::Arc};
 
 use anyhow::Result;
+use axum::extract::DefaultBodyLimit;
 use axum::{
     Router,
     http::{Request, StatusCode},
@@ -102,7 +103,8 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
                     axum::http::header::ACCEPT,
                 ])
                 .allow_credentials(true),
-        );
+        )
+        .layer(DefaultBodyLimit::max(config.server.body_limit as usize));
 
     // Bind to 0.0.0.0 to be safe, but use the port from config
     let addr = SocketAddr::from(([0, 0, 0, 0], config.server.port));
