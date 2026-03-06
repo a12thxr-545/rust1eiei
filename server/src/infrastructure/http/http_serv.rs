@@ -63,6 +63,10 @@ fn api_serve(db_pool: Arc<PgPoolSquad>, realtime_hub: Arc<RealtimeHub>) -> Route
             "/social",
             routers::social::routes(Arc::clone(&db_pool), Arc::clone(&realtime_hub)),
         )
+        .nest(
+            "/mission-chat",
+            routers::mission_chat::routes(Arc::clone(&db_pool), Arc::clone(&realtime_hub)),
+        )
         .nest("/rating", routers::rating::routes(Arc::clone(&db_pool)))
         .fallback(|| async { (StatusCode::NOT_FOUND, "API not found") })
 }

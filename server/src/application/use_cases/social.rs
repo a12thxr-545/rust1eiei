@@ -23,11 +23,11 @@ where
     T4: MissionViewingRepository + Send + Sync,
     T5: CrewOperationRepository + Send + Sync,
 {
-    friendship_repo: Arc<T1>,
-    invitation_repo: Arc<T2>,
-    brawlers_repo: Arc<T3>,
-    mission_repo: Arc<T4>,
-    crew_repo: Arc<T5>,
+    pub friendship_repo: Arc<T1>,
+    pub invitation_repo: Arc<T2>,
+    pub brawlers_repo: Arc<T3>,
+    pub mission_repo: Arc<T4>,
+    pub crew_repo: Arc<T5>,
     pub realtime_hub: SharedRealtimeHub,
 }
 

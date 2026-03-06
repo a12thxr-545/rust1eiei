@@ -1,3 +1,4 @@
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -44,5 +45,12 @@ pub enum RealtimeEvent {
     MissionLeft {
         mission_id: i32,
         brawler_id: i32,
+    },
+    MissionChatMessage {
+        mission_id: i32,
+        brawler_id: i32,
+        brawler_name: String,
+        content: String,
+        created_at: NaiveDateTime,
     },
 }

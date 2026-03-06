@@ -618,6 +618,59 @@
 
             <!-- Main Content: Crew & Invitations -->
             <div class="mission-social-sections">
+                <!-- Mission Chat -->
+                <div class="social-card chat-card">
+                    <div class="card-header">
+                        <h3>Mission Chat</h3>
+                        <div class="card-actions-header">
+                            <span class="chat-status-dot"></span>
+                            <span class="chat-status-text">Encrypted Channel</span>
+                        </div>
+                    </div>
+
+                    <div class="chat-container">
+                        <div class="chat-messages">
+                            @for (msg of chatMessages(); track msg.id) {
+                            <div class="chat-msg" [class.own-msg]="msg.brawler_id === passportService.data()?.id">
+                                <div class="msg-bubble">
+                                    <div class="msg-header">
+                                        <span class="msg-sender">{{ msg.brawler_name }}</span>
+                                        <span class="msg-time">{{ msg.created_at | date:'HH:mm' }}</span>
+                                    </div>
+                                    <div class="msg-content">{{ msg.content }}</div>
+                                </div>
+                            </div>
+                            } @empty {
+                            <div class="empty-chat">
+                                <div class="empty-chat-icon">💬</div>
+                                <p>No messages in this frequency yet.</p>
+                            </div>
+                            }
+                        </div>
+
+                        <div class="chat-input-wrapper">
+                            @if (isInMission(selectedMission()?.id!) || isLeader(selectedMission())) {
+                            <input type="text" [(ngModel)]="chatInput" (keyup.enter)="sendChat()"
+                                placeholder="Transmit message..." class="chat-input">
+                            <button class="chat-send-btn" (click)="sendChat()" [disabled]="!chatInput.trim()">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
+                            </button>
+                            } @else {
+                            <div class="chat-locked">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                </svg>
+                                <span>Join mission to access chat</span>
+                            </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Crew Members -->
                 <div class="social-card">
                     <div class="card-header">

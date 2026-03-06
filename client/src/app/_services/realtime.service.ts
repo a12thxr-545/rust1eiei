@@ -90,6 +90,8 @@ export class RealtimeService {
             }
             this._missionService.triggerRefresh();
             this.refreshMissions();
+        } else if (event.type === 'MissionChatMessage') {
+            this._missionService.receiveChatMessage(event.payload);
         }
     }
 

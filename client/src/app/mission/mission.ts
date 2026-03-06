@@ -4,7 +4,7 @@ import { MissionService } from '../_services/mission-service';
 import { PassportService } from '../_services/passport-service';
 import { SnackbarService } from '../_services/snackbar.service';
 import { DatePipe } from '@angular/common';
-import { CrewMember, Mission } from '../_model/mission';
+import { CrewMember, Mission, MissionChatMessage } from '../_model/mission';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { filter } from 'rxjs';
@@ -63,6 +63,15 @@ export class MissionComponent implements OnInit, OnDestroy {
           setTimeout(() => {
             this.refreshAll();
           });
+        })
+      );
+
+      this._subscriptions.add(
+        this._missionService.chatMessage$.subscribe(msg => {
+          if (this.selectedMission()?.id === msg.mission_id) {
+            this.chatMessages.update(msgs => [...msgs, msg]);
+            this.scrollToBottom();
+          }
         })
       );
     }
@@ -126,6 +135,9 @@ export class MissionComponent implements OnInit, OnDestroy {
   crewMembers = signal<CrewMember[]>([]);
   missionInvitations = signal<MissionInvitation[]>([]);
   loadingCrew = signal(false);
+  chatMessages = signal<MissionChatMessage[]>([]);
+  chatInput = '';
+  showChat = signal(true); // Default show chat if in mission
 
   // Invite cooldown tracking
   private inviteCooldowns = new Map<number, number>(); // brawlerId -> timestamp
@@ -274,6 +286,7 @@ export class MissionComponent implements OnInit, OnDestroy {
     this.missionInvitations.set([]);
     this.loadingCrew.set(true);
     this.loadCrewMembers(mission.id);
+    this.loadChat(mission.id);
 
     // Start polling when modal opens
     if (isPlatformBrowser(this._platformId)) {
@@ -606,7 +619,41 @@ export class MissionComponent implements OnInit, OnDestroy {
     const paginator = this.brawlerSearchResults();
     paginator.pagination.query = this.brawlerSearchQuery;
     paginator.pagination.currentPage = 1;
-    this._memberService.paginator.set(paginator);
     this._memberService.getMember();
+  }
+
+  async loadChat(missionId: number) {
+    try {
+      const msgs = await this._missionService.getChatMessages(missionId);
+      this.chatMessages.set(msgs);
+      this.scrollToBottom();
+    } catch (e) {
+      console.error('Failed to load chat:', e);
+    }
+  }
+
+  async sendChat() {
+    if (!this.chatInput.trim() || !this.selectedMission()) return;
+    const missionId = this.selectedMission()!.id;
+    const content = this.chatInput.trim();
+    this.chatInput = '';
+
+    try {
+      await this._missionService.sendChatMessage(missionId, content);
+      this.scrollToBottom();
+    } catch (e: any) {
+      this._snackbar.error(e.error || 'Failed to send message');
+    }
+  }
+
+  private scrollToBottom() {
+    setTimeout(() => {
+      if (isPlatformBrowser(this._platformId)) {
+        const chatContainer = document.querySelector('.chat-messages');
+        if (chatContainer) {
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+      }
+    }, 100);
   }
 }

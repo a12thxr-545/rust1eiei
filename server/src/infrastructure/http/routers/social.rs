@@ -324,11 +324,11 @@ pub async fn get_realtime_events<T1, T2, T3, T4, T5>(
     user_id_ext: Option<Extension<i32>>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>>
 where
-    T1: FriendshipRepository + Send + Sync,
-    T2: MissionInvitationRepository + Send + Sync,
-    T3: BrawlerRepository + Send + Sync,
-    T4: MissionViewingRepository + Send + Sync,
-    T5: CrewOperationRepository + Send + Sync,
+    T1: FriendshipRepository + Send + Sync + 'static,
+    T2: MissionInvitationRepository + Send + Sync + 'static,
+    T3: BrawlerRepository + Send + Sync + 'static,
+    T4: MissionViewingRepository + Send + Sync + 'static,
+    T5: CrewOperationRepository + Send + Sync + 'static,
 {
     let user_id = user_id_ext.map(|Extension(id)| id).unwrap_or(0);
 
@@ -338,53 +338,69 @@ where
 
     tracing::info!("User {} connected to realtime events", user_id);
     let rx = use_case.realtime_hub.tx.subscribe();
-    let stream = tokio_stream::wrappers::BroadcastStream::new(rx).filter_map(move |event| {
-        if let Ok(event) = event {
-            // Filter events relevant to this user
-            let is_relevant = match &event {
-                crate::domain::value_objects::realtime::RealtimeEvent::FriendRequest {
-                    to_id,
-                    ..
-                } => *to_id == user_id,
-                crate::domain::value_objects::realtime::RealtimeEvent::MissionInvitation {
-                    invitee_id,
-                    ..
-                } => *invitee_id == user_id,
-                crate::domain::value_objects::realtime::RealtimeEvent::FriendAccepted {
-                    to_id,
-                    ..
-                } => *to_id == user_id,
-                crate::domain::value_objects::realtime::RealtimeEvent::MissionInvitationAccepted {
-                    inviter_id,
-                    ..
-                } => *inviter_id == user_id,
-                crate::domain::value_objects::realtime::RealtimeEvent::MissionStatusChanged {
-                    ..
-                } => true,
-                crate::domain::value_objects::realtime::RealtimeEvent::MissionDeleted {
-                    ..
-                } => true,
-                crate::domain::value_objects::realtime::RealtimeEvent::MissionCreated {
-                    ..
-                } => true,
-                crate::domain::value_objects::realtime::RealtimeEvent::MissionUpdated {
-                    ..
-                } => true,
-                crate::domain::value_objects::realtime::RealtimeEvent::MissionJoined {
-                    ..
-                } => true,
-                crate::domain::value_objects::realtime::RealtimeEvent::MissionLeft {
-                    ..
-                } => true,
-            };
+    let stream = tokio_stream::wrappers::BroadcastStream::new(rx)
+        .then(move |event| {
+            let use_case = Arc::clone(&use_case);
+            async move {
+                if let Ok(event) = event {
+                    let is_relevant = match &event {
+                        crate::domain::value_objects::realtime::RealtimeEvent::FriendRequest {
+                            to_id,
+                            ..
+                        } => *to_id == user_id,
+                        crate::domain::value_objects::realtime::RealtimeEvent::MissionInvitation {
+                            invitee_id,
+                            ..
+                        } => *invitee_id == user_id,
+                        crate::domain::value_objects::realtime::RealtimeEvent::FriendAccepted {
+                            to_id,
+                            ..
+                        } => *to_id == user_id,
+                        crate::domain::value_objects::realtime::RealtimeEvent::MissionInvitationAccepted {
+                            inviter_id,
+                            ..
+                        } => *inviter_id == user_id,
+                        crate::domain::value_objects::realtime::RealtimeEvent::MissionStatusChanged {
+                            ..
+                        } => true,
+                        crate::domain::value_objects::realtime::RealtimeEvent::MissionDeleted {
+                            ..
+                        } => true,
+                        crate::domain::value_objects::realtime::RealtimeEvent::MissionCreated {
+                            ..
+                        } => true,
+                        crate::domain::value_objects::realtime::RealtimeEvent::MissionUpdated {
+                            ..
+                        } => true,
+                        crate::domain::value_objects::realtime::RealtimeEvent::MissionJoined {
+                            ..
+                        } => true,
+                        crate::domain::value_objects::realtime::RealtimeEvent::MissionLeft {
+                            ..
+                        } => true,
+                        crate::domain::value_objects::realtime::RealtimeEvent::MissionChatMessage {
+                            mission_id,
+                            ..
+                        } => {
+                            if user_id == 0 {
+                                false
+                            } else {
+                                let is_member = use_case.crew_repo.is_member(*mission_id, user_id).await.unwrap_or(false);
+                                let is_chief = use_case.mission_repo.get_one(*mission_id).await.map(|m| m.chief_id == user_id).unwrap_or(false);
+                                is_member || is_chief
+                            }
+                        }
+                    };
 
-            if is_relevant {
-                let data = serde_json::to_string(&event).unwrap();
-                return Some(Ok(Event::default().data(data)));
+                    if is_relevant {
+                        let data = serde_json::to_string(&event).unwrap();
+                        return Some(Ok(Event::default().data(data)));
+                    }
+                }
+                None
             }
-        }
-        None
-    });
+        })
+        .filter_map(|x| x);
 
     Sse::new(stream).keep_alive(KeepAlive::default())
 }

@@ -49,3 +49,13 @@ export interface CrewMember {
     mission_success_count: number;
     mission_joined_count: number;
 }
+
+export interface MissionChatMessage {
+    id: number;
+    mission_id: number;
+    brawler_id: number;
+    brawler_name: String;
+    content: string;
+    created_at: string;
+    image_url?: string;
+}

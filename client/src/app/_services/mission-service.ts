@@ -2,7 +2,7 @@ import { inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../environments/environment';
-import { AddMission, CrewMember, EditMission, Mission, MissionFilter, UploadedImage } from '../_model/mission';
+import { AddMission, CrewMember, EditMission, Mission, MissionChatMessage, MissionFilter, UploadedImage } from '../_model/mission';
 import { firstValueFrom, Subject } from 'rxjs';
 
 @Injectable({
@@ -26,6 +26,21 @@ export class MissionService {
 
   private _refreshSubject = new Subject<void>();
   refresh$ = this._refreshSubject.asObservable();
+
+  private _chatMessageSubject = new Subject<MissionChatMessage>();
+  chatMessage$ = this._chatMessageSubject.asObservable();
+
+  receiveChatMessage(message: MissionChatMessage) {
+    this._chatMessageSubject.next(message);
+  }
+
+  async sendChatMessage(missionId: number, content: string): Promise<void> {
+    await firstValueFrom(this._http.post(`${environment.base_url}/api/mission-chat/${missionId}`, { content }));
+  }
+
+  async getChatMessages(missionId: number): Promise<MissionChatMessage[]> {
+    return await firstValueFrom(this._http.get<MissionChatMessage[]>(`${environment.base_url}/api/mission-chat/${missionId}`));
+  }
 
   triggerRefresh() {
     this._refreshSubject.next();
