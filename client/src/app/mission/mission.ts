@@ -114,6 +114,13 @@ export class MissionComponent implements OnInit, OnDestroy {
     this.loadFinishedMissions();
     this._missionService.getCurrentMission();
     this.loadSocialData();
+
+    // Re-load current open mission details if modal is open
+    const selected = this.selectedMission();
+    if (selected) {
+      this.loadCrewMembers(selected.id);
+      this.refreshMissionData(selected.id);
+    }
   }
 
   missions = this._missionService.missions;

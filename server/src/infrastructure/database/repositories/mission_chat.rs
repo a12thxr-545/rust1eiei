@@ -73,7 +73,10 @@ impl MissionChatRepository for MissionChatPostgres {
                     brawler_id: b_id,
                     brawler_name: name,
                     content,
-                    created_at: created,
+                    created_at: chrono::DateTime::<chrono::Utc>::from_naive_utc_and_offset(
+                        created,
+                        chrono::Utc,
+                    ),
                     image_url: img,
                 },
             )

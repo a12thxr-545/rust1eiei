@@ -1,5 +1,5 @@
 use crate::infrastructure::database::schema::mission_chat_messages;
-use chrono::NaiveDateTime;
+use chrono::{DateTime, NaiveDateTime, Utc};
 use diesel::{Insertable, Queryable, Selectable};
 use serde::{Deserialize, Serialize};
 
@@ -32,6 +32,6 @@ pub struct MissionChatMessageWithBrawler {
     pub brawler_id: i32,
     pub brawler_name: String,
     pub content: String,
-    pub created_at: NaiveDateTime,
+    pub created_at: DateTime<Utc>,
     pub image_url: Option<String>,
 }

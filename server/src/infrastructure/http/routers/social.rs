@@ -380,14 +380,20 @@ where
                         } => true,
                         crate::domain::value_objects::realtime::RealtimeEvent::MissionChatMessage {
                             mission_id,
+                            brawler_id,
                             ..
                         } => {
                             if user_id == 0 {
                                 false
+                            } else if *brawler_id == user_id {
+                                true
                             } else {
                                 let is_member = use_case.crew_repo.is_member(*mission_id, user_id).await.unwrap_or(false);
-                                let is_chief = use_case.mission_repo.get_one(*mission_id).await.map(|m| m.chief_id == user_id).unwrap_or(false);
-                                is_member || is_chief
+                                if is_member {
+                                    true
+                                } else {
+                                    use_case.mission_repo.get_one(*mission_id).await.map(|m| m.chief_id == user_id).unwrap_or(false)
+                                }
                             }
                         }
                     };

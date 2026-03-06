@@ -62,12 +62,12 @@ where
 
         let brawler = self.brawler_repo.find_by_id(brawler_id).await?;
 
-        let now = Utc::now().naive_utc();
+        let now = Utc::now();
         let new_message = NewMissionChatMessageEntity {
             mission_id,
             brawler_id,
             content: content.clone(),
-            created_at: now,
+            created_at: now.naive_utc(),
             image_url: None,
         };
 

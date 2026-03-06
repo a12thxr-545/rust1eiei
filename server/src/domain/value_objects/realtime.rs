@@ -1,4 +1,4 @@
-use chrono::NaiveDateTime;
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -51,6 +51,6 @@ pub enum RealtimeEvent {
         brawler_id: i32,
         brawler_name: String,
         content: String,
-        created_at: NaiveDateTime,
+        created_at: DateTime<Utc>,
     },
 }
