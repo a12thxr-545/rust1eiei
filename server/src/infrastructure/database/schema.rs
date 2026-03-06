@@ -19,13 +19,6 @@ diesel::table! {
         cover_url -> Nullable<Varchar>,
         #[max_length = 255]
         cover_public_id -> Nullable<Varchar>,
-        bio -> Nullable<Text>,
-        age -> Nullable<Int4>,
-        #[max_length = 10]
-        gender -> Nullable<Varchar>,
-        missions_completed -> Nullable<Int4>,
-        missions_joined -> Nullable<Int4>,
-        is_active -> Bool,
     }
 }
 
@@ -113,11 +106,4 @@ diesel::joinable!(mission_ratings -> missions (mission_id));
 diesel::joinable!(missions -> brawlers (chief_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
-    brawlers,
-    crew_memberships,
-    friendships,
-    mission_chat_messages,
-    mission_invitations,
-    mission_ratings,
-    missions,
-);
+    brawlers,crew_memberships,friendships,mission_chat_messages,mission_invitations,mission_ratings,missions,);
