@@ -5,10 +5,6 @@ export const passwordValidator = (min: number, max: number): ValidatorFn => {
         const password = control.value as string;
         if (!password) return { required: true };
         if (password.length < min || password.length > max) return { invalidLength: true };
-        if (!/[a-z]/.test(password)) return { invalidLowerCase: true };
-        if (!/[A-Z]/.test(password)) return { invalidUpperCase: true };
-        if (!/[0-9]/.test(password)) return { invalidNumeric: true };
-        if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?]/.test(password)) return { invalidSpecialChar: true };
         return null;
     }
 }

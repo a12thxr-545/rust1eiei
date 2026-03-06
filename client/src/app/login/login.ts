@@ -144,19 +144,8 @@ export class Login {
       case 'password':
         if (ctrl.hasError('required')) {
           this.errorMsg.password.set('Password is required');
-        } else if (this.mode === 'regis') {
-          const errors: string[] = [];
-          if (ctrl.hasError('invalidLength')) errors.push(`${this.passwordMinLength}-${this.passwordMaxLength} chars`);
-          if (ctrl.hasError('invalidLowerCase')) errors.push('lowercase');
-          if (ctrl.hasError('invalidUpperCase')) errors.push('uppercase');
-          if (ctrl.hasError('invalidNumeric')) errors.push('number');
-          if (ctrl.hasError('invalidSpecialChar')) errors.push('special char');
-
-          if (errors.length > 0) {
-            this.errorMsg.password.set('Needs: ' + errors.join(', '));
-          } else {
-            this.errorMsg.password.set('');
-          }
+        } else if (this.mode === 'regis' && ctrl.hasError('invalidLength')) {
+          this.errorMsg.password.set(`Password must be ${this.passwordMinLength}-${this.passwordMaxLength} characters`);
         } else {
           this.errorMsg.password.set('');
         }
