@@ -145,7 +145,7 @@ export class Login {
         if (ctrl.hasError('required')) {
           this.errorMsg.password.set('Password is required');
         } else if (this.mode === 'regis' && ctrl.hasError('invalidLength')) {
-          this.errorMsg.password.set(`Password must be ${this.passwordMinLength}-${this.passwordMaxLength} characters`);
+          this.errorMsg.password.set(`Password must be ${this.passwordMinLength}-${this.passwordMaxLength} chars`);
         } else {
           this.errorMsg.password.set('');
         }
@@ -242,10 +242,14 @@ export class Login {
 
     const isAvailable = await this.passportService.checkUsername(username);
     if (!isAvailable) {
-      this.errorMsg.username.set('Username already taken');
+      if (this.errorMsg.username() === '') {
+        this.errorMsg.username.set('Username already taken');
+      }
       this.generateSuggestions(username);
     } else {
-      this.errorMsg.username.set('');
+      if (this.errorMsg.username() === 'Username already taken') {
+        this.errorMsg.username.set('');
+      }
       this.suggestedUsernames.set([]);
     }
   }
