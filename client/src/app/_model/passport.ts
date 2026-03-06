@@ -7,6 +7,7 @@ export interface Passport {
     username: string;
     avatar_url?: string;
     cover_url?: string;
+    bio?: string;
     joined_count?: number;
     completed_count?: number;
 }

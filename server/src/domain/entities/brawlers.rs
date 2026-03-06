@@ -11,6 +11,7 @@ pub struct BrawlerEntity {
     pub avatar_public_id: Option<String>,
     pub cover_url: Option<String>,
     pub cover_public_id: Option<String>,
+    pub bio: Option<String>,
 }
 
 #[derive(Debug, Clone, Insertable)]

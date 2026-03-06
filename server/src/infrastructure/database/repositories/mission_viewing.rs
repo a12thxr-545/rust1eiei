@@ -118,6 +118,7 @@ impl MissionViewingRepository for MissionViewingPostgres {
                 b.display_name,
                 b.username,
                 COALESCE(b.avatar_url, '') AS avatar_url,
+                b.bio,
                COALESCE(s.success_count, 0) AS mission_success_count,
                COALESCE(j.joined_count, 0) AS mission_joined_count
             FROM 

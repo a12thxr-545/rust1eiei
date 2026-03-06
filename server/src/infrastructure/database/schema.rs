@@ -19,6 +19,7 @@ diesel::table! {
         cover_url -> Nullable<Varchar>,
         #[max_length = 255]
         cover_public_id -> Nullable<Varchar>,
+        bio -> Nullable<Text>,
     }
 }
 
@@ -106,4 +107,11 @@ diesel::joinable!(mission_ratings -> missions (mission_id));
 diesel::joinable!(missions -> brawlers (chief_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
-    brawlers,crew_memberships,friendships,mission_chat_messages,mission_invitations,mission_ratings,missions,);
+    brawlers,
+    crew_memberships,
+    friendships,
+    mission_chat_messages,
+    mission_invitations,
+    mission_ratings,
+    missions,
+);

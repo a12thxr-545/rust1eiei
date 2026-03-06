@@ -143,6 +143,17 @@ impl BrawlerRepository for BrawlerPostgres {
         Ok(())
     }
 
+    async fn update_bio(&self, brawler_id: i32, bio: String) -> Result<()> {
+        let mut conn = Arc::clone(&self.db_pool).get()?;
+
+        diesel::update(brawlers::table)
+            .filter(brawlers::id.eq(brawler_id))
+            .set(brawlers::bio.eq(bio))
+            .execute(&mut conn)?;
+
+        Ok(())
+    }
+
     async fn get_stats(&self, brawler_id: i32) -> Result<(i64, i64)> {
         let mut connection = Arc::clone(&self.db_pool).get()?;
         use crate::infrastructure::database::schema::{crew_memberships, missions};

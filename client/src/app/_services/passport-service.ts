@@ -205,4 +205,23 @@ export class PassportService {
         }
     }
 
+    async updateBio(bio: string): Promise<boolean> {
+        try {
+            const api_url = `${this._base_url}/brawlers/bio`
+            const result = this._http.put<any>(api_url, { bio })
+            const updatedProfile = await firstValueFrom(result)
+
+            // Update local passport with new bio
+            const passport = this.data()
+            if (passport) {
+                const updatedPassport = { ...passport, bio: updatedProfile.bio }
+                this.data.set(updatedPassport)
+                this.savePassportToLocalStorage()
+            }
+
+            return true
+        } catch (error) {
+            return false
+        }
+    }
 }

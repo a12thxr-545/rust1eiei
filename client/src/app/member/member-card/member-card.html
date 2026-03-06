@@ -11,6 +11,7 @@
         (error)="$any($event.target).src = 'assets/defaultavtar.jpg'" alt="photo of {{member().username}}">
 
     <mat-card-content>
+        <p class="interest-text">{{member().bio || 'No background shared yet.'}}</p>
     </mat-card-content>
 
     <mat-card-actions align="end">
