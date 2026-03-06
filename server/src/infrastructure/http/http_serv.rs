@@ -82,6 +82,9 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
                     "https://rust1eiei-8vnkk506c-a12thxr545s-projects.vercel.app"
                         .parse()
                         .unwrap(),
+                    "https://rust1eiei-8y7kwoexb-a12thxr545s-projects.vercel.app"
+                        .parse()
+                        .unwrap(),
                 ])
                 .allow_methods([
                     axum::http::Method::GET,
