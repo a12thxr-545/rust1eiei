@@ -75,11 +75,14 @@ pub fn get_jwt_env() -> Result<JwtEnv> {
 pub fn get_cloundinary_env() -> Result<CloudinaryEnv> {
     dotenvy::dotenv().ok();
 
-    let cloud_name = std::env::var("CLOUDINARY_CLOUD_NAME")?;
+    let cloud_name =
+        std::env::var("CLOUDINARY_CLOUD_NAME").unwrap_or_else(|_| "dtqrphm2b".to_string());
 
-    let api_key = std::env::var("CLOUDINARY_API_KEY")?;
+    let api_key =
+        std::env::var("CLOUDINARY_API_KEY").unwrap_or_else(|_| "332441267638168".to_string());
 
-    let api_secret = std::env::var("CLOUDINARY_API_SECRET")?;
+    let api_secret = std::env::var("CLOUDINARY_API_SECRET")
+        .unwrap_or_else(|_| "esTSyyi2tudHGwUnnX-zxdnOAxU".to_string());
 
     Ok(CloudinaryEnv {
         cloud_name,
