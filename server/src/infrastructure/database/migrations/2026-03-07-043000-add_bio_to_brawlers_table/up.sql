@@ -1,0 +1,1 @@
+ALTER TABLE brawlers ADD COLUMN bio TEXT;

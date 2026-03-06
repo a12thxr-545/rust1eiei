@@ -1,0 +1,1 @@
+ALTER TABLE brawlers DROP COLUMN bio;
