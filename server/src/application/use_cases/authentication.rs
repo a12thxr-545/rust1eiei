@@ -50,7 +50,6 @@ where
             brawler_entity.username,
             brawler_entity.avatar_url,
             brawler_entity.cover_url,
-            brawler_entity.bio,
             joined_count,
             completed_count,
         );

@@ -33,8 +33,6 @@ pub struct BrawlerModel {
     pub username: String,
     #[diesel(sql_type = Varchar)]
     pub avatar_url: String,
-    #[diesel(sql_type = diesel::sql_types::Nullable<diesel::sql_types::Text>)]
-    pub bio: Option<String>,
     #[diesel(sql_type = BigInt)]
     pub mission_success_count: i64,
     #[diesel(sql_type = BigInt)]
@@ -47,7 +45,6 @@ pub struct BrawlerSummaryModel {
     pub username: String,
     pub display_name: String,
     pub avatar_url: Option<String>,
-    pub bio: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -57,7 +54,6 @@ pub struct BrawlerProfileModel {
     pub display_name: String,
     pub avatar_url: Option<String>,
     pub cover_url: Option<String>,
-    pub bio: Option<String>,
     pub joined_count: i64,
     pub completed_count: i64,
 }

@@ -13,7 +13,6 @@ pub struct Passport {
     pub username: String,
     pub avatar_url: Option<String>,
     pub cover_url: Option<String>,
-    pub bio: Option<String>,
     pub joined_count: i64,
     pub completed_count: i64,
 }
@@ -34,7 +33,6 @@ impl Passport {
         username: String,
         avatar_url: Option<String>,
         cover_url: Option<String>,
-        bio: Option<String>,
         joined_count: i64,
         completed_count: i64,
     ) -> Self {
@@ -61,7 +59,6 @@ impl Passport {
             username,
             avatar_url,
             cover_url,
-            bio,
             joined_count,
             completed_count,
         }

@@ -54,7 +54,6 @@ where
             register_model.username.clone(),
             None,
             None,
-            None,
             0,
             0,
         );
@@ -98,7 +97,6 @@ where
             brawler_entity.username,
             brawler_entity.avatar_url,
             brawler_entity.cover_url,
-            brawler_entity.bio,
             joined_count,
             completed_count,
         );
@@ -117,7 +115,6 @@ where
             display_name: brawler_entity.display_name,
             avatar_url: brawler_entity.avatar_url,
             cover_url: brawler_entity.cover_url,
-            bio: brawler_entity.bio,
             joined_count,
             completed_count,
         })
@@ -168,7 +165,6 @@ where
                 username: e.username,
                 display_name: e.display_name,
                 avatar_url: e.avatar_url,
-                bio: e.bio,
             })
             .collect();
 
@@ -213,23 +209,5 @@ where
 
         // Return updated passport
         self.get_profile(brawler_id).await
-    }
-
-    pub async fn update_bio(&self, brawler_id: i32, bio: String) -> Result<BrawlerProfileModel> {
-        // Limit bio length
-        if bio.len() > 500 {
-            return Err(anyhow::anyhow!("Bio is too long (max 500 characters)"));
-        }
-
-        // Update in database
-        self.brawler_repository.update_bio(brawler_id, bio).await?;
-
-        // Return updated profile
-        let username = self
-            .brawler_repository
-            .find_by_id(brawler_id)
-            .await?
-            .username;
-        self.get_profile_by_username(username).await
     }
 }
