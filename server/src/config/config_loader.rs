@@ -29,10 +29,20 @@ pub fn load() -> Result<DotEnvyConfig> {
         .unwrap_or_else(|_| "default_secret_for_railway".to_string())
         .parse()?;
 
+    let refresh_secret = std::env::var("JWT_USER_REFRESH_SECRET")
+        .unwrap_or_else(|_| "default_refresh_secret".to_string())
+        .parse()?;
+
+    let max_crew_per_mission = std::env::var("MAX_CREW_PER_MISSION")
+        .unwrap_or_else(|_| "5".to_string())
+        .parse()?;
+
     let config = DotEnvyConfig {
         server,
         database,
         secret,
+        refresh_secret,
+        max_crew_per_mission,
     };
 
     Ok(config)
