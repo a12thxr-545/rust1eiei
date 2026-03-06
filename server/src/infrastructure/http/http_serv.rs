@@ -9,8 +9,11 @@ use axum::{
     response::Response,
     routing::get,
 };
+use std::time::Duration;
 use tokio::net::TcpListener;
+use tower_http::compression::CompressionLayer;
 use tower_http::cors::CorsLayer;
+use tower_http::timeout::TimeoutLayer;
 use tracing::info;
 
 use crate::{
@@ -71,6 +74,8 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
         .route("/", get(|| async { "Backend is alive!" }))
         .nest("/api", api_serve(Arc::clone(&db_pool), realtime_hub))
         .layer(middleware::from_fn(request_logger))
+        .layer(CompressionLayer::new())
+        .layer(TimeoutLayer::new(Duration::from_secs(30)))
         .layer(
             CorsLayer::new()
                 .allow_origin([
@@ -87,6 +92,9 @@ pub async fn start(config: Arc<DotEnvyConfig>, db_pool: Arc<PgPoolSquad>) -> Res
                         .parse()
                         .unwrap(),
                     "https://rust1eiei-git-main-a12thxr545s-projects.vercel.app"
+                        .parse()
+                        .unwrap(),
+                    "https://rust1eiei-6q0i8uyl4-a12thxr545s-projects.vercel.app"
                         .parse()
                         .unwrap(),
                 ])

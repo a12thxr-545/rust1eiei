@@ -1,5 +1,8 @@
 use std::sync::Arc;
 
+#[global_allocator]
+static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+
 use server::{
     config::config_loader,
     infrastructure::{database::postgresql_connection, http::http_serv::start},

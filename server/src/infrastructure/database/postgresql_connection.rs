@@ -12,7 +12,10 @@ pub const MIGRATIONS: EmbeddedMigrations =
 
 pub fn establish_connection(database_url: &str) -> Result<PgPoolSquad> {
     let manager = ConnectionManager::<PgConnection>::new(database_url);
-    let pool = Pool::builder().max_size(3).build(manager)?;
+    let pool = Pool::builder()
+        .max_size(10)
+        .connection_timeout(std::time::Duration::from_secs(30))
+        .build(manager)?;
 
     // Run migrations on pool creation
     let mut connection = pool.get()?;
