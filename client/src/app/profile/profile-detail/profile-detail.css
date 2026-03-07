@@ -75,12 +75,21 @@
     color: var(--text-primary);
     margin: 0;
     letter-spacing: -1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
 .username {
     font-size: 16px;
     color: var(--text-muted);
     margin: 4px 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 100%;
 }
 
 .role-text {
@@ -373,20 +382,51 @@
     .header-content {
         flex-direction: column;
         align-items: flex-start;
+        gap: 16px;
+    }
+
+    .name-section {
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .display-name {
+        font-size: 24px;
+        letter-spacing: -0.5px;
+    }
+
+    .username {
+        font-size: 14px;
+    }
+
+    .actions-section {
+        width: 100%;
+    }
+
+    .actions-group,
+    .add-friend-btn,
+    .accept-friend-btn,
+    .edit-profile-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .remove-friend-btn {
+        flex-shrink: 0;
     }
 
     .stat-divider {
-        margin: 0 20px;
+        margin: 0 15px;
     }
 
     .avatar-section {
-        padding: 0 24px;
+        padding: 0 20px;
     }
 
     .profile-info,
     .stats-section,
     .bio-section {
-        padding-left: 24px;
-        padding-right: 24px;
+        padding-left: 20px;
+        padding-right: 20px;
     }
 }
