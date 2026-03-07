@@ -30,77 +30,103 @@ impl CrewOperationPostgres {
 #[async_trait]
 impl CrewOperationRepository for CrewOperationPostgres {
     async fn join(&self, crew_member_ships: CrewMemberShips) -> Result<()> {
-        let mut conn = Arc::clone(&self.db_pool).get()?;
-        insert_into(crew_memberships::table)
-            .values(crew_member_ships)
-            .execute(&mut conn)?;
+        let db_pool = Arc::clone(&self.db_pool);
+        tokio::task::spawn_blocking(move || -> Result<()> {
+            let mut conn = db_pool.get()?;
+            insert_into(crew_memberships::table)
+                .values(crew_member_ships)
+                .execute(&mut conn)?;
+            Ok(())
+        })
+        .await??;
         Ok(())
     }
 
     async fn leave(&self, crew_member_ships: CrewMemberShips) -> Result<()> {
-        let mut conn = Arc::clone(&self.db_pool).get()?;
-        delete(crew_memberships::table)
-            .filter(crew_memberships::brawler_id.eq(crew_member_ships.brawler_id))
-            .filter(crew_memberships::mission_id.eq(crew_member_ships.mission_id))
-            .execute(&mut conn)?;
+        let db_pool = Arc::clone(&self.db_pool);
+        tokio::task::spawn_blocking(move || -> Result<()> {
+            let mut conn = db_pool.get()?;
+            delete(crew_memberships::table)
+                .filter(crew_memberships::brawler_id.eq(crew_member_ships.brawler_id))
+                .filter(crew_memberships::mission_id.eq(crew_member_ships.mission_id))
+                .execute(&mut conn)?;
+            Ok(())
+        })
+        .await??;
         Ok(())
     }
 
     async fn get_current_mission(&self, brawler_id: i32) -> Result<Option<i32>> {
-        let mut conn = Arc::clone(&self.db_pool).get()?;
+        let db_pool = Arc::clone(&self.db_pool);
+        let result = tokio::task::spawn_blocking(move || -> Result<Option<i32>> {
+            let mut conn = db_pool.get()?;
 
-        // 1. Check if user is a crew member in any active mission
-        let crew_mission_id = crew_memberships::table
-            .inner_join(missions::table)
-            .filter(crew_memberships::brawler_id.eq(brawler_id))
-            .filter(missions::deleted_at.is_null())
-            .filter(
-                missions::status
-                    .eq("Open")
-                    .or(missions::status.eq("InProgress")),
-            )
-            .select(crew_memberships::mission_id)
-            .first::<i32>(&mut conn)
-            .optional()?;
+            // 1. Check if user is a crew member in any active mission
+            let crew_mission_id = crew_memberships::table
+                .inner_join(missions::table)
+                .filter(crew_memberships::brawler_id.eq(brawler_id))
+                .filter(missions::deleted_at.is_null())
+                .filter(
+                    missions::status
+                        .eq("Open")
+                        .or(missions::status.eq("InProgress")),
+                )
+                .select(crew_memberships::mission_id)
+                .first::<i32>(&mut conn)
+                .optional()?;
 
-        if crew_mission_id.is_some() {
-            return Ok(crew_mission_id);
-        }
+            if crew_mission_id.is_some() {
+                return Ok(crew_mission_id);
+            }
 
-        // 2. Check if user is the chief of any active mission
-        let chief_mission_id = missions::table
-            .filter(missions::chief_id.eq(brawler_id))
-            .filter(missions::deleted_at.is_null())
-            .filter(
-                missions::status
-                    .eq("Open")
-                    .or(missions::status.eq("InProgress")),
-            )
-            .select(missions::id)
-            .first::<i32>(&mut conn)
-            .optional()?;
+            // 2. Check if user is the chief of any active mission
+            let chief_mission_id = missions::table
+                .filter(missions::chief_id.eq(brawler_id))
+                .filter(missions::deleted_at.is_null())
+                .filter(
+                    missions::status
+                        .eq("Open")
+                        .or(missions::status.eq("InProgress")),
+                )
+                .select(missions::id)
+                .first::<i32>(&mut conn)
+                .optional()?;
 
-        Ok(chief_mission_id)
+            Ok(chief_mission_id)
+        })
+        .await??;
+
+        Ok(result)
     }
 
     async fn is_member(&self, mission_id: i32, brawler_id: i32) -> Result<bool> {
-        let mut conn = Arc::clone(&self.db_pool).get()?;
-        let exists = crew_memberships::table
-            .filter(crew_memberships::mission_id.eq(mission_id))
-            .filter(crew_memberships::brawler_id.eq(brawler_id))
-            .first::<(i32, i32, chrono::NaiveDateTime)>(&mut conn)
-            .optional()?
-            .is_some();
-        Ok(exists)
+        let db_pool = Arc::clone(&self.db_pool);
+        let result = tokio::task::spawn_blocking(move || -> Result<bool> {
+            let mut conn = db_pool.get()?;
+            let exists = crew_memberships::table
+                .filter(crew_memberships::mission_id.eq(mission_id))
+                .filter(crew_memberships::brawler_id.eq(brawler_id))
+                .first::<(i32, i32, chrono::NaiveDateTime)>(&mut conn)
+                .optional()?
+                .is_some();
+            Ok(exists)
+        })
+        .await??;
+        Ok(result)
     }
 
     async fn get_members_ordered_by_joined_at(&self, mission_id: i32) -> Result<Vec<i32>> {
-        let mut conn = Arc::clone(&self.db_pool).get()?;
-        let ids = crew_memberships::table
-            .filter(crew_memberships::mission_id.eq(mission_id))
-            .order_by(crew_memberships::joined_at.asc())
-            .select(crew_memberships::brawler_id)
-            .load::<i32>(&mut conn)?;
-        Ok(ids)
+        let db_pool = Arc::clone(&self.db_pool);
+        let result = tokio::task::spawn_blocking(move || -> Result<Vec<i32>> {
+            let mut conn = db_pool.get()?;
+            let ids = crew_memberships::table
+                .filter(crew_memberships::mission_id.eq(mission_id))
+                .order_by(crew_memberships::joined_at.asc())
+                .select(crew_memberships::brawler_id)
+                .load::<i32>(&mut conn)?;
+            Ok(ids)
+        })
+        .await??;
+        Ok(result)
     }
 }

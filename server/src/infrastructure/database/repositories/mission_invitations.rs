@@ -24,11 +24,16 @@ impl MissionInvitationPostgres {
 #[async_trait]
 impl MissionInvitationRepository for MissionInvitationPostgres {
     async fn invite(&self, entity: AddMissionInvitationEntity) -> Result<i32> {
-        let mut conn = Arc::clone(&self.db_pool).get()?;
-        let result = diesel::insert_into(mission_invitations::table)
-            .values(&entity)
-            .returning(mission_invitations::id)
-            .get_result::<i32>(&mut conn)?;
+        let db_pool = Arc::clone(&self.db_pool);
+        let result = tokio::task::spawn_blocking(move || -> Result<i32> {
+            let mut conn = db_pool.get()?;
+            let res = diesel::insert_into(mission_invitations::table)
+                .values(&entity)
+                .returning(mission_invitations::id)
+                .get_result::<i32>(&mut conn)?;
+            Ok(res)
+        })
+        .await??;
         Ok(result)
     }
 
@@ -61,22 +66,34 @@ impl MissionInvitationRepository for MissionInvitationPostgres {
     }
 
     async fn get_received_invitations(&self, uid: i32) -> Result<Vec<MissionInvitationEntity>> {
-        let mut conn = Arc::clone(&self.db_pool).get()?;
-        let result = mission_invitations::table
-            .filter(
-                mission_invitations::invitee_id
-                    .eq(uid)
-                    .and(mission_invitations::status.eq("pending")),
-            )
-            .load::<MissionInvitationEntity>(&mut conn)?;
+        let db_pool = Arc::clone(&self.db_pool);
+        let result =
+            tokio::task::spawn_blocking(move || -> Result<Vec<MissionInvitationEntity>> {
+                let mut conn = db_pool.get()?;
+                let res = mission_invitations::table
+                    .filter(
+                        mission_invitations::invitee_id
+                            .eq(uid)
+                            .and(mission_invitations::status.eq("pending")),
+                    )
+                    .load::<MissionInvitationEntity>(&mut conn)?;
+                Ok(res)
+            })
+            .await??;
         Ok(result)
     }
 
     async fn get_mission_invitations(&self, mid: i32) -> Result<Vec<MissionInvitationEntity>> {
-        let mut conn = Arc::clone(&self.db_pool).get()?;
-        let result = mission_invitations::table
-            .filter(mission_invitations::mission_id.eq(mid))
-            .load::<MissionInvitationEntity>(&mut conn)?;
+        let db_pool = Arc::clone(&self.db_pool);
+        let result =
+            tokio::task::spawn_blocking(move || -> Result<Vec<MissionInvitationEntity>> {
+                let mut conn = db_pool.get()?;
+                let res = mission_invitations::table
+                    .filter(mission_invitations::mission_id.eq(mid))
+                    .load::<MissionInvitationEntity>(&mut conn)?;
+                Ok(res)
+            })
+            .await??;
         Ok(result)
     }
 
@@ -94,11 +111,16 @@ impl MissionInvitationRepository for MissionInvitationPostgres {
     }
 
     async fn delete_existing(&self, mid: i32, uid: i32) -> Result<()> {
-        let mut conn = Arc::clone(&self.db_pool).get()?;
-        diesel::delete(mission_invitations::table)
-            .filter(mission_invitations::mission_id.eq(mid))
-            .filter(mission_invitations::invitee_id.eq(uid))
-            .execute(&mut conn)?;
+        let db_pool = Arc::clone(&self.db_pool);
+        tokio::task::spawn_blocking(move || -> Result<()> {
+            let mut conn = db_pool.get()?;
+            diesel::delete(mission_invitations::table)
+                .filter(mission_invitations::mission_id.eq(mid))
+                .filter(mission_invitations::invitee_id.eq(uid))
+                .execute(&mut conn)?;
+            Ok(())
+        })
+        .await??;
         Ok(())
     }
 }

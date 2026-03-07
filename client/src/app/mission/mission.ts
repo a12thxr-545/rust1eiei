@@ -108,10 +108,10 @@ export class MissionComponent implements OnInit, OnDestroy {
     const passport = this.passportService.data();
     if (!passport) return;
 
-    this.loadOtherMissions();
-    this.loadMyMissions();
-    this.loadJoinedMissions();
-    this.loadFinishedMissions();
+    // Only refresh the active tab to save bandwidth and reduce server load
+    this.refreshActiveTab();
+
+    // Global states that are always needed
     this._missionService.getCurrentMission();
     this.loadSocialData();
 
@@ -120,6 +120,19 @@ export class MissionComponent implements OnInit, OnDestroy {
     if (selected) {
       this.loadCrewMembers(selected.id);
       this.refreshMissionData(selected.id);
+    }
+  }
+
+  private refreshActiveTab() {
+    const index = this.selectedTabIndex;
+    if (index === 0) {
+      this.loadOtherMissions();
+    } else if (index === 1) {
+      this.loadJoinedMissions();
+    } else if (index === 2) {
+      this.loadMyMissions();
+    } else if (index === 3) {
+      this.loadFinishedMissions();
     }
   }
 

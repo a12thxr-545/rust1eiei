@@ -27,11 +27,16 @@ impl MissionChatPostgres {
 #[async_trait]
 impl MissionChatRepository for MissionChatPostgres {
     async fn save_message(&self, message: NewMissionChatMessageEntity) -> Result<i32> {
-        let mut conn = self.db_pool.get()?;
-        let id = diesel::insert_into(mission_chat_messages::table)
-            .values(&message)
-            .returning(mission_chat_messages::id)
-            .get_result::<i32>(&mut conn)?;
+        let db_pool = Arc::clone(&self.db_pool);
+        let id = tokio::task::spawn_blocking(move || -> Result<i32> {
+            let mut conn = db_pool.get()?;
+            let id = diesel::insert_into(mission_chat_messages::table)
+                .values(&message)
+                .returning(mission_chat_messages::id)
+                .get_result::<i32>(&mut conn)?;
+            Ok(id)
+        })
+        .await??;
         Ok(id)
     }
 
@@ -39,30 +44,25 @@ impl MissionChatRepository for MissionChatPostgres {
         &self,
         mission_id: i32,
     ) -> Result<Vec<MissionChatMessageWithBrawler>> {
-        let mut conn = self.db_pool.get()?;
-
-        let results = mission_chat_messages::table
-            .inner_join(brawlers::table)
-            .filter(mission_chat_messages::mission_id.eq(mission_id))
-            .order_by(mission_chat_messages::created_at.asc())
-            .select((
-                mission_chat_messages::id,
-                mission_chat_messages::mission_id,
-                mission_chat_messages::brawler_id,
-                brawlers::display_name,
-                mission_chat_messages::content,
-                mission_chat_messages::created_at,
-                mission_chat_messages::image_url,
-            ))
-            .load::<(
-                i32,
-                i32,
-                i32,
-                String,
-                String,
-                chrono::NaiveDateTime,
-                Option<String>,
-            )>(&mut conn)?;
+        let db_pool = Arc::clone(&self.db_pool);
+        let results = tokio::task::spawn_blocking(move || -> Result<Vec<(i32, i32, i32, String, String, chrono::NaiveDateTime, Option<String>)>> {
+            let mut conn = db_pool.get()?;
+            let res = mission_chat_messages::table
+                .inner_join(brawlers::table)
+                .filter(mission_chat_messages::mission_id.eq(mission_id))
+                .order_by(mission_chat_messages::created_at.asc())
+                .select((
+                    mission_chat_messages::id,
+                    mission_chat_messages::mission_id,
+                    mission_chat_messages::brawler_id,
+                    brawlers::display_name,
+                    mission_chat_messages::content,
+                    mission_chat_messages::created_at,
+                    mission_chat_messages::image_url,
+                ))
+                .load::<_>(&mut conn)?;
+            Ok(res)
+        }).await??;
 
         let messages = results
             .into_iter()
