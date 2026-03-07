@@ -106,7 +106,6 @@
             @if (isLoading()) {
             <div class="loading-state">
                 <div class="spinner"></div>
-                <p>Loading missions...</p>
             </div>
             } @else if (filteredMissions().length === 0) {
             <div class="empty-state">
@@ -221,7 +220,6 @@
             @if (isLoadingMyMissions()) {
             <div class="loading-state">
                 <div class="spinner"></div>
-                <p>Loading participating missions...</p>
             </div>
             } @else if (joinedMissions().length === 0) {
             <div class="empty-state">
@@ -327,7 +325,6 @@
             @if (isLoadingMyMissions()) {
             <div class="loading-state">
                 <div class="spinner"></div>
-                <p>Loading your missions...</p>
             </div>
             } @else if (myMissions().length === 0) {
             <div class="empty-state">
@@ -431,7 +428,6 @@
             @if (isLoadingFinishedMissions()) {
             <div class="loading-state">
                 <div class="spinner"></div>
-                <p>Loading mission history...</p>
             </div>
             } @else if (finishedMissions().length === 0) {
             <div class="empty-state">

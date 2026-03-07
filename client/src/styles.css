@@ -273,6 +273,27 @@ body {
     }
 }
 
+/* Global Loading State */
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 0;
+    gap: 16px;
+    width: 100%;
+}
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--border-color);
+    border-top-color: var(--accent-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.3));
+}
+
 .ngx-spinner-overlay {
     backdrop-filter: blur(4px) !important;
     background-color: var(--nav-bg) !important;
